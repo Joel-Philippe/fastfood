@@ -1,0 +1,251 @@
+import 'package:flutter/material.dart';
+import 'package:fast_food_app/models.dart';
+import 'package:fast_food_app/services/mongo_service.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+
+class ManageCategoriesPage extends StatefulWidget {
+  const ManageCategoriesPage({super.key});
+
+  @override
+  _ManageCategoriesPageState createState() => _ManageCategoriesPageState();
+}
+
+class _ManageCategoriesPageState extends State<ManageCategoriesPage> {
+  final MongoService _mongoService = MongoService();
+  late Future<List<MenuCategory>> _categoriesFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshCategories();
+  }
+
+  void _refreshCategories() {
+    setState(() {
+      _categoriesFuture = _mongoService.getCategories();
+    });
+  }
+
+  void _showCategoryDialog({MenuCategory? category}) {
+    final isEditing = category != null;
+    final formKey = GlobalKey<FormState>();
+    final nameController = TextEditingController(text: category?.name);
+    CategoryType selectedType = category?.type ?? CategoryType.assiettes;
+    Color pickerColor = category?.fontColor != null ? Color(int.parse(category!.fontColor!.substring(1, 7), radix: 16) + 0xFF000000) : Colors.red;
+    Color currentColor = category?.fontColor != null ? Color(int.parse(category!.fontColor!.substring(1, 7), radix: 16) + 0xFF000000) : Colors.red;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            void changeColor(Color color) {
+              setDialogState(() => pickerColor = color);
+            }
+            return AlertDialog(
+              title: Text(isEditing ? 'Modifier la catégorie' : 'Ajouter une catégorie'),
+              content: Form(
+                key: formKey,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextFormField(
+                        controller: nameController,
+                        decoration: const InputDecoration(labelText: 'Nom (Ex: Nos Wraps)'),
+                        validator: (value) => value == null || value.isEmpty ? 'Le nom est requis' : null,
+                      ),
+                      DropdownButtonFormField<CategoryType>(
+                        value: selectedType,
+                        decoration: const InputDecoration(labelText: 'Type de catégorie'),
+                        items: CategoryType.values.map((CategoryType type) {
+                          return DropdownMenuItem<CategoryType>(
+                            value: type,
+                            child: Text(type.toString().split('.').last),
+                          );
+                        }).toList(),
+                        onChanged: (CategoryType? newValue) {
+                          if (newValue != null) {
+                            setDialogState(() {
+                              selectedType = newValue;
+                            });
+                          }
+                        },
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          const Text('Couleur de la police:'),
+                          const SizedBox(width: 10),
+                          GestureDetector(
+                            onTap: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    title: const Text('Sélectionner une couleur'),
+                                    content: SingleChildScrollView(
+                                      child: ColorPicker(
+                                        pickerColor: pickerColor,
+                                        onColorChanged: changeColor,
+                                      ),
+                                    ),
+                                    actions: <Widget>[
+                                      ElevatedButton(
+                                        child: const Text('Sélectionner'),
+                                        onPressed: () {
+                                          setDialogState(() => currentColor = pickerColor);
+                                          Navigator.of(context).pop();
+                                        },
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                            child: Container(
+                              width: 30,
+                              height: 30,
+                              decoration: BoxDecoration(
+                                color: currentColor,
+                                borderRadius: BorderRadius.circular(5),
+                                border: Border.all(color: Colors.grey),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Annuler'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    if (!formKey.currentState!.validate()) return;
+
+                    try {
+                      final hexColor = '#${currentColor.value.toRadixString(16).substring(2).toUpperCase()!}';
+                      if (isEditing) {
+                        await _mongoService.updateCategory(
+                          category!.id!,
+                          nameController.text,
+                          selectedType,
+                          hexColor,
+                        );
+                      } else {
+                        await _mongoService.addCategory(
+                          nameController.text,
+                          selectedType,
+                          hexColor,
+                        );
+                      }
+                      Navigator.of(context).pop();
+                      _refreshCategories();
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Erreur: $e')),
+                      );
+                    }
+                  },
+                  child: const Text('Sauvegarder'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _deleteCategory(String id) async {
+    try {
+      await _mongoService.deleteCategory(id);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Catégorie supprimée.')),
+      );
+      _refreshCategories();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erreur: $e')),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: FutureBuilder<List<MenuCategory>>(
+        future: _categoriesFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text('Aucune catégorie trouvée.'));
+          }
+
+          final categories = snapshot.data!;
+
+          return ListView.builder(
+            itemCount: categories.length,
+            itemBuilder: (context, index) {
+              final category = categories[index];
+              return Card(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: ListTile(
+                  leading: const CircleAvatar(
+                    child: Icon(Icons.category),
+                    radius: 15,
+                  ),
+                  title: Row(
+                    children: [
+                      Text(category.name),
+                      const SizedBox(width: 8),
+                      if (category.fontColor != null)
+                        Container(
+                          width: 20,
+                          height: 20,
+                          decoration: BoxDecoration(
+                            color: Color(int.parse(category.fontColor!.substring(1, 7), radix: 16) + 0xFF000000),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(color: Colors.grey),
+                          ),
+                        ),
+                    ],
+                  ),
+                  subtitle: Text('Type: ${category.type.toString().split('.').last}'),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.edit, color: Colors.blue),
+                        onPressed: () => _showCategoryDialog(category: category),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () => _deleteCategory(category.id!),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showCategoryDialog(),
+        tooltip: 'Ajouter une catégorie',
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+}
