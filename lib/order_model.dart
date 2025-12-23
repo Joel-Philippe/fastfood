@@ -52,10 +52,10 @@ class Order {
 
   // Method to convert an Order object to a map (e.g., for MongoDB backend)
   Map<String, dynamic> toMap() {
-    final map = {
+    final map = <String, dynamic>{
       'customerName': customerName,
       'orderType': orderType,
-      'arrivalTime': arrivalTime,
+      // 'arrivalTime' is handled conditionally below
       'items': items.values.map((cartItem) => {
         'itemId': cartItem.item.id,
         'itemName': cartItem.item.name,
@@ -64,15 +64,19 @@ class Order {
         'itemImageUrl': cartItem.item.imageUrl,
         'itemCategory': cartItem.item.category.toString().split('.').last,
         'quantity': cartItem.quantity,
-        'selectedOptions': cartItem.selectedOptions.map(
+        'itemOptions': cartItem.selectedOptions.map(
           (key, value) => MapEntry(key, value.map((option) => option.toMap()).toList())
         ),
-        'ingredientsToRemove': cartItem.ingredientsToRemove.toList(), // Convert Set to List for JSON
+        'excludedIngredients': cartItem.ingredientsToRemove.toList(), // Convert Set to List for JSON
       }).toList(),
       'totalAmount': totalAmount,
       'orderDate': orderDate.toIso8601String(),
       'status': status,
     };
+
+    if (arrivalTime != null) {
+      map['arrivalTime'] = arrivalTime;
+    }
 
     if (orderType == 'delivery' && address != null) {
       map['address'] = {

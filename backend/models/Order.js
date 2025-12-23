@@ -7,7 +7,7 @@ const orderItemSchema = new mongoose.Schema({
   itemPrice: { type: Number, required: true },
   itemImageUrl: { type: String },
   itemCategory: { type: String, required: true },
-  itemOptions: [{ type: String }],
+  itemOptions: { type: mongoose.Schema.Types.Mixed, default: {} },
   excludedIngredients: [{ type: String }],
   quantity: { type: Number, required: true, min: 1 },
 });
