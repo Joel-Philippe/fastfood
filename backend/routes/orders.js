@@ -76,7 +76,7 @@ router.post(
       // Notify all connected admins about the new order
       broadcastToAdmins({
         type: 'NEW_ORDER',
-        order: newOrder,
+        order: newOrder.toObject(),
       });
 
       res.status(201).json(newOrder);
@@ -131,7 +131,7 @@ router.put(
       if (updatedOrder.userId) {
         sendUpdateToUser(updatedOrder.userId.toString(), {
           type: 'ORDER_STATUS_UPDATE',
-          order: updatedOrder,
+          order: updatedOrder.toObject(),
         });
       }
 
