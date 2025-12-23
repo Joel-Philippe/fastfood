@@ -1,3 +1,4 @@
+import 'package:fast_food_app/app_config.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fast_food_app/cart_provider.dart';
@@ -76,7 +77,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
     try {
       // 1. Call our backend to create a Payment Intent
       final response = await http.post(
-        Uri.parse('http://localhost:5000/api/stripe/create-payment-intent'),
+        Uri.parse('${AppConfig.baseUrl}/api/stripe/create-payment-intent'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'amount': (cart.totalAmount * 100).toInt(), // Amount in cents
@@ -114,12 +115,12 @@ class _CheckoutPageState extends State<CheckoutPage> {
     } on StripeException catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Le paiement a échoué : ${e.error.localizedMessage}')),
+        SnackBar(content: Text('Payment Error: ${e.error.localizedMessage}')),
       );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Une erreur inattendue est survenue : $e')),
+        SnackBar(content: Text('An unexpected error occurred: $e')),
       );
     }
   }

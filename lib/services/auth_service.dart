@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
-import 'package:fast_food_app/main.dart'; // Import main.dart to access BASE_URL
+import 'package:fast_food_app/app_config.dart'; // Import AppConfig
 import 'package:jwt_decoder/jwt_decoder.dart'; // Import jwt_decoder
 
 class AuthException implements Exception {
@@ -12,7 +12,7 @@ class AuthException implements Exception {
 }
 
 class AuthService {
-  final String _baseUrl = '$baseUrl/api/auth'; // Base URL for auth endpoints
+  final String _baseUrl = '${AppConfig.baseUrl}/api/auth'; // Base URL for auth endpoints
   final _storage = const FlutterSecureStorage();
   final String _tokenKey = 'auth_token'; // Key for storing the token
 
@@ -42,8 +42,8 @@ class AuthService {
         throw Exception(errorMessage);
       }
     } catch (e) {
-      // Re-throw a more generic error or the specific one from the backend
-      throw Exception('Failed to login. Please check your credentials and network. Error: $e');
+      // Re-throw a more specific error to help with debugging
+      throw Exception('Login Error: $e');
     }
   }
 

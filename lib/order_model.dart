@@ -64,7 +64,9 @@ class Order {
         'itemImageUrl': cartItem.item.imageUrl,
         'itemCategory': cartItem.item.category.toString().split('.').last,
         'quantity': cartItem.quantity,
-        'selectedOptions': cartItem.selectedOptions,
+        'selectedOptions': cartItem.selectedOptions.map(
+          (key, value) => MapEntry(key, value.map((option) => option.toMap()).toList())
+        ),
         'ingredientsToRemove': cartItem.ingredientsToRemove.toList(), // Convert Set to List for JSON
       }).toList(),
       'totalAmount': totalAmount,

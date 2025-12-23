@@ -1,4 +1,4 @@
-import 'package:fast_food_app/main.dart';
+import 'package:fast_food_app/app_config.dart';
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
@@ -19,7 +19,7 @@ class ManageMenuItemPage extends StatefulWidget {
 
 class _ManageMenuItemPageState extends State<ManageMenuItemPage> {
   String _proxiedImageUrl(String url) {
-    return '$baseUrl/api/image-proxy?url=${Uri.encodeComponent(url)}';
+    return '${AppConfig.baseUrl}/api/image-proxy?url=${Uri.encodeComponent(url)}';
   }
 
   final _formKey = GlobalKey<FormState>();

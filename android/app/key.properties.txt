@@ -1,0 +1,4 @@
+storeFile=upload-keystore.jks.
+storePassword=Ya060492*
+keyAlias=upload
+keyPassword=Ya060492*

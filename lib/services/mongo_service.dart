@@ -6,11 +6,11 @@ import 'package:http/http.dart' as http;
 import 'package:fast_food_app/models.dart';
 import 'package:fast_food_app/order_model.dart';
 import 'package:fast_food_app/services/auth_service.dart'; // Import AuthService
-import 'package:fast_food_app/main.dart'; // Import main.dart to access BASE_URL
+import 'package:fast_food_app/app_config.dart';
 import 'package:image_picker/image_picker.dart';
 
 class MongoService {
-  final String _baseUrl = '$baseUrl/api'; // Replace with your backend API URL
+  final String _baseUrl = '${AppConfig.baseUrl}/api'; // Replace with your backend API URL
   final AuthService _authService = AuthService(); // Instantiate AuthService
 
   Future<Map<String, String>> _getAuthHeaders() async {

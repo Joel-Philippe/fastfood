@@ -1,4 +1,4 @@
-import 'package:fast_food_app/main.dart';
+import 'package:fast_food_app/app_config.dart';
 import 'package:fast_food_app/widgets/gradient_text.dart';
 import 'package:fast_food_app/menu_customization_provider.dart';
 import 'package:fast_food_app/services/mongo_service.dart';
@@ -27,7 +27,7 @@ class MenuCustomizationPage extends StatefulWidget {
 
 class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
   String _proxiedImageUrl(String url) {
-    return '$baseUrl/api/image-proxy?url=${Uri.encodeComponent(url)}';
+    return '${AppConfig.baseUrl}/api/image-proxy?url=${Uri.encodeComponent(url)}';
   }
 
   final MongoService _mongoService = MongoService();

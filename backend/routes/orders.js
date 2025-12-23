@@ -56,7 +56,7 @@ router.post(
       }));
 
       const orderData = {
-        userId: req.user.userId, // Link the order to the logged-in user
+        userId: req.userData.userId, // Link the order to the logged-in user
         customerName,
         orderType,
         arrivalTime,
@@ -89,7 +89,7 @@ router.post(
 // GET the current user's orders
 router.get('/my-orders', authMiddleware, async (req, res) => {
   try {
-    const orders = await Order.find({ userId: req.user.userId }).sort({ orderDate: -1 });
+    const orders = await Order.find({ userId: req.userData.userId }).sort({ orderDate: -1 });
     res.json(orders);
   } catch (err) {
     console.error(err.message);

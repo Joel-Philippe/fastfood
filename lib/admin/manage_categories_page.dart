@@ -1,6 +1,5 @@
 import 'dart:io';
-import 'dart:typed_data';
-import 'package:fast_food_app/main.dart';
+import 'package:fast_food_app/app_config.dart';
 import 'package:flutter/material.dart';
 import 'package:fast_food_app/models.dart';
 import 'package:fast_food_app/services/mongo_service.dart';
@@ -19,7 +18,7 @@ class ManageCategoriesPage extends StatefulWidget {
 
 class _ManageCategoriesPageState extends State<ManageCategoriesPage> {
   String _proxiedImageUrl(String url) {
-    return '$baseUrl/api/image-proxy?url=${Uri.encodeComponent(url)}';
+    return '${AppConfig.baseUrl}/api/image-proxy?url=${Uri.encodeComponent(url)}';
   }
 
   final MongoService _mongoService = MongoService();

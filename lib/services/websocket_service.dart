@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
-import 'package:fast_food_app/main.dart'; // To get the base URL
+import 'package:fast_food_app/app_config.dart'; // To get the base URL
 
 class WebSocketService {
   WebSocketChannel? _channel;
@@ -14,8 +14,8 @@ class WebSocketService {
     // Disconnect any existing channel
     disconnect();
 
-    // Construct WebSocket URL from the global baseUrl
-    final wsUrl = Uri.parse(baseUrl).replace(scheme: 'ws', path: '/').toString();
+    // Construct WebSocket URL from AppConfig.baseUrl
+    final wsUrl = Uri.parse(AppConfig.baseUrl).replace(scheme: 'ws', path: '/').toString();
     
     try {
       _channel = WebSocketChannel.connect(

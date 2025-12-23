@@ -15,6 +15,7 @@ migrate_working_dir/
 # Secrets and environment files
 .env
 backend/.env
+android/key.properties
 
 # Node.js backend
 backend/node_modules/
