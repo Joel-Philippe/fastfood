@@ -247,13 +247,62 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black54),
               ),
               const SizedBox(height: 4),
-              ...order.items.values.map((item) => Padding(
-                padding: const EdgeInsets.only(left: 8.0, top: 4.0),
-                child: Text(
-                  '${item.quantity}x ${item.item.name}',
-                  style: const TextStyle(color: Colors.black87, fontSize: 14),
-                ),
-              )),
+              ...order.items.values.map((item) {
+                // Helper to build rows for options and ingredients
+                Widget buildDetailRow(String text, {bool isRemoval = false}) {
+                  return Padding(
+                    padding: const EdgeInsets.only(left: 24, top: 2), // Indent details
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(isRemoval ? '– ' : '+ ', style: TextStyle(color: isRemoval ? Colors.red : Colors.green)),
+                        Expanded(
+                          child: Text(
+                            text,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.black54,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                List<Widget> details = [];
+
+                // Add selected options
+                item.selectedOptions.forEach((category, options) {
+                  for (var option in options) {
+                    details.add(buildDetailRow('${option.name} (${option.price.toStringAsFixed(2)}€)'));
+                  }
+                });
+
+                // Add excluded ingredients
+                for (var ingredient in item.ingredientsToRemove) {
+                  details.add(buildDetailRow('Sans $ingredient', isRemoval: true));
+                }
+
+                return Padding(
+                  padding: const EdgeInsets.only(left: 8.0, top: 8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${item.quantity}x ${item.item.name}',
+                        style: const TextStyle(
+                          color: Colors.black87,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600, // Make item name slightly bolder
+                        ),
+                      ),
+                      if (details.isNotEmpty)
+                        ...details,
+                    ],
+                  ),
+                );
+              }),
             ],
           ),
         ).animate().fadeIn(delay: (100 * index).ms, duration: 400.ms, curve: Curves.easeOut);

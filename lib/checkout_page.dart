@@ -395,9 +395,69 @@ class _CheckoutPageState extends State<CheckoutPage> {
               itemCount: cart.items.length,
               itemBuilder: (context, index) {
                 final cartItem = cart.items.values.toList()[index];
-                return ListTile(
-                  title: Text(cartItem.item.name),
-                  trailing: Text('${cartItem.quantity} x ${cartItem.item.price.toStringAsFixed(2)} €'),
+
+                // Helper to build rows for options and ingredients
+                Widget buildDetailRow(String text, {bool isRemoval = false}) {
+                  return Padding(
+                    padding: const EdgeInsets.only(left: 16, top: 2), // Indent details
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(isRemoval ? '– ' : '+ ', style: TextStyle(color: isRemoval ? Colors.red : Colors.green, fontSize: 14)),
+                        Expanded(
+                          child: Text(
+                            text,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.black54,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                List<Widget> details = [];
+
+                // Add selected options
+                cartItem.selectedOptions.forEach((category, options) {
+                  for (var option in options) {
+                    details.add(buildDetailRow('${option.name} (${option.price.toStringAsFixed(2)}€)'));
+                  }
+                });
+
+                // Add excluded ingredients
+                for (var ingredient in cartItem.ingredientsToRemove) {
+                  details.add(buildDetailRow('Sans $ingredient', isRemoval: true));
+                }
+
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        visualDensity: VisualDensity.compact,
+                        title: Text(
+                          '${cartItem.quantity}x ${cartItem.item.name}',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        trailing: Text(
+                          '${(cartItem.item.price * cartItem.quantity).toStringAsFixed(2)} €',
+                        ),
+                      ),
+                      if (details.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 0, bottom: 4),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: details,
+                          ),
+                        ),
+                    ],
+                  ),
                 );
               },
             ),

@@ -106,11 +106,11 @@ class Order {
         // as we are reconstructing a specific cart item instance.
       );
 
-      final selectedOptions = (itemMap['selectedOptions'] as Map<String, dynamic>?)?.map(
+      final selectedOptions = (itemMap['itemOptions'] as Map<String, dynamic>?)?.map(
         (key, value) => MapEntry(key, List<Option>.from(value.map((o) => Option.fromMap(o as Map<String, dynamic>)))),
       ) ?? {};
 
-      final ingredientsToRemove = Set<String>.from(itemMap['ingredientsToRemove'] ?? []);
+      final ingredientsToRemove = Set<String>.from(itemMap['excludedIngredients'] ?? []);
 
       final cartItem = CartItem(
         item: menuItem,
