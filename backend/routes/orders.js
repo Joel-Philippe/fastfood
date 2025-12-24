@@ -79,7 +79,7 @@ router.post(
         order: newOrder.toObject(),
       });
 
-      res.status(201).json(newOrder);
+      res.status(201).json(newOrder.toObject());
     } catch (err) {
       console.error(err.message);
       res.status(500).send('Server Error');
@@ -91,7 +91,7 @@ router.post(
 router.get('/my-orders', authMiddleware, async (req, res) => {
   try {
     const orders = await Order.find({ userId: req.userData.userId }).sort({ orderDate: -1 });
-    res.json(orders);
+    res.json(orders.map(o => o.toObject()));
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
@@ -102,7 +102,7 @@ router.get('/my-orders', authMiddleware, async (req, res) => {
 router.get('/', authMiddleware, authorizeRoles('admin'), async (req, res) => {
   try {
     const orders = await Order.find();
-    res.json(orders);
+    res.json(orders.map(o => o.toObject()));
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
@@ -135,7 +135,7 @@ router.put(
         });
       }
 
-      res.json(updatedOrder);
+      res.json(updatedOrder.toObject());
     } catch (err) {
       console.error(err.message);
       res.status(500).send('Server Error');
