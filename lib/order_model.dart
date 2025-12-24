@@ -106,9 +106,20 @@ class Order {
         // as we are reconstructing a specific cart item instance.
       );
 
-      final selectedOptions = (itemMap['itemOptions'] as Map<String, dynamic>?)?.map(
-        (key, value) => MapEntry(key, List<Option>.from(value.map((o) => Option.fromMap(o as Map<String, dynamic>)))),
-      ) ?? {};
+      final optionsData = itemMap['itemOptions'];
+      final Map<String, List<Option>> selectedOptions;
+
+      if (optionsData is Map<String, dynamic>) {
+        selectedOptions = optionsData.map(
+          (key, value) => MapEntry(
+            key,
+            List<Option>.from((value as List).map((o) => Option.fromMap(o as Map<String, dynamic>))),
+          ),
+        );
+      } else {
+        // Handle corrupted data (e.g., it's a List or null) by treating it as empty.
+        selectedOptions = {};
+      }
 
       final ingredientsToRemove = Set<String>.from(itemMap['excludedIngredients'] ?? []);
 
