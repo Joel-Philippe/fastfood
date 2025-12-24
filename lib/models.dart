@@ -111,6 +111,9 @@ class Option {
       'imageUrl': imageUrl, // Use imageUrl
     };
   }
+
+  /// The `json.encode` function looks for a `toJson` method.
+  Map<String, dynamic> toJson() => toMap();
 }
 
 class MenuCategory {

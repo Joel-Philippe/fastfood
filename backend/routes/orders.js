@@ -101,8 +101,25 @@ router.get('/my-orders', authMiddleware, async (req, res) => {
 // GET all orders (Admin only)
 router.get('/', authMiddleware, authorizeRoles('admin'), async (req, res) => {
   try {
-    const orders = await Order.find();
-    res.json(orders.map(o => o.toObject()));
+    const orders = await Order.find().sort({ orderDate: -1 });
+    const plainOrders = orders.map(o => o.toObject());
+
+    // ### START DEBUG LOGGING ###
+    console.log('--- DEBUGGING /api/orders GET request ---');
+    plainOrders.forEach(order => {
+      console.log(`Order ID: ${order._id}`);
+      if (order.items && order.items.forEach) {
+        order.items.forEach(item => {
+          console.log(`  - Item: ${item.itemName}, Options Type: ${Object.prototype.toString.call(item.itemOptions)}, Value: ${JSON.stringify(item.itemOptions)}`);
+        });
+      } else {
+        console.log('  - Order has no items or items is not an array');
+      }
+    });
+    console.log('--- END DEBUGGING ---');
+    // ### END DEBUG LOGGING ###
+
+    res.json(plainOrders);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
