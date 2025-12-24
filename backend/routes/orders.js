@@ -50,7 +50,7 @@ router.post(
           itemPrice: menuItem.price,
           itemImageUrl: menuItem.imageUrl,
           itemCategory: menuItem.category,
-          itemOptions: item.itemOptions || [],
+          itemOptions: item.itemOptions || {},
           excludedIngredients: item.excludedIngredients || [],
           quantity: item.quantity,
         };
