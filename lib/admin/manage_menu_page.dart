@@ -63,8 +63,8 @@ class _ManageMenuPageState extends State<ManageMenuPage> with SingleTickerProvid
       ]);
       if (mounted) {
         setState(() {
-          _menuItems = results[0];
-          _optionTypes = results[1];
+          _menuItems = results[0] as List<MenuItem>; // Explicit cast
+          _optionTypes = results[1] as List<String>; // Explicit cast
           _isLoading = false;
           _error = null;
         });
@@ -420,6 +420,7 @@ class _ManageMenuPageState extends State<ManageMenuPage> with SingleTickerProvid
           ),
         );
       },
-    ).animate().fadeIn(duration: 300.ms);
+    );
+    // Removed .animate().fadeIn(duration: 300.ms);
   }
 }
