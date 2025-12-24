@@ -126,9 +126,9 @@ router.get('/', authMiddleware, authorizeRoles('admin'), async (req, res) => {
   }
 });
 
-// PUT (update) order status (Admin only)
-router.put(
-  '/:id',
+// PATCH (update) order status (Admin only)
+router.patch(
+  '/:id/status',
   [authMiddleware, authorizeRoles('admin'), [body('status', 'Status is required').not().isEmpty()]],
   async (req, res) => {
     const errors = validationResult(req);
@@ -144,12 +144,23 @@ router.put(
       );
       if (!updatedOrder) return res.status(404).json({ message: 'Order not found' });
 
-      // Send real-time update to the user
-      if (updatedOrder.userId) {
-        sendUpdateToUser(updatedOrder.userId.toString(), {
+      // Safely attempt to broadcast updates, but don't let it fail the request
+      try {
+        const updatePayload = {
           type: 'ORDER_STATUS_UPDATE',
           order: updatedOrder.toObject(),
-        });
+        };
+
+        // Send real-time update to the specific user who placed the order
+        if (updatedOrder.userId) {
+          sendUpdateToUser(updatedOrder.userId.toString(), updatePayload);
+        }
+        
+        // Also broadcast the update to all connected admins
+        broadcastToAdmins(updatePayload);
+      } catch (broadcastError) {
+        console.error('WebSocket broadcast failed:', broadcastError.message);
+        // We don't re-throw, allowing the main operation to succeed
       }
 
       res.json(updatedOrder.toObject());
