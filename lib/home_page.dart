@@ -103,19 +103,29 @@ class _HomePageState extends State<HomePage> {
   Future<void> _initWebSocket() async {
     try {
       final token = await _authService.getToken();
-      if (token == null) {
-        debugPrint('HomePage: No token found, cannot connect to WebSocket.');
-        // This is fine as the homepage is public, but we still want to listen for broadcast updates
-        // so we connect without a token. The backend broadcastToAllUsers doesn't check token.
-        _webSocketService.connect(''); // Connect with empty token for broadcasts
-      } else {
-        _webSocketService.connect(token);
-      }
+      _webSocketService.connect(token ?? ''); // Connect with token or empty for broadcasts
 
       _socketSubscription = _webSocketService.stream.listen((message) {
-        if (message['type'] == 'MENU_UPDATE' || message['type'] == 'SETTINGS_UPDATE') {
-          debugPrint('HomePage: Received ${message['type']} update, refreshing data.');
-          _fetchData(); // Re-fetch all data to update UI
+        if (!mounted) return;
+
+        final type = message['type'] as String?;
+        debugPrint('HomePage: Received WebSocket event of type: $type');
+
+        // A comprehensive list of events that should trigger a refresh on the home page.
+        const refreshEvents = [
+          'SETTINGS_UPDATED',
+          'CATEGORY_CREATED',
+          'CATEGORY_UPDATED',
+          'CATEGORY_DELETED',
+          'MENU_ITEM_CREATED',
+          'MENU_ITEM_UPDATED',
+          'MENU_ITEM_DELETED',
+        ];
+
+        if (type != null && refreshEvents.contains(type)) {
+          // The most robust way to handle any data change is to re-fetch.
+          // This ensures all state (categories, items, settings) is consistent.
+          _fetchData();
         }
       }, onError: (error) {
         debugPrint("HomePage WebSocket Stream Error: $error");

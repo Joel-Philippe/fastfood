@@ -1,4 +1,7 @@
+import 'dart:async';
 import 'package:fast_food_app/app_config.dart';
+import 'package:fast_food_app/services/auth_service.dart';
+import 'package:fast_food_app/services/websocket_service.dart';
 import 'package:flutter/material.dart';
 import 'package:fast_food_app/services/mongo_service.dart';
 import 'package:fast_food_app/admin/manage_menu_item_page.dart';
@@ -6,7 +9,7 @@ import 'package:fast_food_app/admin/manage_options_page.dart';
 import 'package:fast_food_app/admin/manage_categories_page.dart';
 import 'package:fast_food_app/admin/manage_hours_page.dart';
 import 'package:fast_food_app/models.dart';
-import 'package:flutter_animate/flutter_animate.dart'; // Keep import for dialogs if they use it
+import 'package:flutter_animate/flutter_animate.dart';
 
 class ManageMenuPage extends StatefulWidget {
   const ManageMenuPage({super.key});
@@ -16,46 +19,105 @@ class ManageMenuPage extends StatefulWidget {
 }
 
 class _ManageMenuPageState extends State<ManageMenuPage> with SingleTickerProviderStateMixin {
-  String _proxiedImageUrl(String url) {
-    return '${AppConfig.baseUrl}/api/image-proxy?url=${Uri.encodeComponent(url)}';
-  }
-
   final MongoService _mongoService = MongoService();
   late TabController _tabController;
-  late Future<List<MenuItem>> _menuItemsFuture;
-  late Future<List<String>> _optionTypesFuture;
+  
+  // State variables
+  List<MenuItem>? _menuItems;
+  List<String>? _optionTypes;
+  bool _isLoading = true;
+  String? _error;
+  
+  // WillPopScope state
   bool _hasChanges = false;
+
+  // WebSocket service
+  final WebSocketService _webSocketService = WebSocketService();
+  final AuthService _authService = AuthService();
+  StreamSubscription? _socketSubscription;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
     _fetchData();
+    _initWebSocket();
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _socketSubscription?.cancel();
+    _webSocketService.disconnect();
     super.dispose();
   }
 
-  void _fetchData() {
-    setState(() {
-      _menuItemsFuture = _mongoService.getMenuItemsForAdmin();
-      _optionTypesFuture = _mongoService.getOptionTypes();
-    });
+  Future<void> _fetchData() async {
+    if (!_isLoading && mounted) {
+      setState(() { _isLoading = true; });
+    }
+    try {
+      final results = await Future.wait([
+        _mongoService.getMenuItemsForAdmin(),
+        _mongoService.getOptionTypes(),
+      ]);
+      if (mounted) {
+        setState(() {
+          _menuItems = results[0];
+          _optionTypes = results[1];
+          _isLoading = false;
+          _error = null;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = 'Failed to load data: $e';
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _initWebSocket() async {
+    try {
+      final token = await _authService.getToken();
+      if (token == null) return;
+      _webSocketService.connect(token);
+
+      _socketSubscription = _webSocketService.stream.listen((message) {
+        if (!mounted) return;
+        final type = message['type'] as String?;
+        
+        const refreshEvents = [
+          'CATEGORY_CREATED', 'CATEGORY_UPDATED', 'CATEGORY_DELETED',
+          'MENU_ITEM_CREATED', 'MENU_ITEM_UPDATED', 'MENU_ITEM_DELETED',
+          'OPTION_CREATED', 'OPTION_UPDATED', 'OPTION_DELETED'
+        ];
+
+        if (type != null && refreshEvents.contains(type)) {
+          debugPrint('ManageMenuPage: Received ${type}, refreshing data.');
+          _hasChanges = true; // Mark that data has changed
+          _fetchData();
+        }
+      });
+    } catch (e) {
+      debugPrint("ManageMenuPage failed to init WebSocket: $e");
+    }
   }
 
   void _handleRefresh() {
-    setState(() {
-      _hasChanges = true;
-      _fetchData();
-    });
+    _hasChanges = true;
+    _fetchData();
   }
 
   Future<bool> _onWillPop() async {
     Navigator.pop(context, _hasChanges);
     return false;
+  }
+  
+  String _proxiedImageUrl(String url) {
+    return '${AppConfig.baseUrl}/api/image-proxy?url=${Uri.encodeComponent(url)}';
   }
 
   @override
@@ -78,7 +140,7 @@ class _ManageMenuPageState extends State<ManageMenuPage> with SingleTickerProvid
                     context,
                     MaterialPageRoute(builder: (context) => const ManageMenuItemPage()),
                   );
-                  _handleRefresh();
+                  // No need to call _handleRefresh here as WebSocket should handle it
                 },
                 backgroundColor: Colors.transparent,
                 tooltip: 'Ajouter un article',
@@ -134,9 +196,9 @@ class _ManageMenuPageState extends State<ManageMenuPage> with SingleTickerProvid
               controller: _tabController,
               children: [
                 _buildMenuItemsTab(),
-                ManageCategoriesPage(onRefresh: _handleRefresh),
+                ManageCategoriesPage(onRefresh: _handleRefresh), // This child might need its own WebSocket listener
                 _buildOptionsTab(),
-                ManageHoursPage(onRefresh: _handleRefresh),
+                ManageHoursPage(onRefresh: _handleRefresh), // This child might need its own WebSocket listener
               ],
             ),
           ),
@@ -145,114 +207,104 @@ class _ManageMenuPageState extends State<ManageMenuPage> with SingleTickerProvid
     );
   }
 
-  Widget _buildFutureTab({
-    required Future<List<dynamic>> future,
-    required Widget Function(List<dynamic> data) builder,
+  Widget _buildTabBody({
+    required bool hasData,
+    required bool hasError,
+    required Widget child,
     required String emptyMessage,
   }) {
-    return FutureBuilder<List<dynamic>>(
-      future: future,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator(color: Color(0xFF53c6fd)));
-        }
-        if (snapshot.hasError) {
-          return Center(child: Text('Erreur: ${snapshot.error}'));
-        }
-        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Center(child: Text(emptyMessage, style: const TextStyle(fontSize: 16, color: Colors.black54)));
-        }
-        return builder(snapshot.data!);
-      },
-    );
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator(color: Color(0xFF53c6fd)));
+    }
+    if (hasError) {
+      return Center(child: Text(_error ?? 'Une erreur est survenue.'));
+    }
+    if (!hasData) {
+      return Center(child: Text(emptyMessage, style: const TextStyle(fontSize: 16, color: Colors.black54)));
+    }
+    return child;
   }
 
   Widget _buildMenuItemsTab() {
-    return _buildFutureTab(
-      future: _menuItemsFuture,
+    return _buildTabBody(
+      hasData: _menuItems != null && _menuItems!.isNotEmpty,
+      hasError: _error != null && _menuItems == null,
       emptyMessage: 'Aucun article de menu.',
-      builder: (data) {
-        final items = data.cast<MenuItem>();
-        return ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: items.length,
-          itemBuilder: (context, index) {
-            final item = items[index];
-            return _buildListItemCard(
-              title: item.name,
-              subtitle: '${item.price.toStringAsFixed(2)} €',
-              leading:
-                  item.imageUrl != null && item.imageUrl!.isNotEmpty
-                      ? ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.network(
-                        _proxiedImageUrl(item.imageUrl!),
-                        width: 50,
-                        height: 50,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => const Center(
-                          child: Icon(Icons.broken_image, size: 40, color: Colors.grey),
-                        ),
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: _menuItems!.length,
+        itemBuilder: (context, index) {
+          final item = _menuItems![index];
+          return _buildListItemCard(
+            title: item.name,
+            subtitle: '${item.price.toStringAsFixed(2)} €',
+            leading:
+                item.imageUrl != null && item.imageUrl!.isNotEmpty
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                      _proxiedImageUrl(item.imageUrl!),
+                      width: 50,
+                      height: 50,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => const Center(
+                        child: Icon(Icons.broken_image, size: 40, color: Colors.grey),
                       ),
-                        )
-                      : null,
-              actions: [
-                Row(mainAxisSize: MainAxisSize.min, children: [
-                  IconButton(
-                    icon: const Icon(Icons.edit_outlined, color: Color(0xFF53c6fd)),
-                    onPressed: () async {
-                      await Navigator.push(context, MaterialPageRoute(builder: (context) => ManageMenuItemPage(menuItem: item)));
-                      _handleRefresh();
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
-                    onPressed: () async {
-                      await _mongoService.deleteMenuItem(item.id);
-                      _handleRefresh();
-                    },
-                  ),
-                ])
-              ],
-            );
-          },
-        );
-      },
+                    ),
+                      )
+                    : null,
+            actions: [
+              Row(mainAxisSize: MainAxisSize.min, children: [
+                IconButton(
+                  icon: const Icon(Icons.edit_outlined, color: Color(0xFF53c6fd)),
+                  onPressed: () async {
+                    await Navigator.push(context, MaterialPageRoute(builder: (context) => ManageMenuItemPage(menuItem: item)));
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                  onPressed: () async {
+                    await _mongoService.deleteMenuItem(item.id);
+                    // No need for _handleRefresh, WebSocket will trigger it
+                  },
+                ),
+              ])
+            ],
+          );
+        },
+      ),
     );
   }
 
   Widget _buildOptionsTab() {
-    return _buildFutureTab(
-      future: _optionTypesFuture,
+    return _buildTabBody(
+      hasData: _optionTypes != null && _optionTypes!.isNotEmpty,
+      hasError: _error != null && _optionTypes == null,
       emptyMessage: 'Aucun type d\'option trouvé.',
-      builder: (data) {
-        final optionTypes = data.cast<String>();
-        return ListView.builder(
-          padding: const EdgeInsets.all(16.0),
-          itemCount: optionTypes.length + 1,
-          itemBuilder: (context, index) {
-            if (index == optionTypes.length) {
-              return _buildListItemCard(
-                title: 'Ajouter un type d\'option',
-                onTap: () => _showAddCustomOptionTypeDialog(context),
-                actions: [Row(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.add_circle_outline, color: Color(0xFF53c6fd))])],
-              );
-            }
-            final typeName = optionTypes[index];
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16.0),
+        itemCount: _optionTypes!.length + 1,
+        itemBuilder: (context, index) {
+          if (index == _optionTypes!.length) {
             return _buildListItemCard(
-              title: 'Gérer: ${typeName.replaceAll('Options', '')}',
-              onTap: () async {
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ManageOptionsPage(collectionName: typeName)),
-                );
-                _handleRefresh();
-              },
-              actions: [Row(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.arrow_forward_ios, color: Color(0xFF53c6fd))])],
+              title: 'Ajouter un type d\'option',
+              onTap: () => _showAddCustomOptionTypeDialog(context),
+              actions: [Row(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.add_circle_outline, color: Color(0xFF53c6fd))])],
             );
-          },
-        );
-      },
+          }
+          final typeName = _optionTypes![index];
+          return _buildListItemCard(
+            title: 'Gérer: ${typeName.replaceAll('Options', '')}',
+            onTap: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ManageOptionsPage(collectionName: typeName)),
+              );
+            },
+            actions: [Row(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.arrow_forward_ios, color: Color(0xFF53c6fd))])],
+          );
+        },
+      ),
     );
   }
   
@@ -277,7 +329,7 @@ class _ManageMenuPageState extends State<ManageMenuPage> with SingleTickerProvid
           child: Row(
             children: [
               if (leading != null) ...[leading, const SizedBox(width: 16)],
-                            Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -288,7 +340,8 @@ class _ManageMenuPageState extends State<ManageMenuPage> with SingleTickerProvid
                     ],
                   ],
                 ),
-              ),              if (actions != null) Row(mainAxisSize: MainAxisSize.min, children: actions),
+              ),
+              if (actions != null) Row(mainAxisSize: MainAxisSize.min, children: actions),
             ],
           ),
         ),
@@ -330,11 +383,11 @@ class _ManageMenuPageState extends State<ManageMenuPage> with SingleTickerProvid
                     controller: typeController,
                     decoration: const InputDecoration(
                       labelText: 'Nom du type d\'option',
-                      hintText: 'Les espaces seront remplacés par des tirets', // Updated hint
+                      hintText: 'Les espaces seront remplacés par des tirets',
                       border: OutlineInputBorder(),
                       focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF53c6fd))),
                     ),
-                    validator: (v) => (v == null || v.isEmpty) ? 'Le nom est requis' : null, // Removed space validation
+                    validator: (v) => (v == null || v.isEmpty) ? 'Le nom est requis' : null,
                   ),
                   const SizedBox(height: 24),
                   Row(
@@ -349,15 +402,15 @@ class _ManageMenuPageState extends State<ManageMenuPage> with SingleTickerProvid
                         style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF53c6fd)),
                         onPressed: () {
                           if (formKey.currentState!.validate()) {
-                            final sanitizedTypeName = typeController.text.toLowerCase().replaceAll(' ', '-'); // Sanitize
+                            final sanitizedTypeName = typeController.text.toLowerCase().replaceAll(' ', '-');
                             Navigator.of(dialogContext).pop();
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => ManageOptionsPage(collectionName: sanitizedTypeName)), // Use sanitized name
-                            ).then((_) => _handleRefresh());
+                              MaterialPageRoute(builder: (context) => ManageOptionsPage(collectionName: sanitizedTypeName)),
+                            );
                           }
                         },
-                        child: const Text('Créer et Gérer', style: const TextStyle(color: Colors.white)),
+                        child: const Text('Créer et Gérer', style: TextStyle(color: Colors.white)),
                       ),
                     ],
                   ),
@@ -365,8 +418,8 @@ class _ManageMenuPageState extends State<ManageMenuPage> with SingleTickerProvid
               ),
             ),
           ),
-        ).animate().fadeIn(duration: 300.ms);
+        );
       },
-    );
+    ).animate().fadeIn(duration: 300.ms);
   }
 }

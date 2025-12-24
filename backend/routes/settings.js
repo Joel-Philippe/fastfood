@@ -32,7 +32,7 @@ router.post('/', authMiddleware, authorizeRoles('admin'), async (req, res) => {
       { hours },
       { new: true, upsert: true, setDefaultsOnInsert: true }
     );
-    broadcastToAllUsers({ type: 'SETTINGS_UPDATE' }); // Notify all users about settings update
+    broadcastToAllUsers({ type: 'SETTINGS_UPDATED', settings: updatedSettings.toObject() }); // Notify all users about settings update
     res.json(updatedSettings);
   } catch (err) {
     console.error('Error updating settings:', err);

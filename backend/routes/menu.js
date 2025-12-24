@@ -46,7 +46,7 @@ router.put(
         return res.status(404).json({ message: 'Category not found' });
       }
 
-      broadcastToAllUsers({ type: 'MENU_UPDATE' }); // Notify all users about menu update
+      broadcastToAllUsers({ type: 'CATEGORY_UPDATED', category: updatedCategory.toObject() }); // Notify all users about menu update
       res.json(updatedCategory);
     } catch (err) {
       console.error(err.message);
@@ -107,7 +107,7 @@ router.post(
       });
 
       const category = await newCategory.save();
-      broadcastToAllUsers({ type: 'MENU_UPDATE' }); // Notify all users
+      broadcastToAllUsers({ type: 'CATEGORY_CREATED', category: category.toObject() }); // Notify all users
       res.status(201).json(category);
     } catch (err) {
       if (err.code === 11000) {
@@ -132,7 +132,7 @@ router.put('/categories/:id', authMiddleware, authorizeRoles('admin'), async (re
     if (!category) {
       return res.status(404).json({ message: 'Category not found' });
     }
-    broadcastToAllUsers({ type: 'MENU_UPDATE' }); // Notify all users about menu update
+    broadcastToAllUsers({ type: 'CATEGORY_UPDATED', category: category.toObject() }); // Notify all users about menu update
     res.json(category);
   } catch (err) {
     console.error(err.message);
@@ -147,7 +147,7 @@ router.delete('/categories/:id', authMiddleware, authorizeRoles('admin'), async 
     if (!category) {
       return res.status(404).json({ message: 'Category not found' });
     }
-    broadcastToAllUsers({ type: 'MENU_UPDATE' }); // Notify all users about menu update
+    broadcastToAllUsers({ type: 'CATEGORY_DELETED', categoryId: req.params.id }); // Notify all users about menu update
     res.json({ message: 'Category deleted' });
   } catch (err) {
     console.error(err.message);
@@ -228,7 +228,7 @@ router.post(
       });
 
       const menuItem = await newMenuItem.save();
-      broadcastToAllUsers({ type: 'MENU_UPDATE' }); // Notify all users about menu update
+      broadcastToAllUsers({ type: 'MENU_ITEM_CREATED', item: menuItem.toObject() }); // Notify all users about menu update
       res.status(201).json(menuItem); // Use 201 for resource creation
     } catch (err) {
       console.error('Error creating menu item:', err); // Log the full error object
@@ -266,7 +266,7 @@ router.put('/:id', authMiddleware, authorizeRoles('admin'), async (req, res) => 
 
     const menuItem = await MenuItem.findByIdAndUpdate(req.params.id, updatedFields, { new: true });
     if (!menuItem) return res.status(404).json({ message: 'Menu item not found' });
-    broadcastToAllUsers({ type: 'MENU_UPDATE' }); // Notify all users about menu update
+    broadcastToAllUsers({ type: 'MENU_ITEM_UPDATED', item: menuItem.toObject() }); // Notify all users about menu update
     res.json(menuItem);
   } catch (err) {
     console.error(err.message);
@@ -279,7 +279,7 @@ router.delete('/:id', authMiddleware, authorizeRoles('admin'), async (req, res) 
   try {
     const menuItem = await MenuItem.findByIdAndDelete(req.params.id);
     if (!menuItem) return res.status(404).json({ message: 'Menu item not found' });
-    broadcastToAllUsers({ type: 'MENU_UPDATE' }); // Notify all users about menu update
+    broadcastToAllUsers({ type: 'MENU_ITEM_DELETED', itemId: req.params.id }); // Notify all users about menu update
     res.json({ message: 'Menu item deleted' });
   } catch (err) {
     console.error(err.message);
@@ -343,7 +343,7 @@ router.post(
       });
 
       const option = await newOption.save();
-      broadcastToAllUsers({ type: 'MENU_UPDATE' }); // Notify all users about menu update
+      broadcastToAllUsers({ type: 'OPTION_CREATED', option: option.toObject() }); // Notify all users about menu update
       res.json(option);
     } catch (err) {
       console.error(err.message);
@@ -363,7 +363,7 @@ router.put('/options/:id', authMiddleware, authorizeRoles('admin'), async (req, 
   try {
     const option = await Option.findByIdAndUpdate(req.params.id, updatedFields, { new: true });
     if (!option) return res.status(404).json({ message: 'Option not found' });
-    broadcastToAllUsers({ type: 'MENU_UPDATE' }); // Notify all users about menu update
+    broadcastToAllUsers({ type: 'OPTION_UPDATED', option: option.toObject() }); // Notify all users about menu update
     res.json(option);
   } catch (err) {
     console.error(err.message);
@@ -376,7 +376,7 @@ router.delete('/options/:id', authMiddleware, authorizeRoles('admin'), async (re
   try {
     const option = await Option.findByIdAndDelete(req.params.id);
     if (!option) return res.status(404).json({ message: 'Option not found' });
-    broadcastToAllUsers({ type: 'MENU_UPDATE' }); // Notify all users about menu update
+    broadcastToAllUsers({ type: 'OPTION_DELETED', optionId: req.params.id }); // Notify all users about menu update
     res.json({ message: 'Option deleted' });
   } catch (err) {
     console.error(err.message);
