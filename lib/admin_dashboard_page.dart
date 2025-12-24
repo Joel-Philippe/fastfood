@@ -375,16 +375,64 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
       children: [
         const Divider(),
         const Text('Articles:', style: TextStyle(fontWeight: FontWeight.bold)),
-        ...order.items.values.map((item) => Padding(
-          padding: const EdgeInsets.symmetric(vertical: 2.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Flexible(child: Text('${item.quantity}x ${item.item.name}', softWrap: false, overflow: TextOverflow.ellipsis, maxLines: 1)),
-              Flexible(child: Text('${(item.totalPrice / item.quantity).toStringAsFixed(2)} €')),
-            ],
-          ),
-        )),
+        ...order.items.values.map((cartItem) {
+          // Helper to build rows for options and ingredients
+          Widget buildDetailRow(String text, {bool isRemoval = false}) {
+            return Padding(
+              padding: const EdgeInsets.only(left: 16, top: 2), // Indent details
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(isRemoval ? '– ' : '+ ', style: TextStyle(color: isRemoval ? Colors.red : Colors.green, fontSize: 14)),
+                  Expanded(
+                    child: Text(
+                      text,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.black54,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          List<Widget> details = [];
+
+          // Add selected options
+          cartItem.selectedOptions.forEach((category, options) {
+            for (var option in options) {
+              details.add(buildDetailRow('${option.name} (${option.price.toStringAsFixed(2)}€)'));
+            }
+          });
+
+          // Add excluded ingredients
+          for (var ingredient in cartItem.ingredientsToRemove) {
+            details.add(buildDetailRow('Sans $ingredient', isRemoval: true));
+          }
+
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${cartItem.quantity}x ${cartItem.item.name}',
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                if (details.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: details,
+                    ),
+                  ),
+              ],
+            ),
+          );
+        }),
         const Divider(),
         if (order.orderType == 'delivery' && order.address != null) ...[
           const Text('Adresse de livraison:', style: TextStyle(fontWeight: FontWeight.bold)),
