@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const User = require('../models/User'); // Make sure the path is correct
+const authMiddleware = require('../middleware/authMiddleware'); // ADDED: Import authMiddleware
 
 const router = express.Router();
 
