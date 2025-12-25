@@ -120,4 +120,37 @@ router.post(
   }
 );
 
+// PATCH /api/auth/fcm-token - Update FCM token for the logged-in user
+router.patch(
+  '/fcm-token',
+  authMiddleware,
+  [
+    body('fcmToken', 'FCM token is required').not().isEmpty(),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+      const { fcmToken } = req.body;
+      const userId = req.userData.userId; // From authMiddleware
+
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      user.fcmToken = fcmToken;
+      await user.save();
+
+      res.json({ message: 'FCM token updated successfully' });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Server error while updating FCM token' });
+    }
+  }
+);
+
 module.exports = router;

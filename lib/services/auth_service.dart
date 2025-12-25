@@ -1,8 +1,4 @@
-import 'dart:convert';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:http/http.dart' as http;
-import 'package:fast_food_app/app_config.dart'; // Import AppConfig
-import 'package:jwt_decoder/jwt_decoder.dart'; // Import jwt_decoder
+import 'package:flutter/foundation.dart'; // Add for debugPrint
 
 class AuthException implements Exception {
   final String message;
@@ -110,5 +106,36 @@ class AuthService {
   Future<bool> isAuthenticated() async {
     final token = await getToken();
     return token != null && !await isTokenExpired(token);
+  }
+
+  // Update FCM token
+  Future<void> updateFCMToken(String fcmToken) async {
+    final token = await getToken();
+    if (token == null || await isTokenExpired(token)) {
+      // User is not logged in or token is expired, cannot update FCM token
+      return;
+    }
+
+    try {
+      final response = await http.patch(
+        Uri.parse('$_baseUrl/fcm-token'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: json.encode({
+          'fcmToken': fcmToken,
+        }),
+      );
+
+      if (response.statusCode != 200) {
+        final errorBody = json.decode(response.body);
+        final errorMessage = errorBody['message'] ?? 'Failed to update FCM token with status: ${response.statusCode}';
+        throw AuthException(errorMessage);
+      }
+      debugPrint('FCM token successfully sent to backend.');
+    } catch (e) {
+      throw AuthException('Error updating FCM token: $e');
+    }
   }
 }

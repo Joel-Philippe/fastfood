@@ -29,34 +29,31 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   Map<MenuCategory, List<MenuItem>> _groupedItems = {};
-  List<MenuItem> _allMenuItems = []; // New: For global search
+  List<MenuItem> _allMenuItems = [];
   MenuCategory? _selectedCategory;
   bool _isLoading = true;
   String? _error;
   late ConfettiController _confettiController;
 
-  // Search state
-  final TextEditingController _searchController = TextEditingController();
-  List<MenuItem> _filteredMenuItems = [];
-
   // Restaurant status state
   RestaurantSettings? _settings;
   bool _isRestaurantOpen = true;
   Duration? _timeUntilOpening;
+  Duration? _timeUntilClosing;
   Timer? _statusTimer;
+  Timer? _closingTimer;
 
   // WebSocket for real-time updates
   final WebSocketService _webSocketService = WebSocketService();
-  final AuthService _authService = AuthService(); // Use local authService
+  final AuthService _authService = AuthService();
   StreamSubscription? _socketSubscription;
 
   @override
   void initState() {
     super.initState();
     _confettiController = ConfettiController(duration: const Duration(milliseconds: 300));
-    _searchController.addListener(_filterMenuItems);
     _fetchData();
-    _initWebSocket(); // Initialize WebSocket
+    _initWebSocket();
     // Periodically check the restaurant status
     _statusTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
       if (_settings != null) {
@@ -68,42 +65,17 @@ class _HomePageState extends State<HomePage> {
   @override
   void dispose() {
     _confettiController.dispose();
-    _searchController.removeListener(_filterMenuItems);
-    _searchController.dispose();
     _statusTimer?.cancel();
-    _socketSubscription?.cancel(); // Cancel WebSocket subscription
-    _webSocketService.disconnect(); // Disconnect WebSocket
+    _closingTimer?.cancel();
+    _socketSubscription?.cancel();
+    _webSocketService.disconnect();
     super.dispose();
-  }
-
-  void _filterMenuItems() {
-    final query = _searchController.text.toLowerCase();
-    
-    setState(() {
-      if (query.isEmpty) {
-        // If query is empty, show items from the selected category
-        if (_selectedCategory != null && _groupedItems.containsKey(_selectedCategory)) {
-          _filteredMenuItems = _groupedItems[_selectedCategory]!;
-        } else {
-          _filteredMenuItems = [];
-        }
-      } else {
-        // If query is not empty, search across all items
-        _filteredMenuItems = _allMenuItems.where((item) {
-          final nameMatch = item.name.toLowerCase().contains(query);
-          final descriptionMatch = item.description?.toLowerCase().contains(query) ?? false;
-          // Optionally, you could also match the category name
-          // final categoryMatch = item.category.toLowerCase().contains(query);
-          return nameMatch || descriptionMatch;
-        }).toList();
-      }
-    });
   }
 
   Future<void> _initWebSocket() async {
     try {
       final token = await _authService.getToken();
-      _webSocketService.connect(token ?? ''); // Connect with token or empty for broadcasts
+      _webSocketService.connect(token ?? '');
 
       _socketSubscription = _webSocketService.stream.listen((message) {
         if (!mounted) return;
@@ -111,7 +83,6 @@ class _HomePageState extends State<HomePage> {
         final type = message['type'] as String?;
         debugPrint('HomePage: Received WebSocket event of type: $type');
 
-        // A comprehensive list of events that should trigger a refresh on the home page.
         const refreshEvents = [
           'SETTINGS_UPDATED',
           'CATEGORY_CREATED',
@@ -123,8 +94,6 @@ class _HomePageState extends State<HomePage> {
         ];
 
         if (type != null && refreshEvents.contains(type)) {
-          // The most robust way to handle any data change is to re-fetch.
-          // This ensures all state (categories, items, settings) is consistent.
           _fetchData();
         }
       }, onError: (error) {
@@ -138,7 +107,6 @@ class _HomePageState extends State<HomePage> {
   Future<void> _fetchData() async {
     try {
       final mongoService = widget.mongoService ?? MongoService();
-      // Fetch settings and menu data in parallel
       final results = await Future.wait<dynamic>([
         mongoService.getSettings(),
         mongoService.getCategories(),
@@ -147,7 +115,6 @@ class _HomePageState extends State<HomePage> {
       _settings = results[0] as RestaurantSettings;
       final categories = results[1] as List<MenuCategory>;
 
-      // Check status before fetching menu items
       _checkRestaurantStatus();
 
       final Map<MenuCategory, List<MenuItem>> groupedItems = {};
@@ -163,16 +130,14 @@ class _HomePageState extends State<HomePage> {
       if (!mounted) return;
       setState(() {
         _groupedItems = groupedItems;
-        _allMenuItems = groupedItems.values.expand((items) => items).toList(); // Populate all items
+        _allMenuItems = groupedItems.values.expand((items) => items).toList();
         
         if (_groupedItems.isNotEmpty) {
-          // If a category is already selected, keep it. Otherwise, select the first one.
           if (_selectedCategory == null || !_groupedItems.containsKey(_selectedCategory)) {
              _selectedCategory = _groupedItems.keys.first;
           }
         }
         _isLoading = false;
-        _filterMenuItems(); // This will now correctly show the selected category's items
       });
     } catch (e) {
       if (!mounted) return;
@@ -187,7 +152,6 @@ class _HomePageState extends State<HomePage> {
     if (_settings == null) return;
 
     final now = DateTime.now();
-    // Use the numeric weekday (1=Monday, 7=Sunday) as the key, which is language-independent.
     final dayKey = now.weekday.toString();
     final todayHours = _settings!.hours[dayKey];
 
@@ -195,6 +159,8 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _isRestaurantOpen = false;
         _timeUntilOpening = _calculateTimeUntilNextOpening(now);
+        _timeUntilClosing = null;
+        _closingTimer?.cancel();
       });
       return;
     }
@@ -205,29 +171,54 @@ class _HomePageState extends State<HomePage> {
     final openTime = DateTime(now.year, now.month, now.day, int.parse(openTimeParts[0]), int.parse(openTimeParts[1]));
     var closeTime = DateTime(now.year, now.month, now.day, int.parse(closeTimeParts[0]), int.parse(closeTimeParts[1]));
 
-    // Handle overnight closing times (e.g., open 22:00, close 02:00)
     if (closeTime.isBefore(openTime)) {
       closeTime = closeTime.add(const Duration(days: 1));
     }
 
     if (now.isAfter(openTime) && now.isBefore(closeTime)) {
+      final timeToClose = closeTime.difference(now);
+      const oneHour = Duration(hours: 1);
+
       setState(() {
         _isRestaurantOpen = true;
         _timeUntilOpening = null;
+        if (timeToClose <= oneHour) {
+          _timeUntilClosing = timeToClose;
+          _startClosingTimer();
+        } else {
+          _timeUntilClosing = null;
+          _closingTimer?.cancel();
+        }
       });
     } else {
       setState(() {
         _isRestaurantOpen = false;
         _timeUntilOpening = _calculateTimeUntilNextOpening(now);
+        _timeUntilClosing = null;
+        _closingTimer?.cancel();
       });
     }
   }
 
+  void _startClosingTimer() {
+    if (_closingTimer?.isActive ?? false) return;
+
+    _closingTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_timeUntilClosing == null || _timeUntilClosing! <= Duration.zero) {
+        timer.cancel();
+        _checkRestaurantStatus(); // Re-check status once timer ends
+      } else {
+        setState(() {
+          _timeUntilClosing = _timeUntilClosing! - const Duration(seconds: 1);
+        });
+      }
+    });
+  }
+
   Duration _calculateTimeUntilNextOpening(DateTime now) {
-    final todayIndex = now.weekday; // 1 for Monday, 7 for Sunday
+    final todayIndex = now.weekday;
 
     for (int i = 0; i < 7; i++) {
-      // Start check from today
       final dayIndex = (todayIndex - 1 + i) % 7 + 1;
       final dayKey = dayIndex.toString();
       final dayHours = _settings!.hours[dayKey];
@@ -237,40 +228,27 @@ class _HomePageState extends State<HomePage> {
         var nextOpeningTime = DateTime(
           now.year,
           now.month,
-          now.day + i, // Add the offset 'i' to get the correct future date
+          now.day + i,
           int.parse(openTimeParts[0]),
           int.parse(openTimeParts[1]),
         );
 
-        // If we are checking today (i=0) and the opening time is still in the future
         if (i == 0 && now.isBefore(nextOpeningTime)) {
           return nextOpeningTime.difference(now);
-        }
-        // If we are checking a future day (i>0)
-        else if (i > 0) {
+        } else if (i > 0) {
           return nextOpeningTime.difference(now);
         }
       }
     }
-    // If no opening days are set, return a very long duration
     return const Duration(days: 99);
   }
 
   bool _shouldNavigateToCustomization(MenuItem item) {
-    // An item needs customization if it's a 'menu' or has any option types associated with it.
     return item.category == 'menus' || item.optionTypes.isNotEmpty;
   }
 
   @override
   Widget build(BuildContext context) {
-    final authServiceInstance = widget.authService ?? AuthService();
-
-    // Determine the color for the search bar based on the selected category's fontColor
-    final defaultAccentColor = Theme.of(context).colorScheme.primary;
-    final Color searchBarColor = _selectedCategory != null && _selectedCategory!.fontColor != null
-        ? Color(int.parse(_selectedCategory!.fontColor!.substring(1, 7), radix: 16) + 0xFF000000)
-        : defaultAccentColor;
-
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -283,50 +261,23 @@ class _HomePageState extends State<HomePage> {
         alignment: Alignment.topCenter,
         children: [
           Scaffold(
-            backgroundColor: Colors.transparent, // Make scaffold transparent
+            backgroundColor: Colors.transparent,
             appBar: AppBar(
-              title: Row(
-                children: [
-                  GradientText(
+              title: GradientText(
                     'Tacos Locos',
                     style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     gradient: const LinearGradient(colors: [Color(0xFFE63198), Color(0xFFFEC20B)]),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Container(
-                      height: 40,
-                      child: TextField(
-                        controller: _searchController,
-                        style: TextStyle(color: searchBarColor),
-                        decoration: InputDecoration(
-                          hintText: 'Rechercher un article...',
-                          hintStyle: TextStyle(color: searchBarColor.withOpacity(0.7)),
-                          prefixIcon: Icon(Icons.search, color: searchBarColor, size: 20),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(25.0),
-                            borderSide: BorderSide.none,
-                          ),
-                          filled: true,
-                          fillColor: Colors.white.withOpacity(0.8),
-                          contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
               backgroundColor: Colors.transparent,
               elevation: 0,
               actions: [
                 IconButton(
-                  icon: const Icon(Icons.person_outline, color: Colors.black),
+                  icon: const Icon(Icons.person_outline, color: Color(0xFF18e9fe)),
                   onPressed: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => const ProfilePage()),
                     ).then((_) {
-                      // After returning from profile, force a refresh.
                       setState(() {
                         _isLoading = true;
                       });
@@ -341,7 +292,7 @@ class _HomePageState extends State<HomePage> {
           ),
           if (_isRestaurantOpen)
             Align(
-              alignment: Alignment.bottomCenter, // Moved to avoid FAB
+              alignment: Alignment.bottomCenter,
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: ConfettiWidget(
@@ -360,6 +311,32 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Widget _buildClosingSoonBanner() {
+    if (_timeUntilClosing == null) {
+      return const SizedBox.shrink();
+    }
+
+    final minutesLeft = _timeUntilClosing!.inMinutes;
+    final secondsLeft = _timeUntilClosing!.inSeconds % 60;
+    final timeString = '${minutesLeft.toString().padLeft(2, '0')}:${secondsLeft.toString().padLeft(2, '0')}';
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      color: Colors.amber.shade700,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.timer, color: Colors.white, size: 20),
+          const SizedBox(width: 8),
+          Text(
+            'Fermeture dans $timeString ! Dépêchez-vous !',
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    ).animate().slideIn(duration: 300.ms, begin: const Offset(0, -1)).then().shakeX(amount: 2);
+  }
+
   Widget _buildBody() {
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
@@ -370,28 +347,27 @@ class _HomePageState extends State<HomePage> {
     if (!_isRestaurantOpen && _timeUntilOpening != null) {
       return RestaurantClosedWidget(timeUntilOpening: _timeUntilOpening!);
     }
-    if (_allMenuItems.isEmpty) { // Check all items instead of grouped items
+    if (_allMenuItems.isEmpty) {
       return const Center(child: Text('Aucun article disponible.'));
     }
 
-    // Determine the color for the menu item cards based on the selected category's fontColor
-    final defaultAccentColor = Theme.of(context).colorScheme.primary; // A fallback accent color
+    final defaultAccentColor = Theme.of(context).colorScheme.primary;
     final Color selectedCategoryColor = _selectedCategory != null && _selectedCategory!.fontColor != null
         ? Color(int.parse(_selectedCategory!.fontColor!.substring(1, 7), radix: 16) + 0xFF000000)
-        : defaultAccentColor; // Fallback to primary accent color
+        : defaultAccentColor;
 
     return Column(
       children: [
-        // The search bar has been moved to the AppBar.
+        _buildClosingSoonBanner(),
         Expanded(
           child: Row(
             children: [
               SizedBox(
-                width: 100, // Adjusted width for the category sidebar
+                width: 100,
                 child: _buildCategoryTabs(),
               ),
               Expanded(
-                child: _buildMenuItemsList(selectedCategoryColor), // Pass the color
+                child: _buildMenuItemsList(selectedCategoryColor),
               ),
             ],
           ),
@@ -427,8 +403,6 @@ class _HomePageState extends State<HomePage> {
               onTap: (selectedCategory) {
                 setState(() {
                   _selectedCategory = selectedCategory;
-                  _searchController.clear(); // Clear search on category change
-                  _filterMenuItems();
                 });
               },
             ).animate().fadeIn(delay: (100 * index).ms),
@@ -438,13 +412,14 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildMenuItemsList(Color selectedCategoryColor) { // Accept selectedCategoryColor as parameter
+  Widget _buildMenuItemsList(Color selectedCategoryColor) {
     if (_selectedCategory == null) {
       return const Center(child: Text('Veuillez sélectionner une catégorie.'));
     }
-
-    if (_filteredMenuItems.isEmpty) {
-      return const Center(child: Text('Aucun résultat trouvé.'));
+    
+    final items = _groupedItems[_selectedCategory] ?? [];
+    if (items.isEmpty) {
+      return const Center(child: Text('Aucun article dans cette catégorie.'));
     }
     
     return GridView.builder(
@@ -453,16 +428,16 @@ class _HomePageState extends State<HomePage> {
         crossAxisCount: 1,
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
-        childAspectRatio: 0.9, // Adjusted for new card layout
+        childAspectRatio: 0.9,
       ),
-      itemCount: _filteredMenuItems.length,
+      itemCount: items.length,
       itemBuilder: (context, index) {
-        final item = _filteredMenuItems[index];
+        final item = items[index];
         return MenuItemCard(
           item: item,
           onAddItem: _onAddItem,
           index: index,
-          cardTextColor: selectedCategoryColor, // Pass the selected category's color
+          cardTextColor: selectedCategoryColor,
         );
       },
     );
@@ -489,7 +464,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildFabCartButton(BuildContext context) {
     const fabGradient = LinearGradient(
-      colors: [Color(0xFF53c6fd), Color(0xFF9c4dea)], // A new, "sober" gradient
+      colors: [Color(0xFF53c6fd), Color(0xFF9c4dea)],
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
     );
@@ -529,9 +504,9 @@ class _HomePageState extends State<HomePage> {
                     elevation: 0,
                     child: Stack(
                       alignment: Alignment.center,
-                      clipBehavior: Clip.none, // Allow badge to overflow
+                      clipBehavior: Clip.none,
                       children: [
-                        const Icon(Icons.shopping_cart, color: Colors.white),
+                        const Icon(Icons.shopping_cart, color: Color(0xFF18e9fe)),
                         Positioned(
                           top: -4,
                           right: -4,
@@ -573,5 +548,4 @@ class _HomePageState extends State<HomePage> {
       },
     );
   }
-
 }

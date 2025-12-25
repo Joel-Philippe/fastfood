@@ -368,8 +368,8 @@ class MongoService {
 
   Future<void> updateOrderStatus(String orderId, String status) async {
     final headers = await _getAuthHeaders();
-    final response = await http.put(
-      Uri.parse('$_baseUrl/orders/$orderId'),
+    final response = await http.patch(
+      Uri.parse('$_baseUrl/orders/$orderId/status'),
       headers: headers,
       body: json.encode({'status': status}),
     );

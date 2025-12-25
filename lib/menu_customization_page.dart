@@ -302,13 +302,7 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          colors: [Color(0xFFcdc4bf), Color(0xFFffebcb)],
-        ),
-      ),
+      color: const Color(0xFFfdf9e0),
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: CustomScrollView(
@@ -377,7 +371,7 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
                 child: GradientButton(
                   onPressed: _saveChanges,
                   gradient: const LinearGradient(
-                    colors: [Color(0xFF9c4dea), Color(0xFFff80b1)], // New gradient
+                    colors: [Color(0xFF53c6fd), Color(0xFF53c6fd)], // Solid blue
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
                   ),

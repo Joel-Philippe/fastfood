@@ -126,6 +126,27 @@ router.get('/', authMiddleware, authorizeRoles('admin'), async (req, res) => {
   }
 });
 
+const admin = require('firebase-admin');
+const User = require('../models/User'); // Import the User model
+
+// Helper function to get notification message based on status
+function getStatusNotificationMessage(status) {
+  switch (status) {
+    case 'preparing':
+      return { title: 'Votre commande est en préparation !', body: 'Notre équipe a commencé à préparer votre commande.' };
+    case 'ready':
+      return { title: 'Votre commande est prête !', body: 'Vous pouvez venir la récupérer.' };
+    case 'out_for_delivery':
+      return { title: 'Votre commande est en cours de livraison !', body: 'Notre livreur est en route.' };
+    case 'completed':
+      return { title: 'Commande terminée', body: 'Merci d\'avoir commandé chez nous !' };
+    case 'cancelled':
+      return { title: 'Commande annulée', body: 'Votre commande a été annulée.' };
+    default:
+      return null; // No notification for 'pending' or other statuses
+  }
+}
+
 // PATCH (update) order status (Admin only)
 router.patch(
   '/:id/status',
@@ -151,15 +172,44 @@ router.patch(
           order: updatedOrder.toObject(),
         };
 
-        // Send real-time update to the specific user who placed the order
+        // 1. Send WebSocket update to the specific user
         if (updatedOrder.userId) {
           sendUpdateToUser(updatedOrder.userId.toString(), updatePayload);
         }
         
-        // Also broadcast the update to all connected admins
+        // 2. Broadcast WebSocket update to all connected admins
         broadcastToAdmins(updatePayload);
+
+        // 3. Send Push Notification to the user
+        const notificationContent = getStatusNotificationMessage(updatedOrder.status);
+        if (updatedOrder.userId && notificationContent) {
+          const user = await User.findById(updatedOrder.userId);
+          if (user && user.fcmToken) {
+            const message = {
+              notification: {
+                title: notificationContent.title,
+                body: notificationContent.body,
+              },
+              token: user.fcmToken,
+              // You can add more data here to handle clicks on notifications
+              data: {
+                orderId: updatedOrder._id.toString(),
+                status: updatedOrder.status,
+              }
+            };
+
+            try {
+              await admin.messaging().send(message);
+              console.log('Successfully sent push notification to user:', user._id);
+            } catch (error) {
+              console.error('Error sending push notification:', error.message);
+              // It's common for tokens to become invalid. You might want to handle this by removing the token from the DB.
+            }
+          }
+        }
+
       } catch (broadcastError) {
-        console.error('WebSocket broadcast failed:', broadcastError.message);
+        console.error('WebSocket or Push Notification broadcast failed:', broadcastError.message);
         // We don't re-throw, allowing the main operation to succeed
       }
 

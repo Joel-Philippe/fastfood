@@ -26,6 +26,9 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   bool _isLoading = true;
   String? _error;
 
+  // State for the status filter
+  String? _selectedStatus;
+
   final List<String> _orderStatuses = [
     'pending',
     'preparing',
@@ -209,6 +212,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildCustomAppBar(),
+              _buildFilterChips(),
               Expanded(child: _buildBody()),
             ],
           ),
@@ -241,6 +245,50 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     );
   }
 
+  Widget _buildFilterChips() {
+    // A list containing "All" (null) plus the other statuses
+    final List<String?> filterOptions = [null, ..._orderStatuses];
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 10.0),
+      child: Row(
+        children: filterOptions.map((status) {
+          final isSelected = _selectedStatus == status;
+          final label = status == null ? 'Toutes' : _translateStatus(status);
+          final color = status == null ? Colors.blueGrey : _getStatusColor(status);
+
+          return Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: ChoiceChip(
+              label: Text(label),
+              selected: isSelected,
+              onSelected: (selected) {
+                if (selected) {
+                  setState(() {
+                    _selectedStatus = status;
+                  });
+                }
+              },
+              selectedColor: color.withOpacity(0.7),
+              backgroundColor: color.withOpacity(0.2),
+              labelStyle: TextStyle(
+                color: isSelected ? Colors.white : Colors.black87,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20.0),
+                side: BorderSide(
+                  color: isSelected ? color : Colors.transparent,
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
   Widget _buildBody() {
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator(color: Color(0xFF53c6fd)));
@@ -248,16 +296,25 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     if (_error != null) {
       return Center(child: Text('Erreur: $_error'));
     }
-    if (_orders.isEmpty) {
+
+    final List<Order> filteredOrders;
+    if (_selectedStatus == null) {
+      filteredOrders = _orders;
+    } else {
+      filteredOrders = _orders.where((order) => order.status == _selectedStatus).toList();
+    }
+
+    if (filteredOrders.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.list_alt_rounded, size: 80, color: Colors.grey.shade400),
             const SizedBox(height: 16),
-            const Text(
-              'Aucune commande pour le moment',
-              style: TextStyle(fontSize: 20, color: Colors.black54),
+            Text(
+              _selectedStatus == null ? 'Aucune commande pour le moment' : 'Aucune commande avec le statut "${_translateStatus(_selectedStatus!)}"',
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 20, color: Colors.black54),
             ),
           ],
         ),
@@ -265,9 +322,9 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     }
     return ListView.builder(
       padding: const EdgeInsets.all(8),
-      itemCount: _orders.length,
+      itemCount: filteredOrders.length,
       itemBuilder: (context, index) {
-        final order = _orders[index];
+        final order = filteredOrders[index];
         return _buildOrderCard(order);
       },
     );

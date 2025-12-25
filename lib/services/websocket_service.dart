@@ -14,8 +14,10 @@ class WebSocketService {
     // Disconnect any existing channel
     disconnect();
 
-    // Construct WebSocket URL from AppConfig.baseUrl
-    final wsUrl = Uri.parse(AppConfig.baseUrl).replace(scheme: 'ws', path: '/').toString();
+    // Determine WebSocket scheme based on AppConfig.baseUrl
+    final uri = Uri.parse(AppConfig.baseUrl);
+    final wsScheme = uri.scheme == 'https' ? 'wss' : 'ws';
+    final wsUrl = uri.replace(scheme: wsScheme, path: '/').toString();
     
     try {
       _channel = WebSocketChannel.connect(
