@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fast_food_app/services/auth_service.dart';
+import 'package:fast_food_app/services/auth_service.dart';
 import 'package:fast_food_app/home_page.dart'; // To navigate back to home
 import 'package:fast_food_app/register_page.dart'; // To navigate to register
 import 'package:flutter_animate/flutter_animate.dart';

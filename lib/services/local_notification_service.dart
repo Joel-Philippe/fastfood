@@ -15,9 +15,6 @@ class LocalNotificationService {
       requestAlertPermission: true,
       requestBadgePermission: true,
       requestSoundPermission: true,
-      onDidReceiveLocalNotification: (id, title, body, payload) async {
-        // Handle notification tapped while app is in the foreground
-      },
     );
 
     final InitializationSettings initializationSettings =

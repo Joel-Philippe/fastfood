@@ -15,7 +15,8 @@ import 'package:fast_food_app/widgets/menu_item_card.dart';
 import 'package:fast_food_app/widgets/category_card_widget.dart';
 import 'package:fast_food_app/profile_page.dart';
 import 'package:fast_food_app/widgets/restaurant_closed_widget.dart';
-import 'package:fast_food_app/services/websocket_service.dart'; // Import WebSocketService
+import 'package:fast_food_app/services/websocket_service.dart';
+import 'package:fast_food_app/services/auth_service.dart'; // Add this import // Import WebSocketService
 
 class HomePage extends StatefulWidget {
   final MongoService? mongoService;
@@ -263,11 +264,11 @@ class _HomePageState extends State<HomePage> {
           Scaffold(
             backgroundColor: Colors.transparent,
             appBar: AppBar(
-              title: GradientText(
-                    'Tacos Locos',
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    gradient: const LinearGradient(colors: [Color(0xFFE63198), Color(0xFFFEC20B)]),
-                  ),
+              title: Image.asset(
+                'assets/images/locos.png',
+                height: 40, // Adjust height to fit the AppBar
+              ),
+              centerTitle: true, // Center the logo
               backgroundColor: Colors.transparent,
               elevation: 0,
               actions: [
@@ -334,7 +335,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-    ).animate().slideIn(duration: 300.ms, begin: const Offset(0, -1)).then().shakeX(amount: 2);
+    );
   }
 
   Widget _buildBody() {

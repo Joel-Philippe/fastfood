@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:fast_food_app/services/auth_service.dart';
 import 'package:fast_food_app/services/websocket_service.dart';
 import 'package:flutter/material.dart';
+import 'package:fast_food_app/services/auth_service.dart';
 import 'package:provider/provider.dart';
 import 'package:fast_food_app/models.dart';
 import 'package:fast_food_app/cart_provider.dart';

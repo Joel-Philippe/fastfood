@@ -1,4 +1,9 @@
-import 'package:flutter/foundation.dart'; // Add for debugPrint
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:http/http.dart' as http;
+import 'package:fast_food_app/app_config.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 class AuthException implements Exception {
   final String message;
@@ -8,11 +13,10 @@ class AuthException implements Exception {
 }
 
 class AuthService {
-  final String _baseUrl = '${AppConfig.baseUrl}/api/auth'; // Base URL for auth endpoints
+  final String _baseUrl = '${AppConfig.baseUrl}/api/auth';
   final _storage = const FlutterSecureStorage();
-  final String _tokenKey = 'auth_token'; // Key for storing the token
+  final String _tokenKey = 'auth_token';
 
-  // Login with email and password
   Future<void> login(String email, String password) async {
     try {
       final response = await http.post(
@@ -32,23 +36,19 @@ class AuthService {
           throw Exception('Login successful, but no token received.');
         }
       } else {
-        // Attempt to parse error message from backend
         final errorBody = json.decode(response.body);
         final errorMessage = errorBody['message'] ?? 'Login failed with status code: ${response.statusCode}';
         throw Exception(errorMessage);
       }
     } catch (e) {
-      // Re-throw a more specific error to help with debugging
       throw Exception('Login Error: $e');
     }
   }
 
-  // Sign out
   Future<void> logout() async {
     await _storage.delete(key: _tokenKey);
   }
 
-  // Register a new user
   Future<void> register(String email, String password, String name) async {
     try {
       final response = await http.post(
@@ -57,7 +57,7 @@ class AuthService {
         body: json.encode({
           'email': email,
           'password': password,
-          'name': name, // Include name in the registration payload
+          'name': name,
         }),
       );
 
@@ -71,48 +71,40 @@ class AuthService {
     }
   }
 
-  // Get auth token
   Future<String?> getToken() async {
     return await _storage.read(key: _tokenKey);
   }
 
-  // Get user role from JWT
   Future<String?> getUserRole() async {
     final token = await getToken();
     if (token != null && !JwtDecoder.isExpired(token)) {
       final decodedToken = JwtDecoder.decode(token);
-      return decodedToken['role']; // Assuming the role is stored in the JWT payload
+      return decodedToken['role'];
     }
     return null;
   }
 
-  // Get user name from JWT
   Future<String?> getUserName() async {
     final token = await getToken();
     if (token != null && !JwtDecoder.isExpired(token)) {
       final decodedToken = JwtDecoder.decode(token);
-      return decodedToken['userName']; // Assuming the name is stored as 'userName' in the JWT payload
+      return decodedToken['userName'];
     }
     return null;
   }
 
-
-  // Check if a token is expired
   Future<bool> isTokenExpired(String token) async {
     return JwtDecoder.isExpired(token);
   }
 
-  // Check if user is authenticated
   Future<bool> isAuthenticated() async {
     final token = await getToken();
     return token != null && !await isTokenExpired(token);
   }
 
-  // Update FCM token
   Future<void> updateFCMToken(String fcmToken) async {
     final token = await getToken();
     if (token == null || await isTokenExpired(token)) {
-      // User is not logged in or token is expired, cannot update FCM token
       return;
     }
 

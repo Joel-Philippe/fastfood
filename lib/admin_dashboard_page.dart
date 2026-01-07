@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:fast_food_app/services/auth_service.dart';
 import 'package:fast_food_app/services/mongo_service.dart';
 import 'package:fast_food_app/services/auth_service.dart';
 import 'package:fast_food_app/services/websocket_service.dart';
@@ -473,6 +474,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
             padding: const EdgeInsets.symmetric(vertical: 4.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min, // ADDED: Fix for RenderFlex layout error
               children: [
                 Text(
                   '${cartItem.quantity}x ${cartItem.item.name}',

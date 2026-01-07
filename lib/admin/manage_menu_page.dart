@@ -3,6 +3,7 @@ import 'package:fast_food_app/app_config.dart';
 import 'package:fast_food_app/services/auth_service.dart';
 import 'package:fast_food_app/services/websocket_service.dart';
 import 'package:flutter/material.dart';
+import 'package:fast_food_app/services/auth_service.dart';
 import 'package:fast_food_app/services/mongo_service.dart';
 import 'package:fast_food_app/admin/manage_menu_item_page.dart';
 import 'package:fast_food_app/admin/manage_options_page.dart';
@@ -207,104 +208,98 @@ class _ManageMenuPageState extends State<ManageMenuPage> with SingleTickerProvid
     );
   }
 
-  Widget _buildTabBody({
-    required bool hasData,
-    required bool hasError,
-    required Widget child,
-    required String emptyMessage,
-  }) {
+
+
+  Widget _buildMenuItemsTab() {
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator(color: Color(0xFF53c6fd)));
     }
-    if (hasError) {
+    if (_error != null) {
       return Center(child: Text(_error ?? 'Une erreur est survenue.'));
     }
-    if (!hasData) {
-      return Center(child: Text(emptyMessage, style: const TextStyle(fontSize: 16, color: Colors.black54)));
+    if (_menuItems == null || _menuItems!.isEmpty) {
+      return Center(child: Text('Aucun article de menu.', style: const TextStyle(fontSize: 16, color: Colors.black54)));
     }
-    return child;
-  }
 
-  Widget _buildMenuItemsTab() {
-    return _buildTabBody(
-      hasData: _menuItems != null && _menuItems!.isNotEmpty,
-      hasError: _error != null && _menuItems == null,
-      emptyMessage: 'Aucun article de menu.',
-      child: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: _menuItems!.length,
-        itemBuilder: (context, index) {
-          final item = _menuItems![index];
-          return _buildListItemCard(
-            title: item.name,
-            subtitle: '${item.price.toStringAsFixed(2)} €',
-            leading:
-                item.imageUrl != null && item.imageUrl!.isNotEmpty
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.network(
-                      _proxiedImageUrl(item.imageUrl!),
-                      width: 50,
-                      height: 50,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => const Center(
-                        child: Icon(Icons.broken_image, size: 40, color: Colors.grey),
-                      ),
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: _menuItems!.length,
+      itemBuilder: (context, index) {
+        final item = _menuItems![index];
+        return _buildListItemCard(
+          title: item.name,
+          subtitle: '${item.price.toStringAsFixed(2)} €',
+          leading:
+              item.imageUrl != null && item.imageUrl!.isNotEmpty
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(
+                    _proxiedImageUrl(item.imageUrl!),
+                    width: 50,
+                    height: 50,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => const Center(
+                      child: Icon(Icons.broken_image, size: 40, color: Colors.grey),
                     ),
-                      )
-                    : null,
-            actions: [
-              Row(mainAxisSize: MainAxisSize.min, children: [
-                IconButton(
-                  icon: const Icon(Icons.edit_outlined, color: Color(0xFF53c6fd)),
-                  onPressed: () async {
-                    await Navigator.push(context, MaterialPageRoute(builder: (context) => ManageMenuItemPage(menuItem: item)));
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
-                  onPressed: () async {
-                    await _mongoService.deleteMenuItem(item.id);
-                    // No need for _handleRefresh, WebSocket will trigger it
-                  },
-                ),
-              ])
-            ],
-          );
-        },
-      ),
+                  ),
+                    )
+                  : null,
+          actions: [
+            Row(mainAxisSize: MainAxisSize.min, children: [
+              IconButton(
+                icon: const Icon(Icons.edit_outlined, color: Color(0xFF53c6fd)),
+                onPressed: () async {
+                  await Navigator.push(context, MaterialPageRoute(builder: (context) => ManageMenuItemPage(menuItem: item)));
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                onPressed: () async {
+                  await _mongoService.deleteMenuItem(item.id);
+                  // No need for _handleRefresh, WebSocket will trigger it
+                },
+              ),
+            ])
+          ],
+        );
+      },
     );
   }
 
   Widget _buildOptionsTab() {
-    return _buildTabBody(
-      hasData: _optionTypes != null && _optionTypes!.isNotEmpty,
-      hasError: _error != null && _optionTypes == null,
-      emptyMessage: 'Aucun type d\'option trouvé.',
-      child: ListView.builder(
-        padding: const EdgeInsets.all(16.0),
-        itemCount: _optionTypes!.length + 1,
-        itemBuilder: (context, index) {
-          if (index == _optionTypes!.length) {
-            return _buildListItemCard(
-              title: 'Ajouter un type d\'option',
-              onTap: () => _showAddCustomOptionTypeDialog(context),
-              actions: [Row(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.add_circle_outline, color: Color(0xFF53c6fd))])],
-            );
-          }
-          final typeName = _optionTypes![index];
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator(color: Color(0xFF53c6fd)));
+    }
+    if (_error != null) {
+      return Center(child: Text(_error ?? 'Une erreur est survenue.'));
+    }
+    if (_optionTypes == null || _optionTypes!.isEmpty) {
+      return Center(child: Text('Aucun type d\'option trouvé.', style: const TextStyle(fontSize: 16, color: Colors.black54)));
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16.0),
+      itemCount: _optionTypes!.length + 1,
+      itemBuilder: (context, index) {
+        if (index == _optionTypes!.length) {
           return _buildListItemCard(
-            title: 'Gérer: ${typeName.replaceAll('Options', '')}',
-            onTap: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => ManageOptionsPage(collectionName: typeName)),
-              );
-            },
-            actions: [Row(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.arrow_forward_ios, color: Color(0xFF53c6fd))])],
+            title: 'Ajouter un type d\'option',
+            onTap: () => _showAddCustomOptionTypeDialog(context),
+            actions: [Row(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.add_circle_outline, color: Color(0xFF53c6fd))])],
           );
-        },
-      ),
+        }
+        final typeName = _optionTypes![index];
+        return _buildListItemCard(
+          title: 'Gérer: ${typeName.replaceAll('Options', '')}',
+          onTap: () async {
+            await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => ManageOptionsPage(collectionName: typeName)),
+            );
+          },
+          actions: [Row(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.arrow_forward_ios, color: Color(0xFF53c6fd))])],
+        );
+      },
     );
   }
   

@@ -24,7 +24,7 @@ class AppConfig {
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       return 'http://10.0.2.2:5000';
     } else {
-      return 'http://localhost:5000';
+      return 'https://fastfood-fss9.onrender.com';
     }
   }
 

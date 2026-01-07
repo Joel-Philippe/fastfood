@@ -8,6 +8,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:fast_food_app/auth_wrapper.dart';
 
 import 'package:fast_food_app/menu_customization_provider.dart';
+import 'package:fast_food_app/services/auth_service.dart'; // Add this import
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';

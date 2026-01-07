@@ -83,6 +83,12 @@ class _LoginPageState extends State<LoginPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // Logo
+                  Image.asset(
+                    'assets/images/locos.png',
+                    height: 150,
+                  ),
+                  const SizedBox(height: 30),
                   // Title
                   const Text(
                     'Accès Administrateur',

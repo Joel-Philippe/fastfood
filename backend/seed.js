@@ -12,8 +12,15 @@ dotenv.config();
 const adminCredentials = {
   name: 'Admin',
   email: 'admin@example.com',
-  password: 'password123', // Change this in a production environment
 };
+
+// Check for ADMIN_PASSWORD environment variable
+const adminPassword = process.env.ADMIN_PASSWORD;
+if (!adminPassword) {
+  console.error('Error: ADMIN_PASSWORD environment variable is not set.');
+  console.error('Please set it before running the seed script.');
+  process.exit(1); // Exit with an error code
+}
 
 
 const options = [
@@ -185,11 +192,10 @@ const seedDB = async () => {
 
     console.log('--- Creating Admin User ---');
     console.log(`Email: ${adminCredentials.email}`);
-    console.log(`Password: ${adminCredentials.password}`);
     
     const adminExists = await User.findOne({ email: adminCredentials.email });
     if (!adminExists) {
-      const hashedPassword = await bcrypt.hash(adminCredentials.password, 12);
+      const hashedPassword = await bcrypt.hash(adminPassword, 12);
       const adminUser = new User({
         name: adminCredentials.name,
         email: adminCredentials.email,

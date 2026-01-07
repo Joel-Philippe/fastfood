@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fast_food_app/services/auth_service.dart';
+import 'package:fast_food_app/services/auth_service.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -89,10 +90,9 @@ class _RegisterPageState extends State<RegisterPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Icon(
-                  Icons.person_add_alt_1,
-                  size: 80,
-                  color: Colors.grey,
+                Image.asset(
+                  'assets/images/locos.png',
+                  height: 150,
                 ),
                 const SizedBox(height: 20),
                 const Text(
