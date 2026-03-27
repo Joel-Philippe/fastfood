@@ -94,8 +94,13 @@ app.get('/api/image-proxy', async (req, res) => {
       }});
 
 
-// Catch-all route to serve the Flutter Web app for any non-API requests
-app.get('/:path*', (req, res) => {
+// Catch-all middleware to serve the Flutter Web app for any non-API requests
+app.use((req, res, next) => {
+  // If the request starts with /api, it's a 404 for the API, not the frontend
+  if (req.url.startsWith('/api')) {
+    return next();
+  }
+  // Otherwise, serve the Flutter index.html
   res.sendFile(path.join(__dirname, '../build/web/index.html'));
 });
 
