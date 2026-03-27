@@ -94,9 +94,9 @@ app.get('/api/image-proxy', async (req, res) => {
       }});
 
 
-// Basic Route
-app.get('/', (req, res) => {
-  res.send('Fast Food Backend API is running!');
+// Catch-all route to serve the Flutter Web app for any non-API requests
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../build/web/index.html'));
 });
 
 // Error Handling Middleware
