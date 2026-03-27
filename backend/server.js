@@ -97,11 +97,23 @@ app.get('/api/image-proxy', async (req, res) => {
 // Catch-all middleware to serve the Flutter Web app for any non-API requests
 app.use((req, res, next) => {
   // If the request starts with /api, it's a 404 for the API, not the frontend
-  if (req.url.startsWith('/api')) {
+  if (req.originalUrl.startsWith('/api')) {
     return next();
   }
-  // Otherwise, serve the Flutter index.html
-  res.sendFile(path.join(__dirname, '../build/web/index.html'));
+  
+  // Resolve absolute path to index.html
+  const indexPath = path.resolve(__dirname, '..', 'build', 'web', 'index.html');
+  
+  res.sendFile(indexPath, (err) => {
+    if (err) {
+      console.error('Error sending index.html:', err);
+      // Don't call next(err) here to avoid the generic "Something broke!"
+      // unless we really have to. Let's try to send a specific message.
+      if (!res.headersSent) {
+        res.status(500).send(`Frontend error: ${err.message}`);
+      }
+    }
+  });
 });
 
 // Error Handling Middleware
