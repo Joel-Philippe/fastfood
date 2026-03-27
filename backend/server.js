@@ -95,7 +95,7 @@ app.get('/api/image-proxy', async (req, res) => {
 
 
 // Catch-all route to serve the Flutter Web app for any non-API requests
-app.get('(.*)', (req, res) => {
+app.get('/:path*', (req, res) => {
   res.sendFile(path.join(__dirname, '../build/web/index.html'));
 });
 
