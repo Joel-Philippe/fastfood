@@ -58,55 +58,71 @@ void main() async {
 }
 
 Future<void> _setupFirebaseMessaging() async {
-  FirebaseMessaging messaging = FirebaseMessaging.instance;
+  try {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
 
-  NotificationSettings settings = await messaging.requestPermission(
-    alert: true,
-    announcement: false,
-    badge: true,
-    carPlay: false,
-    criticalAlert: false,
-    provisional: false,
-    sound: true,
-  );
+    NotificationSettings settings = await messaging.requestPermission(
+      alert: true,
+      announcement: false,
+      badge: true,
+      carPlay: false,
+      criticalAlert: false,
+      provisional: false,
+      sound: true,
+    );
 
-  debugPrint('User granted permission: ${settings.authorizationStatus}');
+    debugPrint('User granted permission: ${settings.authorizationStatus}');
 
-  String? token = await messaging.getToken();
-  debugPrint('FCM Token: $token');
-
-  if (token != null) {
-    final authService = AuthService();
-    if (await authService.isAuthenticated()) {
+    if (settings.authorizationStatus == AuthorizationStatus.authorized || 
+        settings.authorizationStatus == AuthorizationStatus.provisional) {
+      
+      String? token;
       try {
-        await authService.updateFCMToken(token);
-        debugPrint('FCM token sent to backend for authenticated user.');
+        // On Web, getToken might need a vapidKey. If not provided, it might fail.
+        token = await messaging.getToken();
       } catch (e) {
-        debugPrint('Failed to send FCM token to backend: $e');
+        debugPrint('Error getting FCM token: $e');
       }
-    } else {
-      debugPrint('User not authenticated, FCM token will be sent on login.');
+
+      debugPrint('FCM Token: $token');
+
+      if (token != null) {
+        final authService = AuthService();
+        if (await authService.isAuthenticated()) {
+          try {
+            await authService.updateFCMToken(token);
+            debugPrint('FCM token sent to backend for authenticated user.');
+          } catch (e) {
+            debugPrint('Failed to send FCM token to backend: $e');
+          }
+        } else {
+          debugPrint('User not authenticated, FCM token will be sent on login.');
+        }
+      }
     }
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      debugPrint('Got a message whilst in the foreground!');
+      debugPrint('Message data: ${message.data}');
+
+      if (message.notification != null) {
+        debugPrint('Message also contained a notification: ${message.notification}');
+        localNotificationService.showNotification(
+          id: message.hashCode,
+          title: message.notification!.title ?? '',
+          body: message.notification!.body ?? '',
+          payload: message.data['orderId'],
+        );
+      }
+    });
+
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      debugPrint('A new onMessageOpenedApp event was published!');
+    });
+  } catch (e) {
+    debugPrint('Critical error in Firebase Messaging setup: $e');
+    // We don't rethrow to allow the app to continue even if messaging fails
   }
-
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    debugPrint('Got a message whilst in the foreground!');
-    debugPrint('Message data: ${message.data}');
-
-    if (message.notification != null) {
-      debugPrint('Message also contained a notification: ${message.notification}');
-      localNotificationService.showNotification(
-        id: message.hashCode,
-        title: message.notification!.title ?? '',
-        body: message.notification!.body ?? '',
-        payload: message.data['orderId'],
-      );
-    }
-  });
-
-  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-    debugPrint('A new onMessageOpenedApp event was published!');
-  });
 }
 
 class MyApp extends StatelessWidget {
