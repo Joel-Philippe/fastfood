@@ -243,8 +243,11 @@ router.post(
       
       res.json({ message: 'If an account exists with that email, a reset code has been sent.' });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Server error during forgot password request' });
+      console.error('FORGOT PASSWORD ERROR:', error);
+      res.status(500).json({ 
+        message: 'Server error during forgot password request',
+        error: error.message 
+      });
     }
   }
 );
