@@ -3,6 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const admin = require('firebase-admin');
+const path = require('path');
 
 // Initialize Firebase Admin SDK
 let serviceAccount;
