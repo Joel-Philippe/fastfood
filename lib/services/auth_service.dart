@@ -160,4 +160,23 @@ class AuthService {
       throw AuthException('Error changing password: $e');
     }
   }
+
+  Future<void> forgotPassword(String email) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/forgot-password'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'email': email}),
+      );
+
+      if (response.statusCode != 200) {
+        final errorBody = json.decode(response.body);
+        final errorMessage = errorBody['message'] ?? 'Failed to send reset email.';
+        throw AuthException(errorMessage);
+      }
+    } catch (e) {
+      if (e is AuthException) rethrow;
+      throw AuthException('Error during forgot password request: $e');
+    }
+  }
 }

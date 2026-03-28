@@ -197,4 +197,37 @@ router.patch(
   }
 );
 
+// --- Forgot Password Route ---
+// POST /api/auth/forgot-password
+router.post(
+  '/forgot-password',
+  [
+    body('email', 'Please include a valid email').isEmail(),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+      const { email } = req.body;
+      const user = await User.findOne({ email });
+      
+      if (!user) {
+        // For security reasons, don't reveal if a user exists or not
+        return res.json({ message: 'If an account exists with that email, a reset link has been sent.' });
+      }
+
+      // TODO: Implement actual email sending logic here (e.g., using nodemailer or SendGrid)
+      // For now, we just simulate success.
+      
+      res.json({ message: 'If an account exists with that email, a reset link has been sent.' });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Server error during forgot password request' });
+    }
+  }
+);
+
 module.exports = router;

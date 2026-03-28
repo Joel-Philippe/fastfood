@@ -60,6 +60,74 @@ class _UserLoginPageState extends State<UserLoginPage> {
     }
   }
 
+  void _showForgotPasswordDialog() {
+    final emailController = TextEditingController(text: _emailController.text);
+    bool isRequesting = false;
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('Réinitialiser le mot de passe'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Entrez votre email pour recevoir un lien de réinitialisation.'),
+              const SizedBox(height: 20),
+              TextField(
+                controller: emailController,
+                decoration: const InputDecoration(labelText: 'Email'),
+                keyboardType: TextInputType.emailAddress,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: isRequesting ? null : () => Navigator.pop(context),
+              child: const Text('Annuler'),
+            ),
+            ElevatedButton(
+              onPressed: isRequesting
+                  ? null
+                  : () async {
+                      if (emailController.text.isEmpty || !emailController.text.contains('@')) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Veuillez entrer un email valide.')),
+                        );
+                        return;
+                      }
+
+                      setDialogState(() => isRequesting = true);
+                      try {
+                        await _authService.forgotPassword(emailController.text);
+                        if (mounted) {
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Si un compte existe, un email a été envoyé.'),
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))),
+                          );
+                        }
+                      } finally {
+                        if (mounted) setDialogState(() => isRequesting = false);
+                      }
+                    },
+              child: isRequesting
+                  ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                  : const Text('Envoyer'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     const accentColor = Color(0xFF53c6fd);
@@ -145,7 +213,17 @@ class _UserLoginPageState extends State<UserLoginPage> {
                     ),
                     obscureText: true,
                   ),
-                  const SizedBox(height: 40),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: _showForgotPasswordDialog,
+                      child: const Text(
+                        'Mot de passe oublié ?',
+                        style: TextStyle(color: accentColor, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
                   // Login Button
                   _isLoading
                       ? const Center(child: CircularProgressIndicator())
