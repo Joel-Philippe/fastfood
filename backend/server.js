@@ -113,6 +113,10 @@ app.get('/api/image-proxy', async (req, res) => {
       }});
 
 
+// Serve static files from the Flutter Web build directory
+const webPath = path.resolve(__dirname, '..', 'build', 'web');
+app.use(express.static(webPath));
+
 // Catch-all middleware to serve the Flutter Web app for any non-API requests
 app.use((req, res, next) => {
   // If the request starts with /api, it's a 404 for the API, not the frontend
