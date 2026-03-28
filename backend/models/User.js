@@ -5,7 +5,9 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   name: { type: String }, // New name field (optional)
   role: { type: String, default: 'user' }, // Add role field with default 'user'
-  fcmToken: { type: String } // Field to store FCM registration token for push notifications
+  fcmToken: { type: String }, // Field to store FCM registration token for push notifications
+  resetPasswordToken: { type: String },
+  resetPasswordExpires: { type: Date }
 });
 
 module.exports = mongoose.model('User', userSchema);

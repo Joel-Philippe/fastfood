@@ -215,17 +215,77 @@ router.post(
       const user = await User.findOne({ email });
       
       if (!user) {
-        // For security reasons, don't reveal if a user exists or not
-        return res.json({ message: 'If an account exists with that email, a reset link has been sent.' });
+        // Return success even if email not found for security
+        return res.json({ message: 'If an account exists with that email, a reset code has been sent.' });
       }
 
-      // TODO: Implement actual email sending logic here (e.g., using nodemailer or SendGrid)
-      // For now, we just simulate success.
+      // Generate a secure 6-digit code or a long token
+      const resetToken = crypto.randomBytes(20).toString('hex');
+      user.resetPasswordToken = resetToken;
+      user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+      await user.save();
+
+      // Create reset link (assuming frontend is on the same domain)
+      const resetUrl = `${req.protocol}://${req.get('host')}/reset-password?token=${resetToken}`;
+
+      await resend.emails.send({
+        from: 'onboarding@resend.dev', // Use a verified domain in production
+        to: email,
+        subject: 'Réinitialisation de votre mot de passe - Fast Food App',
+        html: `
+          <h3>Vous avez demandé une réinitialisation de mot de passe</h3>
+          <p>Veuillez cliquer sur le lien suivant pour choisir un nouveau mot de passe :</p>
+          <a href="${resetUrl}">${resetUrl}</a>
+          <p>Ce lien expirera dans une heure.</p>
+          <p>Si vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail.</p>
+        `
+      });
       
-      res.json({ message: 'If an account exists with that email, a reset link has been sent.' });
+      res.json({ message: 'If an account exists with that email, a reset code has been sent.' });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Server error during forgot password request' });
+    }
+  }
+);
+
+// --- Reset Password Route ---
+// POST /api/auth/reset-password
+router.post(
+  '/reset-password',
+  [
+    body('token', 'Token is required').not().isEmpty(),
+    body('newPassword', 'New password must be 6 or more characters').isLength({ min: 6 }),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+      const { token, newPassword } = req.body;
+
+      const user = await User.findOne({
+        resetPasswordToken: token,
+        resetPasswordExpires: { $gt: Date.now() }
+      });
+
+      if (!user) {
+        return res.status(400).json({ message: 'Password reset token is invalid or has expired.' });
+      }
+
+      // Update password
+      const hashedPassword = await bcrypt.hash(newPassword, 12);
+      user.password = hashedPassword;
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpires = undefined;
+      await user.save();
+
+      res.json({ message: 'Your password has been reset successfully.' });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Server error during password reset' });
     }
   }
 );
