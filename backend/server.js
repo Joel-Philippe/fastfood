@@ -5,10 +5,28 @@ const cors = require('cors');
 const admin = require('firebase-admin');
 
 // Initialize Firebase Admin SDK
-const serviceAccount = require('./serviceAccountKey.json');
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
-});
+let serviceAccount;
+try {
+  serviceAccount = require('./serviceAccountKey.json');
+} catch (e) {
+  console.log('serviceAccountKey.json not found, attempting to load from environment variable...');
+  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    try {
+      serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+    } catch (parseError) {
+      console.error('Error parsing FIREBASE_SERVICE_ACCOUNT environment variable:', parseError);
+    }
+  }
+}
+
+if (serviceAccount) {
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+  });
+  console.log('Firebase Admin initialized successfully');
+} else {
+  console.error('CRITICAL: Firebase service account credentials missing!');
+}
 
 const app = express();
 const PORT = process.env.PORT || 5002;
