@@ -90,9 +90,12 @@ class _RegisterPageState extends State<RegisterPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Image.asset(
-                  'assets/images/locos.png',
-                  height: 150,
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(40),
+                  child: Image.asset(
+                    'assets/images/locos.png',
+                    height: 150,
+                  ),
                 ),
                 const SizedBox(height: 20),
                 const Text(

@@ -84,9 +84,12 @@ class _LoginPageState extends State<LoginPage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // Logo
-                  Image.asset(
-                    'assets/images/locos.png',
-                    height: 150,
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(40), // Large rounded corners for big logo
+                    child: Image.asset(
+                      'assets/images/locos.png',
+                      height: 150,
+                    ),
                   ),
                   const SizedBox(height: 30),
                   // Title

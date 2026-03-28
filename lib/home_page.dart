@@ -264,11 +264,14 @@ class _HomePageState extends State<HomePage> {
           Scaffold(
             backgroundColor: Colors.transparent,
             appBar: AppBar(
-              title: Image.asset(
-                'assets/images/locos.png',
-                height: 40, // Adjust height to fit the AppBar
+              title: ClipRRect(
+                borderRadius: BorderRadius.circular(20), // Rounded corners for the logo
+                child: Image.asset(
+                  'assets/images/locos.png',
+                  height: 40,
+                ),
               ),
-              centerTitle: true, // Center the logo
+              centerTitle: true,
               backgroundColor: Colors.transparent,
               elevation: 0,
               actions: [
