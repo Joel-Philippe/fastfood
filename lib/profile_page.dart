@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:fast_food_app/services/auth_service.dart';
-import 'package:fast_food_app/services/auth_service.dart';
 import 'package:fast_food_app/user_login_page.dart';
 import 'package:fast_food_app/register_page.dart';
 import 'package:fast_food_app/admin_page.dart';
@@ -70,7 +69,18 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    const accentColor = Color(0xFF53c6fd);
+    
     return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new, color: accentColor),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
