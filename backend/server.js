@@ -119,9 +119,15 @@ app.use(express.static(webPath));
 
 // Catch-all middleware to serve the Flutter Web app for any non-API requests
 app.use((req, res, next) => {
-  // If the request starts with /api, it's a 404 for the API, not the frontend
+  // If the request starts with /api, it's a 404 for the API
   if (req.originalUrl.startsWith('/api')) {
     return next();
+  }
+  
+  // If the request is for a file that looks like a static asset, don't serve index.html
+  // This prevents issues where missing assets return HTML instead of 404
+  if (req.originalUrl.match(/\.(js|json|png|jpg|jpeg|gif|ico|svg|css|mp4|mp3|otf|ttf|wasm)$/)) {
+    return res.status(404).send('Not found');
   }
   
   // Resolve absolute path to index.html
@@ -130,8 +136,6 @@ app.use((req, res, next) => {
   res.sendFile(indexPath, (err) => {
     if (err) {
       console.error('Error sending index.html:', err);
-      // Don't call next(err) here to avoid the generic "Something broke!"
-      // unless we really have to. Let's try to send a specific message.
       if (!res.headersSent) {
         res.status(500).send(`Frontend error: ${err.message}`);
       }

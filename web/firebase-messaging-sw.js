@@ -9,12 +9,12 @@ importScripts('https://www.gstatic.com/firebasejs/9.22.1/firebase-messaging-comp
 // DO NOT STORE SECRETS IN THIS FILE.
 // This configuration should be injected at build time from environment variables.
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  appId: "YOUR_APP_ID",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  projectId: "YOUR_PROJECT_ID",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  storageBucket: "YOUR_STORAGE_BUCKET"
+  apiKey: "AIzaSyACF06OMjoGp97SxLTQfnZs27zTql_r2aA",
+  appId: "1:692167422939:web:df43499f86c85f334a2dfe",
+  messagingSenderId: "692167422939",
+  projectId: "fast-food-app-f58ca",
+  authDomain: "fast-food-app-f58ca.firebaseapp.com",
+  storageBucket: "fast-food-app-f58ca.firebasestorage.app"
 };
 
 // Retrieve your Firebase project configuration from `firebase_options.dart`
