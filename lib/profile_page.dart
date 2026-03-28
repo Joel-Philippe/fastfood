@@ -146,12 +146,100 @@ class _ProfilePageState extends State<ProfilePage> {
             gradient: buttonGradient,
           ),
         const SizedBox(height: 20),
+        GradientButton(
+          onPressed: _showChangePasswordDialog,
+          text: 'Modifier mon mot de passe',
+          icon: Icons.lock_outline,
+          gradient: buttonGradient,
+        ),
+        const SizedBox(height: 20),
         _buildOutlinedButton(
           onPressed: _logout,
           text: 'Se déconnecter',
           color: accentColor,
         ),
       ],
+    );
+  }
+
+  void _showChangePasswordDialog() {
+    final oldPasswordController = TextEditingController();
+    final newPasswordController = TextEditingController();
+    final confirmPasswordController = TextEditingController();
+    bool isChanging = false;
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('Modifier le mot de passe'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: oldPasswordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(labelText: 'Ancien mot de passe'),
+                ),
+                TextField(
+                  controller: newPasswordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(labelText: 'Nouveau mot de passe'),
+                ),
+                TextField(
+                  controller: confirmPasswordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(labelText: 'Confirmer le nouveau mot de passe'),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: isChanging ? null : () => Navigator.pop(context),
+              child: const Text('Annuler'),
+            ),
+            ElevatedButton(
+              onPressed: isChanging
+                  ? null
+                  : () async {
+                      if (newPasswordController.text != confirmPasswordController.text) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Les mots de passe ne correspondent pas.')),
+                        );
+                        return;
+                      }
+
+                      setDialogState(() => isChanging = true);
+                      try {
+                        await _authService.changePassword(
+                          oldPasswordController.text,
+                          newPasswordController.text,
+                        );
+                        if (mounted) {
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Mot de passe modifié avec succès !')),
+                          );
+                        }
+                      } catch (e) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(e.toString())),
+                          );
+                        }
+                      } finally {
+                        if (mounted) setDialogState(() => isChanging = false);
+                      }
+                    },
+              child: isChanging
+                  ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                  : const Text('Modifier'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

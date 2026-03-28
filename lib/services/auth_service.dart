@@ -130,4 +130,34 @@ class AuthService {
       throw AuthException('Error updating FCM token: $e');
     }
   }
+
+  Future<void> changePassword(String oldPassword, String newPassword) async {
+    final token = await getToken();
+    if (token == null || await isTokenExpired(token)) {
+      throw AuthException('You must be logged in to change your password.');
+    }
+
+    try {
+      final response = await http.patch(
+        Uri.parse('$_baseUrl/change-password'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: json.encode({
+          'oldPassword': oldPassword,
+          'newPassword': newPassword,
+        }),
+      );
+
+      if (response.statusCode != 200) {
+        final errorBody = json.decode(response.body);
+        final errorMessage = errorBody['message'] ?? 'Failed to update password with status: ${response.statusCode}';
+        throw AuthException(errorMessage);
+      }
+    } catch (e) {
+      if (e is AuthException) rethrow;
+      throw AuthException('Error changing password: $e');
+    }
+  }
 }

@@ -154,4 +154,47 @@ router.patch(
   }
 );
 
+// --- Change Password Route ---
+// PATCH /api/auth/change-password
+router.patch(
+  '/change-password',
+  authMiddleware,
+  [
+    body('oldPassword', 'Old password is required').not().isEmpty(),
+    body('newPassword', 'New password must be 6 or more characters').isLength({ min: 6 }),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+      const { oldPassword, newPassword } = req.body;
+      const userId = req.userData.userId;
+
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      // Check if old password is correct
+      const isMatch = await bcrypt.compare(oldPassword, user.password);
+      if (!isMatch) {
+        return res.status(400).json({ message: 'Incorrect old password' });
+      }
+
+      // Hash and update to new password
+      const hashedPassword = await bcrypt.hash(newPassword, 12);
+      user.password = hashedPassword;
+      await user.save();
+
+      res.json({ message: 'Password updated successfully' });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Server error during password change' });
+    }
+  }
+);
+
 module.exports = router;
