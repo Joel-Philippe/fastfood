@@ -136,8 +136,8 @@ app.use((req, res, next) => {
 
 // Error Handling Middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send('Something broke!');
+  console.error('SERVER ERROR:', err.stack);
+  res.status(500).send(`Server Error: ${err.message}`);
 });
 
 const http = require('http');
