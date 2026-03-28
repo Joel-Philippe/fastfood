@@ -179,4 +179,26 @@ class AuthService {
       throw AuthException('Error during forgot password request: $e');
     }
   }
+
+  Future<void> resetPassword(String token, String newPassword) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/reset-password'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'token': token,
+          'newPassword': newPassword,
+        }),
+      );
+
+      if (response.statusCode != 200) {
+        final errorBody = json.decode(response.body);
+        final errorMessage = errorBody['message'] ?? 'Failed to reset password.';
+        throw AuthException(errorMessage);
+      }
+    } catch (e) {
+      if (e is AuthException) rethrow;
+      throw AuthException('Error during password reset: $e');
+    }
+  }
 }
