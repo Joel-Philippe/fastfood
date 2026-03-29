@@ -1,15 +1,24 @@
 # --- Étape 1 : Build de l'application Flutter Web ---
-FROM debian:latest AS build-env
+FROM debian:stable-slim AS build-env
 
-# Installation des dépendances système
-RUN apt-get update && apt-get install -y curl git wget unzip xz-utils libglu1-mesa libpulse0 libgl1
+# Installation des dépendances système nécessaires à Flutter
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    wget \
+    unzip \
+    xz-utils \
+    libglu1-mesa \
+    ca-certificates \
+    && apt-get clean
 
 # Installation de Flutter
 RUN git clone https://github.com/flutter/flutter.git -b stable /usr/local/flutter
 ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
 
-# Vérification de l'installation
-RUN flutter doctor
+# Configuration de Flutter (on désactive les analytics pour éviter les blocages)
+RUN flutter config --no-analytics
+RUN flutter config --enable-web
 
 # Copie des fichiers du projet et build
 WORKDIR /app
@@ -19,7 +28,7 @@ RUN flutter build web --release
 
 # --- Étape 2 : Runtime Node.js pour le Backend ---
 FROM node:18-slim
-
+...
 WORKDIR /app
 
 # Copie des fichiers compilés du frontend depuis l'étape 1
