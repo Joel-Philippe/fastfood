@@ -215,7 +215,7 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
                   Icon(Icons.calendar_today, color: Colors.black54, size: 16),
                   const SizedBox(width: 8),
                   Text(
-                    DateFormat('dd/MM/yyyy à HH:mm').format(order.orderDate),
+                    DateFormat('dd/MM/yyyy à HH:mm').format(order.orderDate.toLocal()),
                     style: const TextStyle(color: Colors.black54, fontSize: 14),
                   ),
                 ],

@@ -63,6 +63,7 @@ router.post(
         arrivalTime,
         items: orderItems,
         totalAmount,
+        orderDate: new Date(), // Set server time
       };
 
       if (orderType === 'delivery') {

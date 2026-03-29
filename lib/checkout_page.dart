@@ -48,6 +48,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
       if (uri.queryParameters.containsKey('session_id') && uri.queryParameters.containsKey('order_id')) {
         final orderId = uri.queryParameters['order_id']!;
         
+        // --- CLEAN URL ---
+        // Remove the query parameters from the browser's address bar without reloading
+        final newUrl = html.window.location.href.split('?')[0];
+        html.window.history.replaceState(null, 'Tacos Locos', newUrl);
+        
         WidgetsBinding.instance.addPostFrameCallback((_) {
           Navigator.pushAndRemoveUntil(
             context,
