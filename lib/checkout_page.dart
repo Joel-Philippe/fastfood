@@ -11,6 +11,9 @@ import 'dart:convert'; // For json.encode/decode
 import 'package:http/http.dart' as http; // For making HTTP requests
 import 'package:fast_food_app/widgets/gradient_widgets.dart';
 import 'package:fast_food_app/services/auth_service.dart'; // Import AuthService
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:url_launcher/url_launcher.dart';
+import 'dart:html' as html; // To get the current URL for success/cancel redirects
 
 class CheckoutPage extends StatefulWidget {
   const CheckoutPage({super.key});
@@ -36,6 +39,22 @@ class _CheckoutPageState extends State<CheckoutPage> {
   void initState() {
     super.initState();
     _loadUserName();
+    _checkPaymentSuccess();
+  }
+
+  void _checkPaymentSuccess() {
+    if (kIsWeb) {
+      final uri = Uri.parse(html.window.location.href);
+      if (uri.queryParameters.containsKey('session_id')) {
+        // Payment was successful, place the order now
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          final cart = Provider.of<CartProvider>(context, listen: false);
+          if (cart.itemCount > 0) {
+            _placeOrder(cart);
+          }
+        });
+      }
+    }
   }
 
   Future<void> _loadUserName() async {
@@ -75,42 +94,76 @@ class _CheckoutPageState extends State<CheckoutPage> {
     }
 
     try {
-      // 1. Call our backend to create a Payment Intent
-      final response = await http.post(
-        Uri.parse('${AppConfig.baseUrl}/api/stripe/create-payment-intent'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'amount': (cart.totalAmount * 100).toInt(), // Amount in cents
-          'currency': 'eur',
-        }),
-      );
+      if (kIsWeb) {
+        // --- Web Payment Logic (Stripe Checkout) ---
+        final itemsSummary = cart.items.values
+            .map((item) => "${item.quantity}x ${item.item.name}")
+            .join(", ");
 
-      if (response.statusCode != 200) {
-        throw Exception('Failed to create payment intent: ${response.body}');
+        final response = await http.post(
+          Uri.parse('${AppConfig.baseUrl}/api/stripe/create-checkout-session'),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode({
+            'amount': (cart.totalAmount * 100).toInt(),
+            'currency': 'eur',
+            'success_url': html.window.location.href.split('?')[0], // Base URL without params
+            'cancel_url': html.window.location.href,
+            'items_summary': itemsSummary,
+          }),
+        );
+
+        if (response.statusCode != 200) {
+          throw Exception('Failed to create checkout session: ${response.body}');
+        }
+
+        final responseBody = json.decode(response.body);
+        final checkoutUrl = responseBody['url'];
+
+        if (checkoutUrl != null) {
+          // Redirect to Stripe Checkout
+          await launchUrl(Uri.parse(checkoutUrl), webOnlyWindowName: '_self');
+        } else {
+          throw Exception('Checkout URL not received.');
+        }
+      } else {
+        // --- Mobile Payment Logic (Payment Sheet) ---
+        // 1. Call our backend to create a Payment Intent
+        final response = await http.post(
+          Uri.parse('${AppConfig.baseUrl}/api/stripe/create-payment-intent'),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode({
+            'amount': (cart.totalAmount * 100).toInt(), // Amount in cents
+            'currency': 'eur',
+          }),
+        );
+
+        if (response.statusCode != 200) {
+          throw Exception('Failed to create payment intent: ${response.body}');
+        }
+
+        final responseBody = json.decode(response.body);
+        final clientSecret = responseBody['clientSecret'];
+
+        if (clientSecret == null) {
+          throw Exception('Client secret not received from backend.');
+        }
+
+        // 2. Initialize the Payment Sheet
+        if (!mounted) return;
+        await Stripe.instance.initPaymentSheet(
+          paymentSheetParameters: SetupPaymentSheetParameters(
+            paymentIntentClientSecret: clientSecret,
+            merchantDisplayName: 'Tacos Locos',
+            style: Theme.of(context).brightness == Brightness.dark ? ThemeMode.dark : ThemeMode.light,
+          ),
+        );
+
+        // 3. Present the Payment Sheet
+        await Stripe.instance.presentPaymentSheet();
+
+        // If payment is successful on mobile, proceed to place the order
+        await _placeOrder(cart);
       }
-
-      final responseBody = json.decode(response.body);
-      final clientSecret = responseBody['clientSecret'];
-
-      if (clientSecret == null) {
-        throw Exception('Client secret not received from backend.');
-      }
-
-      // 2. Initialize the Payment Sheet
-      if (!mounted) return;
-      await Stripe.instance.initPaymentSheet(
-        paymentSheetParameters: SetupPaymentSheetParameters(
-          paymentIntentClientSecret: clientSecret,
-          merchantDisplayName: 'Fast Food App',
-          style: Theme.of(context).brightness == Brightness.dark ? ThemeMode.dark : ThemeMode.light,
-        ),
-      );
-
-      // 3. Present the Payment Sheet
-      await Stripe.instance.presentPaymentSheet();
-
-      // If payment is successful, proceed to place the order
-      await _placeOrder(cart);
 
     } on StripeException catch (e) {
       if (!mounted) return;
