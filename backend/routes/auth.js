@@ -1,11 +1,14 @@
 const express = require('express');
+const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { Resend } = require('resend');
 const { body, validationResult } = require('express-validator');
 const User = require('../models/User'); // Make sure the path is correct
 const authMiddleware = require('../middleware/authMiddleware'); // ADDED: Import authMiddleware
 
 const router = express.Router();
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // --- Registration Route (optional, to create the first admin) ---
 // POST /api/auth/register
