@@ -29,6 +29,9 @@ RUN flutter config --enable-web
 WORKDIR /home/flutteruser/app
 COPY --chown=flutteruser:flutteruser . .
 
+# Création d'un fichier .env vide pour satisfaire pubspec.yaml sans exposer de secrets
+RUN touch .env
+
 # Installation des dépendances et build
 RUN flutter pub get
 RUN flutter build web --release
