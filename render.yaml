@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: fastfood-docker
+    runtime: docker
+    plan: free
+    region: frankfurt
+    envVars:
+      - key: MONGODB_URI
+        sync: false # Vous devrez la remplir dans l'interface Render
+      - key: JWT_SECRET
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: FIREBASE_SERVICE_ACCOUNT
+        sync: false
+      - key: ALLOW_ADMIN_CREATION
+        value: "false"
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
