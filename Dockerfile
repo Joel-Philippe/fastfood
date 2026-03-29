@@ -20,13 +20,17 @@ ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PAT
 RUN git config --global --add safe.directory /usr/local/flutter
 RUN flutter config --no-analytics
 RUN flutter config --enable-web
-RUN flutter precache --web
 
-# Copie des fichiers du projet et build
+# Copie des fichiers du projet
 WORKDIR /app
 COPY . .
-RUN flutter pub get --verbose
-RUN flutter build web --release --verbose
+
+# On force la mise à jour de Flutter et on nettoie avant le build
+RUN flutter upgrade
+RUN flutter pub get
+
+# Build de l'application Web
+RUN flutter build web --release
 
 # --- Étape 2 : Runtime Node.js pour le Backend ---
 FROM node:18-slim
