@@ -37,12 +37,10 @@ void main() async {
   await AppConfig.init();
   await initializeDateFormatting('fr_FR', null);
 
-  if (!kIsWeb) {
-    final stripeKey = AppConfig.stripePublishableKey;
-    if (stripeKey != null && stripeKey.isNotEmpty) {
-      Stripe.publishableKey = stripeKey;
-      await Stripe.instance.applySettings();
-    }
+  final stripeKey = AppConfig.stripePublishableKey;
+  if (stripeKey != null && stripeKey.isNotEmpty) {
+    Stripe.publishableKey = stripeKey;
+    await Stripe.instance.applySettings();
   }
 
   await _setupFirebaseMessaging();
