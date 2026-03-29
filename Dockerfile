@@ -17,14 +17,16 @@ RUN git clone https://github.com/flutter/flutter.git -b stable /usr/local/flutte
 ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
 
 # Configuration de Flutter
+RUN git config --global --add safe.directory /usr/local/flutter
 RUN flutter config --no-analytics
 RUN flutter config --enable-web
+RUN flutter precache --web
 
 # Copie des fichiers du projet et build
 WORKDIR /app
 COPY . .
-RUN flutter pub get
-RUN flutter build web --release
+RUN flutter pub get --verbose
+RUN flutter build web --release --verbose
 
 # --- Étape 2 : Runtime Node.js pour le Backend ---
 FROM node:18-slim
