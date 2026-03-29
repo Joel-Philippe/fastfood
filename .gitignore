@@ -39,8 +39,8 @@ backend/node_modules/
 .flutter-plugins-dependencies
 .pub-cache/
 .pub/
-/build/*
-!/build/web/
+/build/
+# !/build/web/ (REMOVED: Do not commit build artifacts)
 
 # Symbolication related
 app.*.symbols
