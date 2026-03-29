@@ -45,13 +45,24 @@ class _CheckoutPageState extends State<CheckoutPage> {
   void _checkPaymentSuccess() {
     if (kIsWeb) {
       final uri = Uri.parse(html.window.location.href);
-      if (uri.queryParameters.containsKey('session_id')) {
-        // Payment was successful, place the order now
+      if (uri.queryParameters.containsKey('session_id') && uri.queryParameters.containsKey('order_id')) {
+        final orderId = uri.queryParameters['order_id']!;
+        
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          final cart = Provider.of<CartProvider>(context, listen: false);
-          if (cart.itemCount > 0) {
-            _placeOrder(cart);
-          }
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (context) => OrderConfirmationPage(
+                orderId: orderId,
+                customerName: "", 
+                orderType: "",
+                arrivalTime: null,
+                orderItems: {},
+                totalAmount: 0,
+              ),
+            ),
+            (route) => route.isFirst,
+          );
         });
       }
     }
@@ -96,6 +107,32 @@ class _CheckoutPageState extends State<CheckoutPage> {
     try {
       if (kIsWeb) {
         // --- Web Payment Logic (Stripe Checkout) ---
+        
+        // 1. Create the order in MongoDB FIRST (with status pending)
+        final orderId = (Random().nextInt(900000) + 100000).toString();
+        final newOrder = AppModels.Order(
+          id: orderId,
+          customerName: _nameController.text,
+          orderType: _orderType,
+          arrivalTime: _orderType == 'eat_in' ? _arrivalTime?.format(context) : null,
+          items: Map.from(cart.items),
+          totalAmount: cart.totalAmount,
+          orderDate: DateTime.now(),
+          status: 'pending',
+          address: _orderType == 'delivery'
+              ? AppModels.Address(
+                  street: _streetController.text,
+                  city: _cityController.text,
+                  postalCode: _postalCodeController.text,
+                  phone: _phoneController.text,
+                )
+              : null,
+        );
+
+        // Save to DB before redirecting
+        await _mongoService.placeOrder(newOrder);
+
+        // 2. Create Stripe Checkout Session
         final itemsSummary = cart.items.values
             .map((item) => "${item.quantity}x ${item.item.name}")
             .join(", ");
@@ -106,7 +143,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
           body: json.encode({
             'amount': (cart.totalAmount * 100).toInt(),
             'currency': 'eur',
-            'success_url': html.window.location.href.split('?')[0], // Base URL without params
+            'metadata': {
+              'orderId': orderId,
+            },
+            // Success URL includes the orderId so we can show it on return
+            'success_url': '${html.window.location.href.split('?')[0]}?session_id={CHECKOUT_SESSION_ID}&order_id=$orderId',
             'cancel_url': html.window.location.href,
             'items_summary': itemsSummary,
           }),
@@ -120,6 +161,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
         final checkoutUrl = responseBody['url'];
 
         if (checkoutUrl != null) {
+          // Clear cart now because we're leaving the app
+          cart.clearCart();
           // Redirect to Stripe Checkout
           await launchUrl(Uri.parse(checkoutUrl), webOnlyWindowName: '_self');
         } else {
