@@ -300,7 +300,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
   Widget _buildOrderTypeChip(String label, String value, IconData icon) {
     final bool isSelected = _orderType == value;
-    final Color selectedColor = Theme.of(context).colorScheme.primary;
 
     return Expanded(
       child: GestureDetector(
@@ -310,10 +309,14 @@ class _CheckoutPageState extends State<CheckoutPage> {
           margin: const EdgeInsets.symmetric(horizontal: 4),
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
           decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFF53c6fd) : Colors.white,
+            color: isSelected 
+                ? const Color(0xFF53c6fd) 
+                : (Theme.of(context).brightness == Brightness.dark ? const Color(0xFF2C2C2C) : Colors.white),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: isSelected ? const Color(0xFF53c6fd) : Colors.grey[300]!,
+              color: isSelected 
+                  ? const Color(0xFF53c6fd) 
+                  : (Theme.of(context).brightness == Brightness.dark ? Colors.grey[700]! : Colors.grey[300]!),
               width: 1.5,
             ),
             boxShadow: isSelected
@@ -527,7 +530,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                             text,
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.black54,
+                              color: Theme.of(context).brightness == Brightness.dark ? Colors.white60 : Colors.black54,
                             ),
                           ),
                         ),
@@ -612,13 +615,3 @@ class _CheckoutPageState extends State<CheckoutPage> {
     );
   }
 }
-
-dit_card,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
