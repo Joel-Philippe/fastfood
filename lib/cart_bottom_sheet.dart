@@ -43,6 +43,8 @@ class CartBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
     return DraggableScrollableSheet(
       initialChildSize: 0.9,
       minChildSize: 0.5,
@@ -50,9 +52,9 @@ class CartBottomSheet extends StatelessWidget {
       expand: false,
       builder: (BuildContext context, ScrollController scrollController) {
         return Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          decoration: BoxDecoration(
+            color: theme.scaffoldBackgroundColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: Column(
             children: [
@@ -71,7 +73,10 @@ class CartBottomSheet extends StatelessWidget {
                         end: Alignment.centerRight,
                       ),
                     ),
-                    const CloseButton(),
+                    IconButton(
+                      icon: Icon(Icons.close, color: isDark ? Colors.white70 : Colors.black54),
+                      onPressed: () => Navigator.pop(context),
+                    ),
                   ],
                 ),
               ),
@@ -80,13 +85,13 @@ class CartBottomSheet extends StatelessWidget {
                 child: Consumer<CartProvider>(
                   builder: (context, cart, child) {
                     if (cart.items.isEmpty) {
-                      return const Center(
+                      return Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.shopping_cart_outlined, size: 80, color: Colors.grey),
-                            SizedBox(height: 20),
-                            Text('Votre panier est vide !', style: TextStyle(fontSize: 18, color: Colors.grey)),
+                            Icon(Icons.shopping_cart_outlined, size: 80, color: isDark ? Colors.grey[800] : Colors.grey[300]),
+                            const SizedBox(height: 20),
+                            Text('Votre panier est vide !', style: TextStyle(fontSize: 18, color: isDark ? Colors.white38 : Colors.grey)),
                           ],
                         ),
                       );
@@ -94,7 +99,7 @@ class CartBottomSheet extends StatelessWidget {
                     return ListView.separated(
                       controller: scrollController,
                       itemCount: cart.items.length,
-                      separatorBuilder: (context, index) => const Divider(height: 1, indent: 16, endIndent: 16),
+                      separatorBuilder: (context, index) => Divider(height: 1, indent: 16, endIndent: 16, color: isDark ? Colors.white10 : Colors.black12),
                       itemBuilder: (context, index) {
                         final cartItems = cart.items.entries.toList();
                         final cartItem = cartItems[index].value;
@@ -106,18 +111,18 @@ class CartBottomSheet extends StatelessWidget {
                             children: [
                               Row(
                                 children: [
-                                  Expanded(child: Text(cartItem.item.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
-                                  Text('${(cartItem.totalPrice / cartItem.quantity).toStringAsFixed(2)} €', style: const TextStyle(fontSize: 16)),
+                                  Expanded(child: Text(cartItem.item.name, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87))),
+                                  Text('${(cartItem.totalPrice / cartItem.quantity).toStringAsFixed(2)} €', style: TextStyle(fontSize: 16, color: isDark ? Colors.white70 : Colors.black87)),
                                 ],
                               ),
-                              _buildCustomizationDetails(cartItem),
+                              _buildCustomizationDetails(cartItem, context),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Row(
                                     children: [
-                                      IconButton(icon: const Icon(Icons.remove_circle_outline, color: Colors.grey), onPressed: () => cart.updateItemQuantity(cartItemKey, cartItem.quantity - 1)),
-                                      Text(cartItem.quantity.toString(), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                      IconButton(icon: Icon(Icons.remove_circle_outline, color: isDark ? Colors.white38 : Colors.grey), onPressed: () => cart.updateItemQuantity(cartItemKey, cartItem.quantity - 1)),
+                                      Text(cartItem.quantity.toString(), style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87)),
                                       IconButton(icon: Icon(Icons.add_circle_outline, color: theme.primaryColor), onPressed: () => cart.updateItemQuantity(cartItemKey, cartItem.quantity + 1)),
                                     ],
                                   ),
@@ -155,8 +160,8 @@ class CartBottomSheet extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10)],
+                  color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(isDark ? 0.3 : 0.1), blurRadius: 10)],
                 ),
                 child: Consumer<CartProvider>(
                   builder: (context, cart, child) => Column(
@@ -174,7 +179,7 @@ class CartBottomSheet extends StatelessWidget {
                               end: Alignment.centerRight,
                             ),
                           ),
-                          Text('${cart.totalAmount.toStringAsFixed(2)} €', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                          Text('${cart.totalAmount.toStringAsFixed(2)} €', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87)),
                         ],
                       ),
                       const SizedBox(height: 16),

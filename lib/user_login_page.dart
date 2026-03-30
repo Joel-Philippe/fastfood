@@ -131,6 +131,7 @@ class _UserLoginPageState extends State<UserLoginPage> {
   @override
   Widget build(BuildContext context) {
     const accentColor = Color(0xFF53c6fd);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     const buttonGradient = LinearGradient(
       colors: [Color(0xFF9c4dea), Color(0xFFff80b1)],
       begin: Alignment.centerLeft,
@@ -139,9 +140,11 @@ class _UserLoginPageState extends State<UserLoginPage> {
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFfcf1f1), Color(0xFFfffcdd)],
+            colors: isDark 
+                ? [const Color(0xFF121212), const Color(0xFF1E1E1E)]
+                : [const Color(0xFFfcf1f1), const Color(0xFFfffcdd)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -165,23 +168,25 @@ class _UserLoginPageState extends State<UserLoginPage> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  const Text(
+                  Text(
                     'Connectez-vous à votre compte',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 16,
-                      color: Colors.black54,
+                      color: isDark ? Colors.white70 : Colors.black54,
                     ),
                   ),
                   const SizedBox(height: 50),
                   // Email Field
                   TextField(
                     controller: _emailController,
+                    style: TextStyle(color: isDark ? Colors.white : Colors.black87),
                     decoration: InputDecoration(
                       hintText: 'Email',
+                      hintStyle: TextStyle(color: isDark ? Colors.white38 : Colors.black38),
                       prefixIcon: const Icon(Icons.email_outlined, color: accentColor),
                       filled: true,
-                      fillColor: Colors.white.withOpacity(0.8),
+                      fillColor: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.8),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
@@ -197,11 +202,13 @@ class _UserLoginPageState extends State<UserLoginPage> {
                   // Password Field
                   TextField(
                     controller: _passwordController,
+                    style: TextStyle(color: isDark ? Colors.white : Colors.black87),
                     decoration: InputDecoration(
                       hintText: 'Mot de passe',
+                      hintStyle: TextStyle(color: isDark ? Colors.white38 : Colors.black38),
                       prefixIcon: const Icon(Icons.lock_open_outlined, color: accentColor),
                       filled: true,
-                      fillColor: Colors.white.withOpacity(0.8),
+                      fillColor: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.8),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
@@ -275,9 +282,9 @@ class _UserLoginPageState extends State<UserLoginPage> {
                             (route) => false,
                           );
                         },
-                        child: const Text(
+                        child: Text(
                           'Retour',
-                          style: TextStyle(color: Colors.black54),
+                          style: TextStyle(color: isDark ? Colors.white38 : Colors.black54),
                         ),
                       ),
                     ],

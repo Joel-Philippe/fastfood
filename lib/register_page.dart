@@ -80,8 +80,11 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    const accentColor = Color(0xFF53c6fd);
+
     return Scaffold(
-      backgroundColor: _colorFromHex("#edf0f5"),
+      backgroundColor: isDark ? const Color(0xFF121212) : _colorFromHex("#edf0f5"),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -94,27 +97,29 @@ class _RegisterPageState extends State<RegisterPage> {
                   borderRadius: BorderRadius.circular(40),
                   child: Image.asset(
                     'assets/images/locos.png',
-                    height: 150,
+                    height: 120,
                   ),
                 ),
                 const SizedBox(height: 20),
-                const Text(
+                Text(
                   'Créer un Compte',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color: isDark ? Colors.white : Colors.black87,
                   ),
                 ),
                 const SizedBox(height: 40),
                 TextField(
-                  controller: _nameController, // New name field
+                  controller: _nameController,
+                  style: TextStyle(color: isDark ? Colors.white : Colors.black87),
                   decoration: InputDecoration(
                     hintText: 'Votre Nom',
-                    prefixIcon: const Icon(Icons.person_outline),
+                    hintStyle: TextStyle(color: isDark ? Colors.white38 : Colors.black38),
+                    prefixIcon: const Icon(Icons.person_outline, color: accentColor),
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: isDark ? Colors.white.withOpacity(0.05) : Colors.white,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
@@ -124,11 +129,13 @@ class _RegisterPageState extends State<RegisterPage> {
                 const SizedBox(height: 20),
                 TextField(
                   controller: _emailController,
+                  style: TextStyle(color: isDark ? Colors.white : Colors.black87),
                   decoration: InputDecoration(
                     hintText: 'Email',
-                    prefixIcon: const Icon(Icons.email_outlined),
+                    hintStyle: TextStyle(color: isDark ? Colors.white38 : Colors.black38),
+                    prefixIcon: const Icon(Icons.email_outlined, color: accentColor),
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: isDark ? Colors.white.withOpacity(0.05) : Colors.white,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
@@ -139,11 +146,13 @@ class _RegisterPageState extends State<RegisterPage> {
                 const SizedBox(height: 20),
                 TextField(
                   controller: _passwordController,
+                  style: TextStyle(color: isDark ? Colors.white : Colors.black87),
                   decoration: InputDecoration(
                     hintText: 'Mot de passe',
-                    prefixIcon: const Icon(Icons.lock_open_outlined),
+                    hintStyle: TextStyle(color: isDark ? Colors.white38 : Colors.black38),
+                    prefixIcon: const Icon(Icons.lock_open_outlined, color: accentColor),
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: isDark ? Colors.white.withOpacity(0.05) : Colors.white,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
@@ -154,11 +163,13 @@ class _RegisterPageState extends State<RegisterPage> {
                 const SizedBox(height: 20),
                 TextField(
                   controller: _confirmPasswordController,
+                  style: TextStyle(color: isDark ? Colors.white : Colors.black87),
                   decoration: InputDecoration(
                     hintText: 'Confirmer le mot de passe',
-                    prefixIcon: const Icon(Icons.lock_outline),
+                    hintStyle: TextStyle(color: isDark ? Colors.white38 : Colors.black38),
+                    prefixIcon: const Icon(Icons.lock_outline, color: accentColor),
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: isDark ? Colors.white.withOpacity(0.05) : Colors.white,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
@@ -169,27 +180,45 @@ class _RegisterPageState extends State<RegisterPage> {
                 const SizedBox(height: 40),
                 _isLoading
                     ? const Center(child: CircularProgressIndicator())
-                    : ElevatedButton(
-                        onPressed: _register,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black87,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                    : Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF9c4dea), Color(0xFFff80b1)],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
                           ),
-                          elevation: 5,
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF9c4dea).withOpacity(0.4),
+                              blurRadius: 10,
+                              offset: const Offset(0, 5),
+                            ),
+                          ],
                         ),
-                        child: const Text(
-                          'S\'inscrire',
-                          style: TextStyle(fontSize: 18, color: Colors.white),
+                        child: ElevatedButton(
+                          onPressed: _register,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            foregroundColor: Colors.white,
+                            shadowColor: Colors.transparent,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Text(
+                            'S\'inscrire',
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
                         ),
                       ),
                 const SizedBox(height: 20),
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text(
+                  child: Text(
                     'Déjà un compte ? Se connecter',
-                    style: TextStyle(color: Colors.black54),
+                    style: TextStyle(color: isDark ? Colors.white38 : Colors.black54),
                   ),
                 ),
               ],
