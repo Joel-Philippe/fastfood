@@ -109,6 +109,20 @@ class _CheckoutPageState extends State<CheckoutPage> {
       return; // Form is not valid
     }
 
+    // --- AUTH CHECK ---
+    final isAuthenticated = await _authService.isAuthenticated();
+    if (!isAuthenticated) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Veuillez vous connecter pour commander.')),
+      );
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const UserLoginPage()),
+      );
+      return;
+    }
+
     try {
       if (kIsWeb) {
         // --- Web Payment Logic (Stripe Checkout) ---

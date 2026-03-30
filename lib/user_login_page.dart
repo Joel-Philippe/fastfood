@@ -268,7 +268,13 @@ class _UserLoginPageState extends State<UserLoginPage> {
                         ),
                       ),
                       TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
+                        onPressed: () {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(builder: (context) => const HomePage()),
+                            (route) => false,
+                          );
+                        },
                         child: const Text(
                           'Retour',
                           style: TextStyle(color: Colors.black54),

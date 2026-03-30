@@ -19,22 +19,14 @@ class _AuthWrapperState extends State<AuthWrapper> {
   }
 
   Future<void> _checkAuthStatusAndNavigate() async {
-    final authService = AuthService();
-    final isAuthenticated = await authService.isAuthenticated();
-
     if (!mounted) return;
 
-    if (isAuthenticated) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomePage()),
-      );
-    } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const UserLoginPage()),
-      );
-    }
+    // Always navigate to HomePage by default at launch.
+    // Auth requirement will be handled at the feature level (Checkout, Profile, etc.)
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const HomePage()),
+    );
   }
 
   @override
