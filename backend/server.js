@@ -202,5 +202,3 @@ createWebSocketServer(server);
 server.listen(PORT, HOST, () => {
   console.log(`Server (HTTP and WebSocket) running on http://${HOST}:${PORT}`);
 });
-}`);
-});
