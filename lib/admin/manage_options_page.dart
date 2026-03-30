@@ -41,6 +41,7 @@ class _ManageOptionsPageState extends State<ManageOptionsPage> {
   @override
   Widget build(BuildContext context) {
     const accentColor = Color(0xFF53c6fd);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     const buttonGradient = LinearGradient(
       colors: [Color(0xFF9c4dea), Color(0xFFff80b1)],
       begin: Alignment.centerLeft,
@@ -64,9 +65,11 @@ class _ManageOptionsPageState extends State<ManageOptionsPage> {
           ),
         ),
         body: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Color(0xFFfcf1f1), Color(0xFFfffcdd)],
+              colors: isDark 
+                  ? [const Color(0xFF121212), const Color(0xFF1E1E1E)]
+                  : [const Color(0xFFfcf1f1), const Color(0xFFfffcdd)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -103,6 +106,7 @@ class _ManageOptionsPageState extends State<ManageOptionsPage> {
   }
 
   Widget _buildOptionsList() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return FutureBuilder<List<Option>>(
       future: _optionsFuture,
       builder: (context, snapshot) {
@@ -110,10 +114,10 @@ class _ManageOptionsPageState extends State<ManageOptionsPage> {
           return const Center(child: CircularProgressIndicator(color: Color(0xFF53c6fd)));
         }
         if (snapshot.hasError) {
-          return Center(child: Text('Erreur: ${snapshot.error}'));
+          return Center(child: Text('Erreur: ${snapshot.error}', style: TextStyle(color: isDark ? Colors.white70 : Colors.black87)));
         }
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('Aucune option trouvée.', style: TextStyle(fontSize: 16, color: Colors.black54)));
+          return Center(child: Text('Aucune option trouvée.', style: TextStyle(fontSize: 16, color: isDark ? Colors.white38 : Colors.black54)));
         }
 
         final options = snapshot.data!;
@@ -147,12 +151,13 @@ class _ManageOptionsPageState extends State<ManageOptionsPage> {
     String? subtitle,
     List<Widget>? actions,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8),
       elevation: 2,
       shadowColor: Colors.black.withOpacity(0.1),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      color: Colors.white.withOpacity(0.8),
+      color: isDark ? const Color(0xFF1E1E1E).withOpacity(0.8) : Colors.white.withOpacity(0.8),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
         child: Row(
@@ -162,10 +167,10 @@ class _ManageOptionsPageState extends State<ManageOptionsPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: isDark ? Colors.white : Colors.black87)),
                   if (subtitle != null) ...[
                     const SizedBox(height: 4),
-                    Text(subtitle, style: const TextStyle(color: Colors.black54)),
+                    Text(subtitle, style: TextStyle(color: isDark ? Colors.white60 : Colors.black54)),
                   ],
                 ],
               ),
