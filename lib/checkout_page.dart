@@ -13,7 +13,7 @@ import 'package:fast_food_app/widgets/gradient_widgets.dart';
 import 'package:fast_food_app/services/auth_service.dart'; // Import AuthService
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:url_launcher/url_launcher.dart';
-import 'dart:html' as html; // To get the current URL for success/cancel redirects
+// import 'dart:html' as html; // To get the current URL for success/cancel redirects
 
 class CheckoutPage extends StatefulWidget {
   const CheckoutPage({super.key});
@@ -44,6 +44,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
   void _checkPaymentSuccess() {
     if (kIsWeb) {
+      /*
       final uri = Uri.parse(html.window.location.href);
       if (uri.queryParameters.containsKey('session_id') && uri.queryParameters.containsKey('order_id')) {
         final orderId = uri.queryParameters['order_id']!;
@@ -70,6 +71,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
           );
         });
       }
+      */
     }
   }
 
@@ -165,9 +167,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
             'metadata': {
               'orderId': orderId,
             },
-            // Success URL includes the orderId so we can show it on return
-            'success_url': '${html.window.location.href.split('?')[0]}?session_id={CHECKOUT_SESSION_ID}&order_id=$orderId',
-            'cancel_url': html.window.location.href,
+            // Using absolute URLs to avoid dart:html dependency for now
+            'success_url': 'https://fastfood-fss9.onrender.com/#/checkout?session_id={CHECKOUT_SESSION_ID}&order_id=$orderId',
+            'cancel_url': 'https://fastfood-fss9.onrender.com/#/checkout',
             'items_summary': itemsSummary,
           }),
         );

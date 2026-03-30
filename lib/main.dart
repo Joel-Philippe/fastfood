@@ -16,7 +16,6 @@ import 'firebase_options.dart';
 
 import 'package:fast_food_app/services/local_notification_service.dart';
 import 'package:fast_food_app/reset_password_page.dart';
-import 'dart:html' as html;
 
 // Handler for background messages
 @pragma('vm:entry-point')
@@ -29,10 +28,6 @@ final LocalNotificationService localNotificationService = LocalNotificationServi
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  if (kIsWeb) {
-    // URL cleaning handled in CheckoutPage
-  }
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
