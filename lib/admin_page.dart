@@ -24,17 +24,19 @@ class _AdminPageState extends State<AdminPage> {
     required VoidCallback onTap,
   }) {
     const accentColor = Color(0xFF53c6fd);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.8),
+          color: isDark ? const Color(0xFF1E1E1E).withOpacity(0.8) : Colors.white.withOpacity(0.8),
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: isDark ? Colors.white10 : Colors.transparent),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
               blurRadius: 10,
               offset: const Offset(0, 4),
             )
@@ -48,10 +50,10 @@ class _AdminPageState extends State<AdminPage> {
             Text(
               label,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Colors.black54,
+                color: isDark ? Colors.white70 : Colors.black54,
               ),
             ),
           ],
@@ -63,14 +65,17 @@ class _AdminPageState extends State<AdminPage> {
   @override
   Widget build(BuildContext context) {
     const accentColor = Color(0xFF53c6fd);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
         body: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Color(0xFFfcf1f1), Color(0xFFfffcdd)],
+              colors: isDark 
+                  ? [const Color(0xFF121212), const Color(0xFF1E1E1E)]
+                  : [const Color(0xFFfcf1f1), const Color(0xFFfffcdd)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),

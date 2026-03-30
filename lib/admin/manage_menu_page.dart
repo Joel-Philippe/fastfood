@@ -124,6 +124,7 @@ class _ManageMenuPageState extends State<ManageMenuPage> with SingleTickerProvid
   @override
   Widget build(BuildContext context) {
     const accentColor = Color(0xFF53c6fd);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     const buttonGradient = LinearGradient(
       colors: [Color(0xFF9c4dea), Color(0xFFff80b1)],
       begin: Alignment.centerLeft,
@@ -141,7 +142,6 @@ class _ManageMenuPageState extends State<ManageMenuPage> with SingleTickerProvid
                     context,
                     MaterialPageRoute(builder: (context) => const ManageMenuItemPage()),
                   );
-                  // No need to call _handleRefresh here as WebSocket should handle it
                 },
                 backgroundColor: Colors.transparent,
                 tooltip: 'Ajouter un article',
@@ -155,9 +155,11 @@ class _ManageMenuPageState extends State<ManageMenuPage> with SingleTickerProvid
               )
             : null,
         body: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Color(0xFFfcf1f1), Color(0xFFfffcdd)],
+              colors: isDark 
+                  ? [const Color(0xFF121212), const Color(0xFF1E1E1E)]
+                  : [const Color(0xFFfcf1f1), const Color(0xFFfffcdd)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -171,7 +173,7 @@ class _ManageMenuPageState extends State<ManageMenuPage> with SingleTickerProvid
                     icon: const Icon(Icons.arrow_back, color: accentColor),
                     onPressed: () => Navigator.pop(context, _hasChanges),
                   ),
-                  backgroundColor: const Color(0xFFfcf1f1).withOpacity(0.8),
+                  backgroundColor: isDark ? const Color(0xFF1E1E1E).withOpacity(0.8) : const Color(0xFFfcf1f1).withOpacity(0.8),
                   floating: true,
                   pinned: true,
                   snap: true,
@@ -180,7 +182,7 @@ class _ManageMenuPageState extends State<ManageMenuPage> with SingleTickerProvid
                     controller: _tabController,
                     isScrollable: true,
                     labelColor: accentColor,
-                    unselectedLabelColor: Colors.black54,
+                    unselectedLabelColor: isDark ? Colors.white38 : Colors.black54,
                     indicatorColor: accentColor,
                     indicatorWeight: 3,
                     tabs: const [
@@ -197,9 +199,9 @@ class _ManageMenuPageState extends State<ManageMenuPage> with SingleTickerProvid
               controller: _tabController,
               children: [
                 _buildMenuItemsTab(),
-                ManageCategoriesPage(onRefresh: _handleRefresh), // This child might need its own WebSocket listener
+                ManageCategoriesPage(onRefresh: _handleRefresh),
                 _buildOptionsTab(),
-                ManageHoursPage(onRefresh: _handleRefresh), // This child might need its own WebSocket listener
+                ManageHoursPage(onRefresh: _handleRefresh),
               ],
             ),
           ),
@@ -417,5 +419,31 @@ class _ManageMenuPageState extends State<ManageMenuPage> with SingleTickerProvid
       },
     );
     // Removed .animate().fadeIn(duration: 300.ms);
+  }
+}        ),
+        );
+      },
+    );
+    // Removed .animate().fadeIn(duration: 300.ms);
+  }
+}l sanitizedTypeName = typeController.text.toLowerCase().replaceAll(' ', '-');
+                            Navigator.of(dialogContext).pop();
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => ManageOptionsPage(collectionName: sanitizedTypeName)),
+                            );
+                          }
+                        },
+                        child: const Text('Créer et Gérer', style: TextStyle(color: Colors.white)),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 }

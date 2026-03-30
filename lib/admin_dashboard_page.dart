@@ -247,7 +247,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   }
 
   Widget _buildFilterChips() {
-    // A list containing "All" (null) plus the other statuses
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final List<String?> filterOptions = [null, ..._orderStatuses];
 
     return SingleChildScrollView(
@@ -274,7 +274,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
               selectedColor: color.withOpacity(0.7),
               backgroundColor: color.withOpacity(0.2),
               labelStyle: TextStyle(
-                color: isSelected ? Colors.white : Colors.black87,
+                color: isSelected ? Colors.white : (isDark ? Colors.white70 : Colors.black87),
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),
               shape: RoundedRectangleBorder(
@@ -291,11 +291,12 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   }
 
   Widget _buildBody() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator(color: Color(0xFF53c6fd)));
     }
     if (_error != null) {
-      return Center(child: Text('Erreur: $_error'));
+      return Center(child: Text('Erreur: $_error', style: TextStyle(color: isDark ? Colors.white70 : Colors.black87)));
     }
 
     final List<Order> filteredOrders;
@@ -310,12 +311,12 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.list_alt_rounded, size: 80, color: Colors.grey.shade400),
+            Icon(Icons.list_alt_rounded, size: 80, color: isDark ? Colors.grey[800] : Colors.grey.shade400),
             const SizedBox(height: 16),
             Text(
               _selectedStatus == null ? 'Aucune commande pour le moment' : 'Aucune commande avec le statut "${_translateStatus(_selectedStatus!)}"',
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 20, color: Colors.black54),
+              style: TextStyle(fontSize: 20, color: isDark ? Colors.white38 : Colors.black54),
             ),
           ],
         ),
@@ -332,30 +333,36 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   }
 
   Widget _buildOrderCard(Order order) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.8),
+        color: isDark ? const Color(0xFF1E1E1E).withOpacity(0.8) : Colors.white.withOpacity(0.8),
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: isDark ? Colors.white10 : Colors.transparent),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           )
         ],
       ),
-      child: ExpansionTile(
-        key: PageStorageKey(order.id),
-        title: _buildOrderCardHeader(order),
-        tilePadding: const EdgeInsets.all(16),
-        childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        children: [_buildOrderCardDetails(order)],
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          key: PageStorageKey(order.id),
+          title: _buildOrderCardHeader(order),
+          tilePadding: const EdgeInsets.all(16),
+          childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          children: [_buildOrderCardDetails(order)],
+        ),
       ),
     );
   }
 
   Widget _buildOrderCardHeader(Order order) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -365,7 +372,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
             Flexible(
               child: Text(
                 '#${order.id.substring(order.id.length - 6)}',
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: isDark ? Colors.white : Colors.black87),
                 softWrap: false,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -373,7 +380,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
             Flexible(
               child: Text(
                 '${order.totalAmount.toStringAsFixed(2)} €',
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: isDark ? Colors.white : Colors.black87),
                 softWrap: false,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -383,9 +390,9 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
         const SizedBox(height: 8),
         Row(
           children: [
-            const Icon(Icons.person_outline, size: 16, color: Colors.black54),
+            Icon(Icons.person_outline, size: 16, color: isDark ? Colors.white60 : Colors.black54),
             const SizedBox(width: 4),
-            Flexible(child: Text(order.customerName, style: const TextStyle(color: Colors.black54), softWrap: false, overflow: TextOverflow.ellipsis, maxLines: 1)),
+            Flexible(child: Text(order.customerName, style: TextStyle(color: isDark ? Colors.white60 : Colors.black54), softWrap: false, overflow: TextOverflow.ellipsis, maxLines: 1)),
           ],
         ),
         const SizedBox(height: 12),
