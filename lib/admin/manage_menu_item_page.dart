@@ -233,18 +233,20 @@ class _ManageMenuItemPageState extends State<ManageMenuItemPage> {
 
   InputDecoration _buildInputDecoration({required String label, required IconData icon}) {
     const accentColor = Color(0xFF53c6fd);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return InputDecoration(
       labelText: label,
-      labelStyle: const TextStyle(color: Colors.black54),
+      labelStyle: TextStyle(color: isDark ? Colors.white60 : Colors.black54),
       prefixIcon: Icon(icon, color: accentColor),
       filled: true,
-      fillColor: Colors.white.withOpacity(0.8),
+      fillColor: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.8),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
       focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: accentColor, width: 2)),
     );
   }
 
   Widget _buildImagePicker() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     Widget content;
     if (_imageBytes != null) {
       content = ClipRRect(borderRadius: BorderRadius.circular(11), child: Image.memory(_imageBytes!, fit: BoxFit.cover));
@@ -262,14 +264,18 @@ class _ManageMenuItemPageState extends State<ManageMenuItemPage> {
         ),
       );
     } else {
-      content = const Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.image_outlined, size: 40, color: Colors.grey), Text('Choisir une image', style: TextStyle(color: Colors.grey))]));
+      content = Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.image_outlined, size: 40, color: isDark ? Colors.white38 : Colors.grey), Text('Choisir une image', style: TextStyle(color: isDark ? Colors.white38 : Colors.grey))]));
     }
     return GestureDetector(
       onTap: _pickImage,
       child: Container(
         height: 180,
         width: double.infinity,
-        decoration: BoxDecoration(color: Colors.white.withOpacity(0.8), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade300)),
+        decoration: BoxDecoration(
+          color: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.8), 
+          borderRadius: BorderRadius.circular(12), 
+          border: Border.all(color: isDark ? Colors.white10 : Colors.grey.shade300)
+        ),
         child: content,
       ),
     );
@@ -277,6 +283,7 @@ class _ManageMenuItemPageState extends State<ManageMenuItemPage> {
 
   Widget _buildDynamicOptionsSelector() {
     const accentColor = Color(0xFF53c6fd);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return FutureBuilder<List<String>>(
       future: _optionTypesFuture,
       builder: (context, snapshot) {
@@ -284,7 +291,7 @@ class _ManageMenuItemPageState extends State<ManageMenuItemPage> {
         final allOptionTypes = snapshot.data!;
         return Wrap(
           spacing: 8.0,
-          runSpacing: 4.0,
+          runSpacing: 8.0,
           children: allOptionTypes.map((type) {
             final isSelected = _selectedOptionTypes.contains(type);
             return GestureDetector(
@@ -299,15 +306,24 @@ class _ManageMenuItemPageState extends State<ManageMenuItemPage> {
               },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: isSelected ? accentColor : Colors.white.withOpacity(0.8),
+                  color: isSelected ? accentColor : (isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.8)),
                   borderRadius: BorderRadius.circular(30),
-                  border: Border.all(color: isSelected ? accentColor : Colors.grey[300]!, width: 1.5),
+                  border: Border.all(color: isSelected ? accentColor : (isDark ? Colors.white10 : Colors.grey[300]!), width: 1.5),
                 ),
                 child: Text(
                   type.replaceAll('Options', ''),
-                  style: TextStyle(color: isSelected ? Colors.white : Colors.black87, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal),
+                  style: TextStyle(color: isSelected ? Colors.white : (isDark ? Colors.white70 : Colors.black87), fontWeight: isSelected ? FontWeight.bold : FontWeight.normal),
+                ),
+              ),
+            );
+          }).toList(),
+        );
+      },
+    );
+  }
+}tStyle(color: isSelected ? Colors.white : Colors.black87, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal),
                 ),
               ),
             );

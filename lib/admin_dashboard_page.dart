@@ -421,7 +421,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                 _translateStatus(order.status),
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: _getStatusColor(order.status).withRed(50).withGreen(50),
+                  color: _getStatusColor(order.status),
                 ),
                 softWrap: false,
                 overflow: TextOverflow.ellipsis,
@@ -518,6 +518,13 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const Text('Date:', style: TextStyle(color: Colors.grey)),
+            Flexible(child: Text(DateFormat('dd/MM/yy HH:mm').format(order.orderDate), style: const TextStyle(fontWeight: FontWeight.bold), softWrap: false, overflow: TextOverflow.ellipsis, maxLines: 1)),
+          ],
+        ),
+      ],
+    );
+  }
+}te:', style: TextStyle(color: Colors.grey)),
             Flexible(child: Text(DateFormat('dd/MM/yy HH:mm').format(order.orderDate), style: const TextStyle(fontWeight: FontWeight.bold), softWrap: false, overflow: TextOverflow.ellipsis, maxLines: 1)),
           ],
         ),

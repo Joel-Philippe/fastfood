@@ -77,6 +77,7 @@ class _ManageHoursPageState extends State<ManageHoursPage> {
   @override
   Widget build(BuildContext context) {
     const accentColor = Color(0xFF53c6fd);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: FutureBuilder<RestaurantSettings>(
@@ -86,7 +87,7 @@ class _ManageHoursPageState extends State<ManageHoursPage> {
             return const Center(child: CircularProgressIndicator(color: accentColor));
           }
           if (snapshot.hasError) {
-            return Center(child: Text('Erreur: ${snapshot.error}'));
+            return Center(child: Text('Erreur: ${snapshot.error}', style: TextStyle(color: isDark ? Colors.white70 : Colors.black87)));
           }
 
           return Column(
@@ -103,7 +104,7 @@ class _ManageHoursPageState extends State<ManageHoursPage> {
                       elevation: 2,
                       shadowColor: Colors.black.withOpacity(0.1),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      color: Colors.white.withOpacity(0.8),
+                      color: isDark ? const Color(0xFF1E1E1E).withOpacity(0.8) : Colors.white.withOpacity(0.8),
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: Column(
@@ -111,7 +112,7 @@ class _ManageHoursPageState extends State<ManageHoursPage> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(dayName, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black54)),
+                                Text(dayName, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black54)),
                                 Switch(
                                   value: dayHours.isOpen,
                                   onChanged: (bool value) => setState(() => dayHours.isOpen = value),
@@ -164,9 +165,10 @@ class _ManageHoursPageState extends State<ManageHoursPage> {
   }
 
   Widget _buildTimeSelector(String label, String time, VoidCallback onTap) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       children: [
-        Text(label, style: const TextStyle(color: Colors.black54)),
+        Text(label, style: TextStyle(color: isDark ? Colors.white60 : Colors.black54)),
         const SizedBox(height: 4),
         InkWell(
           onTap: onTap,
@@ -174,7 +176,7 @@ class _ManageHoursPageState extends State<ManageHoursPage> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.05),
+              color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(time, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF53c6fd))),

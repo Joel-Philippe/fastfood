@@ -195,10 +195,11 @@ class _ManageOptionsPageState extends State<ManageOptionsPage> {
     final formKey = GlobalKey<FormState>();
     final nameController = TextEditingController(text: option?.name);
     final priceController = TextEditingController(text: option?.price.toString() ?? '0.0');
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     await showDialog<void>(
       context: context,
-      barrierColor: Colors.transparent,
+      barrierColor: Colors.black54,
       builder: (BuildContext dialogContext) {
         return Dialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
@@ -207,13 +208,16 @@ class _ManageOptionsPageState extends State<ManageOptionsPage> {
           child: Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFFfcf1f1), Color(0xFFfffcdd)],
+              gradient: LinearGradient(
+                colors: isDark 
+                    ? [const Color(0xFF2C2C2C), const Color(0xFF1E1E1E)]
+                    : [const Color(0xFFfcf1f1), const Color(0xFFfffcdd)],
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
               ),
               borderRadius: BorderRadius.circular(20.0),
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10)],
+              border: Border.all(color: isDark ? Colors.white10 : Colors.transparent),
+              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 10)],
             ),
             child: Form(
               key: formKey,
@@ -224,12 +228,14 @@ class _ManageOptionsPageState extends State<ManageOptionsPage> {
                   const SizedBox(height: 24),
                   TextFormField(
                     controller: nameController,
+                    style: TextStyle(color: isDark ? Colors.white : Colors.black87),
                     decoration: _buildInputDecoration(label: 'Nom de l\'option', icon: Icons.text_fields),
                     validator: (v) => (v == null || v.isEmpty) ? 'Le nom est requis' : null,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: priceController,
+                    style: TextStyle(color: isDark ? Colors.white : Colors.black87),
                     decoration: _buildInputDecoration(label: 'Prix', icon: Icons.euro_symbol),
                     keyboardType: TextInputType.number,
                     validator: (v) => (v == null || double.tryParse(v) == null) ? 'Prix invalide' : null,
@@ -238,7 +244,7 @@ class _ManageOptionsPageState extends State<ManageOptionsPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: const Text('Annuler', style: TextStyle(color: Colors.black54))),
+                      TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: Text('Annuler', style: TextStyle(color: isDark ? Colors.white38 : Colors.black54))),
                       const SizedBox(width: 8),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF53c6fd)),
@@ -274,12 +280,13 @@ class _ManageOptionsPageState extends State<ManageOptionsPage> {
 
   InputDecoration _buildInputDecoration({required String label, required IconData icon}) {
     const accentColor = Color(0xFF53c6fd);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return InputDecoration(
       labelText: label,
-      labelStyle: const TextStyle(color: Colors.black54),
+      labelStyle: TextStyle(color: isDark ? Colors.white60 : Colors.black54),
       prefixIcon: Icon(icon, color: accentColor),
       filled: true,
-      fillColor: Colors.white.withOpacity(0.8),
+      fillColor: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.8),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
       focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: accentColor, width: 2)),
     );
