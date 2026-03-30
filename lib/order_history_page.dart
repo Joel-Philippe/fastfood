@@ -91,11 +91,14 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
   @override
   Widget build(BuildContext context) {
     const accentColor = Color(0xFF53c6fd);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFFfcf1f1), Color(0xFFfffcdd)],
+          colors: isDark
+              ? [const Color(0xFF121212), const Color(0xFF1E1E1E)]
+              : [const Color(0xFFfcf1f1), const Color(0xFFfffcdd)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -124,12 +127,13 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
   }
 
   Widget _buildBody() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
     if (_error != null) {
-      return Center(child: Text('Erreur: $_error'));
+      return Center(child: Text('Erreur: $_error', style: TextStyle(color: isDark ? Colors.white70 : Colors.black87)));
     }
 
     if (_orders == null || _orders!.isEmpty) {
@@ -137,11 +141,11 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.receipt_long, size: 100, color: Colors.grey[300]),
+            Icon(Icons.receipt_long, size: 100, color: isDark ? Colors.grey[800] : Colors.grey[300]),
             const SizedBox(height: 24),
-            const Text(
+            Text(
               'Aucune commande trouvée',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black54),
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: isDark ? Colors.white70 : Colors.black54),
             ),
             const SizedBox(height: 8),
             const Text(
@@ -166,11 +170,12 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           padding: const EdgeInsets.all(16.0),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.8),
+            color: isDark ? const Color(0xFF1E1E1E).withOpacity(0.8) : Colors.white.withOpacity(0.8),
             borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: isDark ? Colors.white10 : Colors.transparent),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               )
@@ -212,18 +217,18 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
               const Divider(height: 24),
               Row(
                 children: [
-                  Icon(Icons.calendar_today, color: Colors.black54, size: 16),
+                  Icon(Icons.calendar_today, color: isDark ? Colors.white60 : Colors.black54, size: 16),
                   const SizedBox(width: 8),
                   Text(
                     DateFormat('dd/MM/yyyy à HH:mm').format(order.orderDate.toLocal()),
-                    style: const TextStyle(color: Colors.black54, fontSize: 14),
+                    style: TextStyle(color: isDark ? Colors.white60 : Colors.black54, fontSize: 14),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
               Row(
                 children: [
-                  Icon(Icons.flag, color: Colors.black54, size: 16),
+                  Icon(Icons.flag, color: isDark ? Colors.white60 : Colors.black54, size: 16),
                   const SizedBox(width: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -243,9 +248,9 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
                 ],
               ),
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 'Articles :',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black54),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: isDark ? Colors.white70 : Colors.black54),
               ),
               const SizedBox(height: 4),
               ...order.items.values.map((item) {
@@ -262,7 +267,7 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
                             text,
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.black54,
+                              color: isDark ? Colors.white60 : Colors.black54,
                             ),
                           ),
                         ),
@@ -292,10 +297,10 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
                     children: [
                       Text(
                         '${item.quantity}x ${item.item.name}',
-                        style: const TextStyle(
-                          color: Colors.black87,
+                        style: TextStyle(
+                          color: isDark ? Colors.white : Colors.black87,
                           fontSize: 14,
-                          fontWeight: FontWeight.w600, // Make item name slightly bolder
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                       if (details.isNotEmpty)

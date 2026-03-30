@@ -455,7 +455,7 @@ class _HomePageState extends State<HomePage> {
       Provider.of<CartProvider>(context, listen: false).addItem(item);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          backgroundColor: Colors.white,
+          backgroundColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF2C2C2C) : Colors.white,
           content: GradientText(
             '${item.name} ajouté au panier !',
             style: const TextStyle(fontSize: 14),
@@ -548,6 +548,12 @@ class _HomePageState extends State<HomePage> {
                   ),
                 )
               : const SizedBox.shrink(key: ValueKey('EmptyFab')),
+        );
+      },
+    );
+  }
+}
+     : const SizedBox.shrink(key: ValueKey('EmptyFab')),
         );
       },
     );

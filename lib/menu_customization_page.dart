@@ -301,8 +301,10 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
-      color: const Color(0xFFfdf9e0),
+      color: isDark ? const Color(0xFF121212) : const Color(0xFFfdf9e0),
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: CustomScrollView(
@@ -311,7 +313,7 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
             SliverAppBar(
               expandedHeight: 250.0,
               pinned: true,
-              backgroundColor: _isAppBarColored ? _appBarScrollColor : Colors.transparent, // Dynamic background color
+              backgroundColor: _isAppBarColored ? _appBarScrollColor : Colors.transparent,
               flexibleSpace: FlexibleSpaceBar(
                 title: Text(
                   '${widget.menuItem.name} (${_singleItemPrice.toStringAsFixed(2)} €)',
@@ -324,7 +326,7 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
                 ),
                 background: widget.menuItem.imageUrl != null && widget.menuItem.imageUrl!.isNotEmpty
                     ? Image.network(
-                        _proxiedImageUrl(widget.menuItem.imageUrl!), // Use proxied URL
+                        _proxiedImageUrl(widget.menuItem.imageUrl!),
                         fit: BoxFit.cover,
                         color: Colors.black.withOpacity(0.1),
                         colorBlendMode: BlendMode.darken,
@@ -344,7 +346,7 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
                 child: Text(
                   widget.menuItem.description ?? '',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.black87,
+                        color: isDark ? Colors.white70 : Colors.black87,
                         fontSize: 16,
                         height: 1.5,
                       ),
@@ -710,6 +712,21 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+         ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+  ],
       ),
     );
   }

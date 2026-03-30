@@ -78,8 +78,8 @@ class _MenuItemCardState extends State<MenuItemCard> {
                                   return child;
                                 }
                                 return Shimmer.fromColors(
-                                  baseColor: Colors.grey[300]!,
-                                  highlightColor: Colors.grey[100]!,
+                                  baseColor: Theme.of(context).brightness == Brightness.dark ? Colors.grey[800]! : Colors.grey[300]!,
+                                  highlightColor: Theme.of(context).brightness == Brightness.dark ? Colors.grey[700]! : Colors.grey[100]!,
                                   child: Container(color: Colors.white),
                                 );
                               },
@@ -88,7 +88,7 @@ class _MenuItemCardState extends State<MenuItemCard> {
                                   if (mounted) setState(() => _isImageLoaded = true);
                                 });
                                 return Container(
-                                  color: Colors.grey[200],
+                                  color: Theme.of(context).brightness == Brightness.dark ? Colors.grey[800] : Colors.grey[200],
                                   child: const Center(child: Icon(Icons.broken_image, size: 50, color: Colors.grey)),
                                 );
                               },

@@ -63,8 +63,8 @@ class _CategoryCardWidgetState extends State<CategoryCardWidget>
       cardColor = categoryBgColor;
       textColor = Colors.white;
     } else {
-      cardColor = Colors.white;
-      textColor = categoryBgColor;
+      cardColor = Theme.of(context).cardColor;
+      textColor = Theme.of(context).brightness == Brightness.dark ? Colors.white70 : categoryBgColor;
     }
 
     return ScaleTransition(

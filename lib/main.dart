@@ -121,6 +121,8 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF53c6fd),
           brightness: Brightness.light,
+          surface: Colors.white,
+          onSurface: Colors.black87,
         ),
         appBarTheme: AppBarTheme(
           backgroundColor: Colors.white,
@@ -129,7 +131,13 @@ class MyApp extends StatelessWidget {
           titleTextStyle: const TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
+            color: Colors.black87,
           ),
+        ),
+        cardTheme: CardTheme(
+          color: Colors.white,
+          elevation: 2,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
@@ -149,7 +157,8 @@ class MyApp extends StatelessWidget {
           brightness: Brightness.dark,
           surface: const Color(0xFF1E1E1E),
           onSurface: Colors.white,
-          onPrimary: Colors.white, // Texte sur le bouton principal
+          onPrimary: Colors.white,
+          secondary: const Color(0xFF53c6fd),
         ),
         scaffoldBackgroundColor: const Color(0xFF121212),
         appBarTheme: AppBarTheme(
@@ -162,10 +171,19 @@ class MyApp extends StatelessWidget {
             color: Colors.white,
           ),
         ),
+        cardTheme: CardTheme(
+          color: const Color(0xFF1E1E1E),
+          elevation: 4,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        ),
+        listTileTheme: const ListTileThemeData(
+          iconColor: Colors.white70,
+          textColor: Colors.white,
+        ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFF53c6fd),
-            foregroundColor: Colors.white, // Changé en blanc pour meilleur contraste
+            foregroundColor: Colors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(30),
             ),
@@ -173,8 +191,9 @@ class MyApp extends StatelessWidget {
           ),
         ),
         textTheme: const TextTheme(
-          bodyLarge: TextStyle(color: Colors.white70),
+          bodyLarge: TextStyle(color: Colors.white),
           bodyMedium: TextStyle(color: Colors.white70),
+          titleLarge: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
       ),
       home: const AuthWrapper(),
