@@ -213,13 +213,31 @@ class _CheckoutPageState extends State<CheckoutPage> {
           throw Exception('Client secret not received from backend.');
         }
 
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        
         // 2. Initialize the Payment Sheet
         if (!mounted) return;
         await Stripe.instance.initPaymentSheet(
           paymentSheetParameters: SetupPaymentSheetParameters(
             paymentIntentClientSecret: clientSecret,
             merchantDisplayName: 'Tacos Locos',
-            style: Theme.of(context).brightness == Brightness.dark ? ThemeMode.dark : ThemeMode.light,
+            style: isDark ? ThemeMode.dark : ThemeMode.light,
+            appearance: PaymentSheetAppearance(
+              colors: PaymentSheetAppearanceColors(
+                background: isDark ? const Color(0xFF121212) : Colors.white,
+                primary: const Color(0xFF53c6fd),
+                componentBackground: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+                componentDivider: isDark ? Colors.white10 : Colors.grey[200],
+                primaryText: isDark ? Colors.white : Colors.black,
+                secondaryText: isDark ? Colors.white70 : Colors.black54,
+                placeholderText: isDark ? Colors.white24 : Colors.black26,
+                icon: const Color(0xFF53c6fd),
+              ),
+              shapes: PaymentSheetShape(
+                borderRadius: 12,
+                borderWidth: 1,
+              ),
+            ),
           ),
         );
 
