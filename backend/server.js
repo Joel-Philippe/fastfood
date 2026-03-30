@@ -199,6 +199,8 @@ const server = http.createServer(app);
 createWebSocketServer(server);
 
 // Start the server
-server.listen(PORT, () => {
-  console.log(`Server (HTTP and WebSocket) running on port ${PORT}`);
+server.listen(PORT, HOST, () => {
+  console.log(`Server (HTTP and WebSocket) running on http://${HOST}:${PORT}`);
+});
+}`);
 });
