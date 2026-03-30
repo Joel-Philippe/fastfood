@@ -344,7 +344,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 label,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: isSelected ? Colors.white : Colors.black87,
+                  color: isSelected ? Colors.white : (Theme.of(context).brightness == Brightness.dark ? Colors.white70 : Colors.black87),
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
               ),
@@ -605,6 +605,15 @@ class _CheckoutPageState extends State<CheckoutPage> {
               ),
               text: 'Payer et passer la commande',
               icon: Icons.credit_card,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+dit_card,
             ),
           ],
         ),
