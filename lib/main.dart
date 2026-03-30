@@ -31,7 +31,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   if (kIsWeb) {
-    // URL cleaning is handled in CheckoutPage for now
+    // URL cleaning handled in CheckoutPage
   }
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
