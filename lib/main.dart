@@ -127,11 +127,11 @@ class MyApp extends StatelessWidget {
           seedColor: const Color(0xFF53c6fd),
           brightness: Brightness.light,
         ),
-        appBarTheme: const AppBarTheme(
+        appBarTheme: AppBarTheme(
           backgroundColor: Colors.white,
-          foregroundColor: Color(0xFF53c6fd),
+          foregroundColor: const Color(0xFF53c6fd),
           elevation: 0,
-          titleTextStyle: TextStyle(
+          titleTextStyle: const TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
           ),
@@ -155,11 +155,11 @@ class MyApp extends StatelessWidget {
           surface: const Color(0xFF121212),
         ),
         scaffoldBackgroundColor: const Color(0xFF121212),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF1E1E1E),
+        appBarTheme: AppBarTheme(
+          backgroundColor: const Color(0xFF1E1E1E),
           foregroundColor: Colors.white,
           elevation: 0,
-          titleTextStyle: TextStyle(
+          titleTextStyle: const TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
           ),
