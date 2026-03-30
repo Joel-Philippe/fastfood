@@ -3,7 +3,6 @@ import 'package:fast_food_app/app_config.dart';
 import 'package:fast_food_app/services/auth_service.dart';
 import 'package:fast_food_app/services/websocket_service.dart';
 import 'package:flutter/material.dart';
-import 'package:fast_food_app/services/auth_service.dart';
 import 'package:fast_food_app/services/mongo_service.dart';
 import 'package:fast_food_app/admin/manage_menu_item_page.dart';
 import 'package:fast_food_app/admin/manage_options_page.dart';
@@ -64,8 +63,8 @@ class _ManageMenuPageState extends State<ManageMenuPage> with SingleTickerProvid
       ]);
       if (mounted) {
         setState(() {
-          _menuItems = results[0] as List<MenuItem>; // Explicit cast
-          _optionTypes = results[1] as List<String>; // Explicit cast
+          _menuItems = results[0] as List<MenuItem>;
+          _optionTypes = results[1] as List<String>;
           _isLoading = false;
           _error = null;
         });
@@ -97,8 +96,7 @@ class _ManageMenuPageState extends State<ManageMenuPage> with SingleTickerProvid
         ];
 
         if (type != null && refreshEvents.contains(type)) {
-          debugPrint('ManageMenuPage: Received ${type}, refreshing data.');
-          _hasChanges = true; // Mark that data has changed
+          _hasChanges = true;
           _fetchData();
         }
       });
@@ -210,17 +208,16 @@ class _ManageMenuPageState extends State<ManageMenuPage> with SingleTickerProvid
     );
   }
 
-
-
   Widget _buildMenuItemsTab() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator(color: Color(0xFF53c6fd)));
     }
     if (_error != null) {
-      return Center(child: Text(_error ?? 'Une erreur est survenue.'));
+      return Center(child: Text(_error ?? 'Une erreur est survenue.', style: TextStyle(color: isDark ? Colors.white70 : Colors.black87)));
     }
     if (_menuItems == null || _menuItems!.isEmpty) {
-      return Center(child: Text('Aucun article de menu.', style: const TextStyle(fontSize: 16, color: Colors.black54)));
+      return Center(child: Text('Aucun article de menu.', style: TextStyle(fontSize: 16, color: isDark ? Colors.white38 : Colors.black54)));
     }
 
     return ListView.builder(
@@ -258,7 +255,6 @@ class _ManageMenuPageState extends State<ManageMenuPage> with SingleTickerProvid
                 icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
                 onPressed: () async {
                   await _mongoService.deleteMenuItem(item.id);
-                  // No need for _handleRefresh, WebSocket will trigger it
                 },
               ),
             ])
@@ -269,14 +265,15 @@ class _ManageMenuPageState extends State<ManageMenuPage> with SingleTickerProvid
   }
 
   Widget _buildOptionsTab() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator(color: Color(0xFF53c6fd)));
     }
     if (_error != null) {
-      return Center(child: Text(_error ?? 'Une erreur est survenue.'));
+      return Center(child: Text(_error ?? 'Une erreur est survenue.', style: TextStyle(color: isDark ? Colors.white70 : Colors.black87)));
     }
     if (_optionTypes == null || _optionTypes!.isEmpty) {
-      return Center(child: Text('Aucun type d\'option trouvé.', style: const TextStyle(fontSize: 16, color: Colors.black54)));
+      return Center(child: Text('Aucun type d\'option trouvé.', style: TextStyle(fontSize: 16, color: isDark ? Colors.white38 : Colors.black54)));
     }
 
     return ListView.builder(
@@ -312,12 +309,13 @@ class _ManageMenuPageState extends State<ManageMenuPage> with SingleTickerProvid
     List<Widget>? actions,
     VoidCallback? onTap,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8),
       elevation: 2,
       shadowColor: Colors.black.withOpacity(0.1),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      color: Colors.white.withOpacity(0.8),
+      color: isDark ? const Color(0xFF1E1E1E).withOpacity(0.8) : Colors.white.withOpacity(0.8),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: onTap,
@@ -330,10 +328,10 @@ class _ManageMenuPageState extends State<ManageMenuPage> with SingleTickerProvid
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16), softWrap: false, overflow: TextOverflow.ellipsis, maxLines: 1),
+                    Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: isDark ? Colors.white : Colors.black87), softWrap: false, overflow: TextOverflow.ellipsis, maxLines: 1),
                     if (subtitle != null) ...[
                       const SizedBox(height: 4),
-                      Text(subtitle, style: const TextStyle(color: Colors.black54), softWrap: false, overflow: TextOverflow.ellipsis, maxLines: 1),
+                      Text(subtitle, style: TextStyle(color: isDark ? Colors.white60 : Colors.black54), softWrap: false, overflow: TextOverflow.ellipsis, maxLines: 1),
                     ],
                   ],
                 ),
@@ -349,10 +347,11 @@ class _ManageMenuPageState extends State<ManageMenuPage> with SingleTickerProvid
   void _showAddCustomOptionTypeDialog(BuildContext context) {
     final TextEditingController typeController = TextEditingController();
     final formKey = GlobalKey<FormState>();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     showDialog(
       context: context,
-      barrierColor: Colors.transparent,
+      barrierColor: Colors.black54,
       builder: (BuildContext dialogContext) {
         return Dialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
@@ -361,28 +360,35 @@ class _ManageMenuPageState extends State<ManageMenuPage> with SingleTickerProvid
           child: Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFFfcf1f1), Color(0xFFfffcdd)],
+              gradient: LinearGradient(
+                colors: isDark
+                    ? [const Color(0xFF2C2C2C), const Color(0xFF1E1E1E)]
+                    : [const Color(0xFFfcf1f1), const Color(0xFFfffcdd)],
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
               ),
               borderRadius: BorderRadius.circular(20.0),
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10)],
+              border: Border.all(color: isDark ? Colors.white10 : Colors.transparent),
+              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 10)],
             ),
             child: Form(
               key: formKey,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  const Text('Nouveau Type d\'Option', style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)),
+                  Text('Nouveau Type d\'Option', style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87)),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: typeController,
-                    decoration: const InputDecoration(
+                    style: TextStyle(color: isDark ? Colors.white : Colors.black87),
+                    decoration: InputDecoration(
                       labelText: 'Nom du type d\'option',
+                      labelStyle: TextStyle(color: isDark ? Colors.white60 : Colors.black54),
                       hintText: 'Les espaces seront remplacés par des tirets',
-                      border: OutlineInputBorder(),
-                      focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF53c6fd))),
+                      hintStyle: TextStyle(color: isDark ? Colors.white24 : Colors.black26),
+                      border: const OutlineInputBorder(),
+                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: isDark ? Colors.white10 : Colors.black12)),
+                      focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF53c6fd))),
                     ),
                     validator: (v) => (v == null || v.isEmpty) ? 'Le nom est requis' : null,
                   ),
@@ -392,7 +398,7 @@ class _ManageMenuPageState extends State<ManageMenuPage> with SingleTickerProvid
                     children: [
                       TextButton(
                         onPressed: () => Navigator.of(dialogContext).pop(),
-                        child: const Text('Annuler', style: TextStyle(color: Colors.black54)),
+                        child: Text('Annuler', style: TextStyle(color: isDark ? Colors.white38 : Colors.black54)),
                       ),
                       const SizedBox(width: 8),
                       ElevatedButton(
@@ -400,33 +406,6 @@ class _ManageMenuPageState extends State<ManageMenuPage> with SingleTickerProvid
                         onPressed: () {
                           if (formKey.currentState!.validate()) {
                             final sanitizedTypeName = typeController.text.toLowerCase().replaceAll(' ', '-');
-                            Navigator.of(dialogContext).pop();
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => ManageOptionsPage(collectionName: sanitizedTypeName)),
-                            );
-                          }
-                        },
-                        child: const Text('Créer et Gérer', style: TextStyle(color: Colors.white)),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-    // Removed .animate().fadeIn(duration: 300.ms);
-  }
-}        ),
-        );
-      },
-    );
-    // Removed .animate().fadeIn(duration: 300.ms);
-  }
-}l sanitizedTypeName = typeController.text.toLowerCase().replaceAll(' ', '-');
                             Navigator.of(dialogContext).pop();
                             Navigator.push(
                               context,
