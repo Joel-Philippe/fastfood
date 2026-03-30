@@ -3,27 +3,30 @@ import 'package:provider/provider.dart';
 import 'package:fast_food_app/cart_provider.dart';
 import 'package:fast_food_app/checkout_page.dart';
 import 'package:fast_food_app/menu_customization_page.dart';
-import 'package:fast_food_app/widgets/gradient_widgets.dart'; // Added import
+import 'package:fast_food_app/widgets/gradient_widgets.dart';
 
 class CartBottomSheet extends StatelessWidget {
   const CartBottomSheet({super.key});
 
-  Widget _buildCustomizationDetails(CartItem cartItem) {
+  Widget _buildCustomizationDetails(CartItem cartItem, BuildContext context) {
     if (cartItem.selectedOptions.isEmpty && cartItem.ingredientsToRemove.isEmpty && cartItem.selectedSize == null) {
       return const SizedBox.shrink();
     }
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final detailColor = isDark ? Colors.white60 : Colors.black54;
 
     List<Widget> details = [];
 
     // Display selected size first
     if (cartItem.selectedSize != null) {
-      details.add(Text('• Taille: ${cartItem.selectedSize!.name}', style: const TextStyle(fontSize: 12, color: Colors.black54)));
+      details.add(Text('• Taille: ${cartItem.selectedSize!.name}', style: TextStyle(fontSize: 12, color: detailColor)));
     }
 
     cartItem.selectedOptions.forEach((category, options) {
       if (options.isNotEmpty) {
         final categoryDisplay = category.replaceAll('Options', '').replaceAll('mainFillings', 'Garnitures');
-        details.add(Text('• $categoryDisplay: ${options.map((opt) => opt.name).join(', ')}', style: const TextStyle(fontSize: 12, color: Colors.black54)));
+        details.add(Text('• $categoryDisplay: ${options.map((opt) => opt.name).join(', ')}', style: TextStyle(fontSize: 12, color: detailColor)));
       }
     });
 
