@@ -128,6 +128,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     const accentColor = Color(0xFF53c6fd);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     const buttonGradient = LinearGradient(
       colors: [Color(0xFF9c4dea), Color(0xFFff80b1)],
       begin: Alignment.centerLeft,
@@ -136,9 +137,11 @@ class _LoginPageState extends State<LoginPage> {
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFfcf1f1), Color(0xFFfffcdd)],
+            colors: isDark 
+                ? [const Color(0xFF121212), const Color(0xFF1E1E1E)]
+                : [const Color(0xFFfcf1f1), const Color(0xFFfffcdd)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -153,23 +156,23 @@ class _LoginPageState extends State<LoginPage> {
                 children: [
                   // Logo
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(40), // Large rounded corners for big logo
+                    borderRadius: BorderRadius.circular(40),
                     child: Image.asset(
                       'assets/images/locos.png',
-                      height: 150,
+                      height: 120,
                     ),
                   ),
                   const SizedBox(height: 30),
                   // Title
-                  const Text(
+                  Text(
                     'Accès Administrateur',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
-                      color: const Color(0xFF53c6fd),
-                      shadows: [
-                        Shadow(
+                      color: accentColor,
+                      shadows: isDark ? [] : [
+                        const Shadow(
                           blurRadius: 10.0,
                           color: Colors.black26,
                           offset: Offset(2.0, 2.0),
@@ -181,11 +184,13 @@ class _LoginPageState extends State<LoginPage> {
                   // Email Field
                   TextField(
                     controller: _emailController,
+                    style: TextStyle(color: isDark ? Colors.white : Colors.black87),
                     decoration: InputDecoration(
                       hintText: 'Email',
-                      prefixIcon: const Icon(Icons.email_outlined, color: Color(0xFF53c6fd)),
+                      hintStyle: TextStyle(color: isDark ? Colors.white38 : Colors.black38),
+                      prefixIcon: const Icon(Icons.email_outlined, color: accentColor),
                       filled: true,
-                      fillColor: Colors.white.withOpacity(0.8),
+                      fillColor: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.8),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
@@ -201,11 +206,13 @@ class _LoginPageState extends State<LoginPage> {
                   // Password Field
                   TextField(
                     controller: _passwordController,
+                    style: TextStyle(color: isDark ? Colors.white : Colors.black87),
                     decoration: InputDecoration(
                       hintText: 'Mot de passe',
-                      prefixIcon: const Icon(Icons.lock_open_outlined, color: Color(0xFF53c6fd)),
+                      hintStyle: TextStyle(color: isDark ? Colors.white38 : Colors.black38),
+                      prefixIcon: const Icon(Icons.lock_open_outlined, color: accentColor),
                       filled: true,
-                      fillColor: Colors.white.withOpacity(0.8),
+                      fillColor: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.8),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
@@ -258,9 +265,9 @@ class _LoginPageState extends State<LoginPage> {
                   // Back Button
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    child: const Text(
+                    child: Text(
                       'Retour',
-                                      style: const TextStyle(color: Color(0xFF53c6fd), fontWeight: FontWeight.bold),
+                      style: TextStyle(color: isDark ? Colors.white38 : Colors.black54),
                     ),
                   ),
                 ],
