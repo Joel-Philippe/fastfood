@@ -46,7 +46,7 @@ class _ManageCategoriesPageState extends State<ManageCategoriesPage> {
     );
 
     return Scaffold(
-      backgroundColor: Colors.transparent, // Part of the tab view
+      backgroundColor: Colors.transparent,
       floatingActionButton: FloatingActionButton(
         heroTag: null,
         onPressed: () => _showCategoryDialog(context),
@@ -67,10 +67,12 @@ class _ManageCategoriesPageState extends State<ManageCategoriesPage> {
             return const Center(child: CircularProgressIndicator(color: accentColor));
           }
           if (snapshot.hasError) {
-            return Center(child: Text('Erreur: ${snapshot.error}'));
+            final isDark = Theme.of(context).brightness == Brightness.dark;
+            return Center(child: Text('Erreur: ${snapshot.error}', style: TextStyle(color: isDark ? Colors.white70 : Colors.black87)));
           }
+          final isDark = Theme.of(context).brightness == Brightness.dark;
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('Aucune catégorie trouvée.', style: TextStyle(fontSize: 16, color: Colors.black54)));
+            return Center(child: Text('Aucune catégorie trouvée.', style: TextStyle(fontSize: 16, color: isDark ? Colors.white38 : Colors.black54)));
           }
 
           final categories = snapshot.data!;
@@ -88,12 +90,13 @@ class _ManageCategoriesPageState extends State<ManageCategoriesPage> {
   }
 
   Widget _buildCategoryCard(MenuCategory category, Color accentColor) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8),
       elevation: 2,
       shadowColor: Colors.black.withOpacity(0.1),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      color: Colors.white.withOpacity(0.8),
+      color: isDark ? const Color(0xFF1E1E1E).withOpacity(0.8) : Colors.white.withOpacity(0.8),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Row(
@@ -110,11 +113,11 @@ class _ManageCategoriesPageState extends State<ManageCategoriesPage> {
                       )
                     : null,
                 color: (category.backgroundImageUrl == null || category.backgroundImageUrl!.isEmpty)
-                    ? Colors.grey.shade200
+                    ? (isDark ? Colors.grey[800] : Colors.grey.shade200)
                     : null,
               ),
               child: (category.backgroundImageUrl == null || category.backgroundImageUrl!.isEmpty)
-                  ? Icon(Icons.category, color: Colors.grey.shade400)
+                  ? Icon(Icons.category, color: isDark ? Colors.white24 : Colors.grey.shade400)
                   : null,
             ),
             const SizedBox(width: 16),
@@ -122,9 +125,9 @@ class _ManageCategoriesPageState extends State<ManageCategoriesPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(category.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16), softWrap: false, overflow: TextOverflow.ellipsis, maxLines: 1),
+                  Text(category.name, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: isDark ? Colors.white : Colors.black87), softWrap: false, overflow: TextOverflow.ellipsis, maxLines: 1),
                   const SizedBox(height: 4),
-                  Text('Type: ${category.type}', style: const TextStyle(color: Colors.black54), softWrap: false, overflow: TextOverflow.ellipsis, maxLines: 1),
+                  Text('Type: ${category.type}', style: TextStyle(color: isDark ? Colors.white60 : Colors.black54), softWrap: false, overflow: TextOverflow.ellipsis, maxLines: 1),
                 ],
               ),
             ),
@@ -308,20 +311,23 @@ class _ManageCategoriesPageState extends State<ManageCategoriesPage> {
     if (category?.backgroundImageUrl != null && category!.backgroundImageUrl!.isNotEmpty) {
       return ClipRRect(borderRadius: BorderRadius.circular(11), child: Image.network(_proxiedImageUrl(category.backgroundImageUrl!), fit: BoxFit.cover, errorBuilder: (context, error, stackTrace) => const Center(child: Icon(Icons.broken_image, size: 40, color: Colors.grey))));
     }
-    return const Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.image_outlined, size: 40, color: Colors.grey), Text('Sélectionner une image', style: TextStyle(color: Colors.grey))]));
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.image_outlined, size: 40, color: isDark ? Colors.white38 : Colors.grey), Text('Sélectionner une image', style: TextStyle(color: isDark ? Colors.white38 : Colors.grey))]));
   }
 
   Widget _buildColorPicker(BuildContext context, String title, Color currentColor, Function(Color) onColorChanged) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       children: [
-        Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        Text(title, style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Colors.white70 : Colors.black87)),
         const SizedBox(height: 8),
         GestureDetector(
           onTap: () {
             showDialog(
               context: context,
               builder: (context) => AlertDialog(
-                title: Text('Choisir une couleur pour $title'),
+                backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+                title: Text('Choisir une couleur pour $title', style: TextStyle(color: isDark ? Colors.white : Colors.black87)),
                 content: SingleChildScrollView(child: ColorPicker(pickerColor: currentColor, onColorChanged: onColorChanged)),
                 actions: [ElevatedButton(child: const Text('Valider'), onPressed: () => Navigator.of(context).pop())],
               ),
@@ -333,8 +339,8 @@ class _ManageCategoriesPageState extends State<ManageCategoriesPage> {
             decoration: BoxDecoration(
               color: currentColor,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.grey.shade400),
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4, offset: const Offset(0, 2))]
+              border: Border.all(color: isDark ? Colors.white24 : Colors.grey.shade400),
+              boxShadow: [BoxShadow(color: Colors.black.withOpacity(isDark ? 0.3 : 0.1), blurRadius: 4, offset: const Offset(0, 2))]
             ),
           ),
         ),

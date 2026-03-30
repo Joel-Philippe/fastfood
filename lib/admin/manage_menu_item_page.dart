@@ -142,11 +142,14 @@ class _ManageMenuItemPageState extends State<ManageMenuItemPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFfcf1f1), Color(0xFFfffcdd)],
+            colors: isDark 
+                ? [const Color(0xFF121212), const Color(0xFF1E1E1E)]
+                : [const Color(0xFFfcf1f1), const Color(0xFFfffcdd)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -187,6 +190,7 @@ class _ManageMenuItemPageState extends State<ManageMenuItemPage> {
 
   Widget _buildForm() {
     const accentColor = Color(0xFF53c6fd);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     const buttonGradient = LinearGradient(colors: [Color(0xFF9c4dea), Color(0xFFff80b1)]);
 
     return Form(
@@ -196,23 +200,45 @@ class _ManageMenuItemPageState extends State<ManageMenuItemPage> {
         children: [
           _buildImagePicker(),
           const SizedBox(height: 24),
-          TextFormField(controller: _nameController, decoration: _buildInputDecoration(label: 'Nom', icon: Icons.fastfood_outlined), validator: (v) => v!.isEmpty ? 'Nom requis' : null),
+          TextFormField(
+            controller: _nameController, 
+            style: TextStyle(color: isDark ? Colors.white : Colors.black87),
+            decoration: _buildInputDecoration(label: 'Nom', icon: Icons.fastfood_outlined), 
+            validator: (v) => v!.isEmpty ? 'Nom requis' : null
+          ),
           const SizedBox(height: 16),
-          TextFormField(controller: _descriptionController, decoration: _buildInputDecoration(label: 'Description', icon: Icons.description_outlined), maxLines: 3),
+          TextFormField(
+            controller: _descriptionController, 
+            style: TextStyle(color: isDark ? Colors.white : Colors.black87),
+            decoration: _buildInputDecoration(label: 'Description', icon: Icons.description_outlined), 
+            maxLines: 3
+          ),
           const SizedBox(height: 16),
-          TextFormField(controller: _priceController, decoration: _buildInputDecoration(label: 'Prix', icon: Icons.euro_symbol), keyboardType: TextInputType.number, validator: (v) => double.tryParse(v!) == null ? 'Prix invalide' : null),
+          TextFormField(
+            controller: _priceController, 
+            style: TextStyle(color: isDark ? Colors.white : Colors.black87),
+            decoration: _buildInputDecoration(label: 'Prix', icon: Icons.euro_symbol), 
+            keyboardType: TextInputType.number, 
+            validator: (v) => double.tryParse(v!) == null ? 'Prix invalide' : null
+          ),
           const SizedBox(height: 16),
-          TextFormField(controller: _removableIngredientsController, decoration: _buildInputDecoration(label: 'Ingrédients à retirer (séparés par ,)', icon: Icons.remove_circle_outline)),
+          TextFormField(
+            controller: _removableIngredientsController, 
+            style: TextStyle(color: isDark ? Colors.white : Colors.black87),
+            decoration: _buildInputDecoration(label: 'Ingrédients à retirer (séparés par ,)', icon: Icons.remove_circle_outline)
+          ),
           const SizedBox(height: 16),
           DropdownButtonFormField<String>(
             value: _selectedCategory,
+            dropdownColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+            style: TextStyle(color: isDark ? Colors.white : Colors.black87),
             decoration: _buildInputDecoration(label: 'Catégorie', icon: Icons.category_outlined),
             items: _availableCategories.map((c) => DropdownMenuItem(value: c.type, child: Text(c.name))).toList(),
             onChanged: (v) => setState(() => _selectedCategory = v),
             validator: (v) => v == null ? 'Catégorie requise' : null,
           ),
           const SizedBox(height: 24),
-          const Text('Types d\'options applicables', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black54)),
+          Text('Types d\'options applicables', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: isDark ? Colors.white70 : Colors.black54)),
           const SizedBox(height: 8),
           _buildDynamicOptionsSelector(),
           const SizedBox(height: 32),
@@ -315,15 +341,6 @@ class _ManageMenuItemPageState extends State<ManageMenuItemPage> {
                 child: Text(
                   type.replaceAll('Options', ''),
                   style: TextStyle(color: isSelected ? Colors.white : (isDark ? Colors.white70 : Colors.black87), fontWeight: isSelected ? FontWeight.bold : FontWeight.normal),
-                ),
-              ),
-            );
-          }).toList(),
-        );
-      },
-    );
-  }
-}tStyle(color: isSelected ? Colors.white : Colors.black87, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal),
                 ),
               ),
             );

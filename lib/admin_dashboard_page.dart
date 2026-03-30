@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:fast_food_app/services/auth_service.dart';
 import 'package:fast_food_app/services/mongo_service.dart';
-import 'package:fast_food_app/services/auth_service.dart';
 import 'package:fast_food_app/services/websocket_service.dart';
 import 'package:fast_food_app/order_model.dart';
 import 'package:intl/intl.dart';
@@ -115,19 +114,20 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   }
 
   Color _getStatusColor(String status) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     switch (status) {
       case 'pending':
-        return Colors.orange.shade300;
+        return isDark ? const Color(0xFFFFB74D) : Colors.orange.shade700;
       case 'preparing':
-        return Colors.blue.shade300;
+        return isDark ? const Color(0xFF64B5F6) : Colors.blue.shade700;
       case 'ready':
-        return Colors.green.shade300;
+        return isDark ? const Color(0xFF81C784) : Colors.green.shade700;
       case 'out_for_delivery':
-        return Colors.purple.shade300;
+        return isDark ? const Color(0xFFBA68C8) : Colors.purple.shade700;
       case 'completed':
-        return Colors.grey.shade500;
+        return isDark ? Colors.white38 : Colors.grey.shade600;
       case 'cancelled':
-        return Colors.red.shade300;
+        return isDark ? const Color(0xFFE57373) : Colors.red.shade700;
       default:
         return Colors.grey.shade400;
     }
@@ -153,14 +153,15 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   }
 
   void _showStatusPicker(Order order) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) {
         return Container(
-          decoration: const BoxDecoration(
-            color: Color(0xFFfcf1f1),
-            borderRadius: BorderRadius.only(
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E1E1E) : const Color(0xFFfcf1f1),
+            borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(20),
               topRight: Radius.circular(20),
             ),
@@ -175,13 +176,13 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
-                    color: Colors.black.withOpacity(0.7),
+                    color: isDark ? Colors.white70 : Colors.black.withOpacity(0.7),
                   ),
                 ),
               ),
-              const Divider(height: 1),
+              Divider(height: 1, color: isDark ? Colors.white10 : Colors.black12),
               ..._orderStatuses.map((status) => ListTile(
-                title: Text(_translateStatus(status)),
+                title: Text(_translateStatus(status), style: TextStyle(color: isDark ? Colors.white : Colors.black87)),
                 onTap: () {
                   _updateOrderStatus(order.id, status);
                   Navigator.of(context).pop();
@@ -199,11 +200,14 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFfcf1f1), Color(0xFFfffcdd)],
+            colors: isDark 
+                ? [const Color(0xFF121212), const Color(0xFF1E1E1E)]
+                : [const Color(0xFFfcf1f1), const Color(0xFFfffcdd)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -435,16 +439,18 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   }
 
   Widget _buildOrderCardDetails(Order order) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final secondaryTextColor = isDark ? Colors.white60 : Colors.black54;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Divider(),
-        const Text('Articles:', style: TextStyle(fontWeight: FontWeight.bold)),
+        Divider(color: isDark ? Colors.white10 : Colors.black12),
+        Text('Articles:', style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87)),
         ...order.items.values.map((cartItem) {
-          // Helper to build rows for options and ingredients
           Widget buildDetailRow(String text, {bool isRemoval = false}) {
             return Padding(
-              padding: const EdgeInsets.only(left: 16, top: 2), // Indent details
+              padding: const EdgeInsets.only(left: 16, top: 2),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -454,7 +460,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                       text,
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.black54,
+                        color: secondaryTextColor,
                       ),
                     ),
                   ),
@@ -464,15 +470,11 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
           }
 
           List<Widget> details = [];
-
-          // Add selected options
           cartItem.selectedOptions.forEach((category, options) {
             for (var option in options) {
               details.add(buildDetailRow('${option.name} (${option.price.toStringAsFixed(2)}€)'));
             }
           });
-
-          // Add excluded ingredients
           for (var ingredient in cartItem.ingredientsToRemove) {
             details.add(buildDetailRow('Sans $ingredient', isRemoval: true));
           }
@@ -481,11 +483,11 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
             padding: const EdgeInsets.symmetric(vertical: 4.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min, // ADDED: Fix for RenderFlex layout error
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   '${cartItem.quantity}x ${cartItem.item.name}',
-                  style: const TextStyle(fontWeight: FontWeight.w600),
+                  style: TextStyle(fontWeight: FontWeight.w600, color: isDark ? Colors.white : Colors.black87),
                 ),
                 if (details.isNotEmpty)
                   Padding(
@@ -499,33 +501,26 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
             ),
           );
         }),
-        const Divider(),
+        Divider(color: isDark ? Colors.white10 : Colors.black12),
         if (order.orderType == 'delivery' && order.address != null) ...[
-          const Text('Adresse de livraison:', style: TextStyle(fontWeight: FontWeight.bold)),
-          Flexible(child: Text(order.address!.street, softWrap: false, overflow: TextOverflow.ellipsis, maxLines: 1)),
-          Flexible(child: Text('${order.address!.postalCode} ${order.address!.city}', softWrap: false, overflow: TextOverflow.ellipsis, maxLines: 1)),
-          Flexible(child: Text('Tél: ${order.address!.phone}', softWrap: false, overflow: TextOverflow.ellipsis, maxLines: 1)),
+          Text('Adresse de livraison:', style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87)),
+          Flexible(child: Text(order.address!.street, style: TextStyle(color: isDark ? Colors.white70 : Colors.black87), softWrap: false, overflow: TextOverflow.ellipsis, maxLines: 1)),
+          Flexible(child: Text('${order.address!.postalCode} ${order.address!.city}', style: TextStyle(color: isDark ? Colors.white70 : Colors.black87), softWrap: false, overflow: TextOverflow.ellipsis, maxLines: 1)),
+          Flexible(child: Text('Tél: ${order.address!.phone}', style: TextStyle(color: isDark ? Colors.white70 : Colors.black87), softWrap: false, overflow: TextOverflow.ellipsis, maxLines: 1)),
           const SizedBox(height: 8),
         ],
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text('Type de commande:', style: TextStyle(color: Colors.grey)),
-            Flexible(child: Text(_translateStatus(order.orderType), style: const TextStyle(fontWeight: FontWeight.bold), softWrap: false, overflow: TextOverflow.ellipsis, maxLines: 1)),
+            Text('Type de commande:', style: TextStyle(color: secondaryTextColor)),
+            Flexible(child: Text(_translateStatus(order.orderType), style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87), softWrap: false, overflow: TextOverflow.ellipsis, maxLines: 1)),
           ],
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text('Date:', style: TextStyle(color: Colors.grey)),
-            Flexible(child: Text(DateFormat('dd/MM/yy HH:mm').format(order.orderDate), style: const TextStyle(fontWeight: FontWeight.bold), softWrap: false, overflow: TextOverflow.ellipsis, maxLines: 1)),
-          ],
-        ),
-      ],
-    );
-  }
-}te:', style: TextStyle(color: Colors.grey)),
-            Flexible(child: Text(DateFormat('dd/MM/yy HH:mm').format(order.orderDate), style: const TextStyle(fontWeight: FontWeight.bold), softWrap: false, overflow: TextOverflow.ellipsis, maxLines: 1)),
+            Text('Date:', style: TextStyle(color: secondaryTextColor)),
+            Flexible(child: Text(DateFormat('dd/MM/yy HH:mm').format(order.orderDate), style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87), softWrap: false, overflow: TextOverflow.ellipsis, maxLines: 1)),
           ],
         ),
       ],
