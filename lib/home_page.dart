@@ -16,7 +16,6 @@ import 'package:fast_food_app/widgets/category_card_widget.dart';
 import 'package:fast_food_app/profile_page.dart';
 import 'package:fast_food_app/widgets/restaurant_closed_widget.dart';
 import 'package:fast_food_app/services/websocket_service.dart';
-import 'package:fast_food_app/services/auth_service.dart'; // Add this import // Import WebSocketService
 
 class HomePage extends StatefulWidget {
   final MongoService? mongoService;
@@ -250,12 +249,16 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
-          colors: [Color(0xFFFEF1E0), Color(0xFFF8EDE9)],
+          colors: isDark 
+            ? [const Color(0xFF121212), const Color(0xFF1E1E1E)]
+            : [const Color(0xFFFEF1E0), const Color(0xFFF8EDE9)],
         ),
       ),
       child: Stack(
@@ -548,12 +551,6 @@ class _HomePageState extends State<HomePage> {
                   ),
                 )
               : const SizedBox.shrink(key: ValueKey('EmptyFab')),
-        );
-      },
-    );
-  }
-}
-     : const SizedBox.shrink(key: ValueKey('EmptyFab')),
         );
       },
     );

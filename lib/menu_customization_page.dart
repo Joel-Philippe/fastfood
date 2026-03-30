@@ -54,12 +54,10 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
     _isEditing = widget.cartItem != null;
 
     if (savedState != null) {
-      // Load from the saved provider state
       _selectedOptions = savedState.selectedOptions;
       _ingredientsToRemove = savedState.ingredientsToRemove;
       _quantity = savedState.quantity;
     } else {
-      // Otherwise, initialize from cart item or from scratch
       _selectedOptions = Map<String, List<Option>>.from(
         widget.cartItem?.selectedOptions.map(
           (key, value) => MapEntry(key, List<Option>.from(value))
@@ -69,7 +67,6 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
       _quantity = widget.cartItem?.quantity ?? 1;
     }
 
-    // Initialize the futures for the options only once.
     _optionFutures = {
       for (var type in widget.menuItem.optionTypes)
         type: _mongoService.getOptions(type)
@@ -111,7 +108,6 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
   }
 
   void _updatePrices() {
-    // Calculate the sum of prices for selected options with price > 0
     double optionsPrice = 0.0;
     _selectedOptions.forEach((category, options) {
       optionsPrice += options.fold(0.0, (sum, option) =>
@@ -120,8 +116,6 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
     });
 
     double currentPrice;
-    // If the calculated options price is 0, use the item's base price.
-    // Otherwise, use the calculated options price.
     if (optionsPrice == 0.0) {
       currentPrice = widget.menuItem.price;
     } else {
@@ -131,7 +125,7 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
     setState(() {
       _singleItemPrice = currentPrice;
       _totalPrice = _singleItemPrice * _quantity;
-      _saveStateToProvider(); // Save state on price update
+      _saveStateToProvider();
     });
   }
   
@@ -163,11 +157,12 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
           child: Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFFc4f8ea), Color(0xFFfef1e0)],
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
-                          ),              borderRadius: BorderRadius.circular(20.0),
+              gradient: const LinearGradient(
+                colors: [Color(0xFFc4f8ea), Color(0xFFfef1e0)],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              ),
+              borderRadius: BorderRadius.circular(20.0),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.1),
@@ -215,13 +210,10 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
   }
 
   void _saveChanges() {
-    // --- Validation Step ---
     final List<String> requiredOptionTypes = _requiredOptionTypes;
-      final List<String> missingSelections = [];
+    final List<String> missingSelections = [];
     for (String optionType in requiredOptionTypes) {
-      // Check if the item is supposed to have this option type
       if (widget.menuItem.optionTypes.contains(optionType)) {
-        // Check if a selection has been made
         if (_selectedOptions[optionType] == null || _selectedOptions[optionType]!.isEmpty) {
           missingSelections.add(_getOptionDisplayTitle(optionType).replaceAll('Avec ', '').toLowerCase());
         }
@@ -229,12 +221,10 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
     }
 
     if (missingSelections.isNotEmpty) {
-      // If there are missing selections, show a message and stop.
       final message = 'Veuillez sélectionner: ${missingSelections.join(', ')}';
       _showMissingSelectionDialog(message);
-      return; // Stop the function
+      return;
     }
-    // --- End of Validation ---
 
     final cart = Provider.of<CartProvider>(context, listen: false);
     final customizationProvider = Provider.of<MenuCustomizationProvider>(context, listen: false);
@@ -249,8 +239,6 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
       selectedSize = _selectedOptions[sizeOptionKey]!.first;
     }
     
-    // The addItem method in provider handles quantity increment internally.
-    // So we loop based on the desired quantity.
     for (int i = 0; i < _quantity; i++) {
       cart.addItem(
         widget.menuItem,
@@ -260,15 +248,14 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
       );
     }
 
-    // Clear the temporary customization state after adding to cart
     customizationProvider.clearCustomization(widget.menuItem.id);
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF2C2C2C) : Colors.white,
         content: Text(
           '${widget.menuItem.name} ${_isEditing ? 'modifié' : 'ajouté au panier !'}',
-          style: const TextStyle(color: Colors.black),
+          style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
         ),
       ),
     );
@@ -276,13 +263,11 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
   }
 
   String _getOptionDisplayTitle(String optionType) {
-    // Check if a custom display title is provided in the MenuItem
     if (widget.menuItem.optionDisplayTitles != null &&
         widget.menuItem.optionDisplayTitles!.containsKey(optionType)) {
       return widget.menuItem.optionDisplayTitles![optionType]!;
     }
 
-    // Fallback to existing logic if no custom title is found
     switch (optionType) {
       case 'sizeOptions':
         return 'Taille';
@@ -292,9 +277,7 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
         return 'Sauce';
       case 'drinkOptions':
         return 'Boisson';
-      // Add other cases as necessary
       default:
-        // Capitalize first letter as a fallback
         return optionType.replaceAll('Options', '').replaceFirst(optionType[0], optionType[0].toUpperCase());
     }
   }
@@ -373,12 +356,12 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
                 child: GradientButton(
                   onPressed: _saveChanges,
                   gradient: const LinearGradient(
-                    colors: [Color(0xFF53c6fd), Color(0xFF53c6fd)], // Solid blue
+                    colors: [Color(0xFF53c6fd), Color(0xFF53c6fd)],
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
                   ),
                   text: _isEditing ? 'Modifier l\'article (${_totalPrice.toStringAsFixed(2)} €)' : 'Ajouter au panier (${_totalPrice.toStringAsFixed(2)} €)',
-                  icon: _isEditing ? Icons.edit : Icons.add_shopping_cart, // Dynamic icon
+                  icon: _isEditing ? Icons.edit : Icons.add_shopping_cart,
                 ),
               ),
             ),
@@ -422,9 +405,9 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
                   style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
                 ),
                 if (_requiredOptionTypes.contains(optionType) && currentSelections.isEmpty)
-                  TextSpan( // Removed 'const' here
+                  const TextSpan(
                     text: ' *',
-                    style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.red),
+                    style: TextStyle(fontWeight: FontWeight.w600, color: Colors.red),
                   ),
               ],
             ),
@@ -463,7 +446,7 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
                     overflow: TextOverflow.ellipsis,
                   ),
                 )
-              : Text(
+              : const Text(
                   'Faites votre choix',
                   style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w500),
                   overflow: TextOverflow.ellipsis,
@@ -492,7 +475,7 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
                       } else {
                          _selectedOptions[optionType] = selected ? [option] : [];
                       }
-                      _updatePrices(); // This will also call _saveStateToProvider
+                      _updatePrices();
                     });
                   },
                 );
@@ -544,7 +527,6 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
           children: widget.menuItem.removableIngredients.map((ingredient) {
             final isSelected = _ingredientsToRemove.contains(ingredient);
             return _buildOptionChip(
-              // Create a dummy option for consistent UI
               option: Option(id: ingredient, name: ingredient, price: 0.0, type: 'removable_ingredient_type'),
               isSelected: isSelected,
               isRemovable: true,
@@ -555,7 +537,7 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
                   } else {
                     _ingredientsToRemove.remove(ingredient);
                   }
-                  _saveStateToProvider(); // Save state on ingredient change
+                  _saveStateToProvider();
                 });
               },
             );
@@ -573,15 +555,16 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
     bool hasSelection = false,
     Widget? trailing,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.7),
+        color: isDark ? const Color(0xFF1E1E1E).withOpacity(0.8) : Colors.white.withOpacity(0.7),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.withOpacity(0.3)),
+        border: Border.all(color: isDark ? Colors.white10 : Colors.grey.withOpacity(0.3)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
             blurRadius: 5,
             offset: const Offset(0, 2),
           ),
@@ -615,9 +598,11 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
     required Function(bool) onSelected,
     bool isRemovable = false,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final Color selectedBgColor = isRemovable ? const Color(0xFFFF7A7B) : const Color(0xFF53C6FD);
     final Color selectedBorderColor = isRemovable ? const Color(0xFFFF7A7B) : const Color(0xFF53C6FD);
-    final Color selectedTextColor = Colors.white; // Always white for readability
+    final Color unselectedBgColor = isDark ? const Color(0xFF2C2C2C) : Colors.white;
+    final Color selectedTextColor = Colors.white;
     
     final priceText = !isRemovable && option.price > 0 ? ' (${option.price.toStringAsFixed(2)} €)' : '';
 
@@ -627,10 +612,10 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? selectedBgColor : Colors.white,
+          color: isSelected ? selectedBgColor : unselectedBgColor,
           borderRadius: BorderRadius.circular(30),
           border: Border.all(
-            color: isSelected ? selectedBorderColor : Colors.grey[300]!,
+            color: isSelected ? selectedBorderColor : (isDark ? Colors.white10 : Colors.grey[300]!),
             width: 1.5,
           ),
           boxShadow: isSelected ? [
@@ -653,7 +638,7 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
               child: Text(
                 '${option.name}$priceText',
                 style: TextStyle(
-                  color: isSelected ? selectedTextColor : Colors.black87,
+                  color: isSelected ? selectedTextColor : (isDark ? Colors.white70 : Colors.black87),
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
               ),
@@ -665,15 +650,16 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
   }
   
   Widget _buildQuantitySelector() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.7),
+        color: isDark ? const Color(0xFF1E1E1E).withOpacity(0.8) : Colors.white.withOpacity(0.7),
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
             blurRadius: 5,
             offset: const Offset(0, 2),
           ),
@@ -691,7 +677,7 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
               IconButton(
                 icon: const Icon(Icons.remove_circle_outline, size: 30),
                 onPressed: () => _setQuantity(_quantity - 1),
-                color: _quantity > 1 ? Colors.black54 : Colors.grey[400],
+                color: _quantity > 1 ? (isDark ? Colors.white70 : Colors.black54) : Colors.grey[400],
               ),
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 200),
@@ -707,7 +693,7 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
               IconButton(
                 icon: const Icon(Icons.add_circle_outline, size: 30),
                 onPressed: () => _setQuantity(_quantity + 1),
-                color: Colors.black54,
+                color: isDark ? Colors.white70 : Colors.black54,
               ),
             ],
           ),
@@ -716,19 +702,3 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
     );
   }
 }
-
-         ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-  ],
-      ),
-    );
-  }
-}
-
