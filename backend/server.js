@@ -32,7 +32,8 @@ if (serviceAccount) {
 
 const app = express();
 app.set('trust proxy', 1);
-const PORT = process.env.PORT || 5002;
+const PORT = process.env.PORT || 10000;
+const HOST = '0.0.0.0';
 
 // MongoDB Connection String (from user)
 const MONGODB_URI = process.env.MONGODB_URI;
