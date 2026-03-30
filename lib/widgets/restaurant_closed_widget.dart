@@ -68,7 +68,7 @@ class _RestaurantClosedWidgetState extends State<RestaurantClosedWidget> {
               _formatDuration(_remainingTime),
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: Theme.of(context).primaryColor,
+                color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Theme.of(context).primaryColor,
                 fontFamily: 'monospace',
               ),
             ),
