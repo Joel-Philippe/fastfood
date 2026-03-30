@@ -124,15 +124,15 @@ class CartBottomSheet extends StatelessWidget {
                                 children: [
                                   Row(
                                     children: [
-                                      IconButton(icon: Icon(Icons.remove_circle_outline, color: isDark ? Colors.white38 : Colors.grey), onPressed: () => cart.updateItemQuantity(cartItemKey, cartItem.quantity - 1)),
+                                      IconButton(icon: Icon(Icons.remove_circle_outline, color: isDark ? Colors.white38 : Colors.grey[400]), onPressed: () => cart.updateItemQuantity(cartItemKey, cartItem.quantity - 1)),
                                       Text(cartItem.quantity.toString(), style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87)),
-                                      IconButton(icon: Icon(Icons.add_circle_outline, color: theme.primaryColor), onPressed: () => cart.updateItemQuantity(cartItemKey, cartItem.quantity + 1)),
+                                      IconButton(icon: Icon(Icons.add_circle_outline, color: isDark ? Colors.white38 : Colors.grey[400]), onPressed: () => cart.updateItemQuantity(cartItemKey, cartItem.quantity + 1)),
                                     ],
                                   ),
                                   Row(
                                     children: [
                                       IconButton(
-                                        icon: Icon(Icons.edit_outlined, color: theme.primaryColor, size: 20),
+                                        icon: Icon(Icons.edit_outlined, color: isDark ? Colors.white38 : Colors.grey[400], size: 20),
                                         onPressed: () {
                                           Navigator.push(
                                             context,
@@ -146,7 +146,7 @@ class CartBottomSheet extends StatelessWidget {
                                           );
                                         },
                                       ),
-                                      IconButton(icon: Icon(Icons.delete_outline, color: Colors.red[700]), onPressed: () => cart.removeItem(cartItemKey)),
+                                      IconButton(icon: Icon(Icons.delete_outline, color: Colors.red[300]), onPressed: () => cart.removeItem(cartItemKey)),
                                     ],
                                   ),
                                 ],

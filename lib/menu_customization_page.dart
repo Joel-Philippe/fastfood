@@ -144,51 +144,57 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
   }
 
   void _showMissingSelectionDialog(String message) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     showDialog(
       context: context,
-      barrierColor: Colors.transparent,
+      barrierColor: Colors.black54,
       builder: (BuildContext context) {
         return Dialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20.0),
           ),
-          elevation: 0,
+          elevation: 8,
           backgroundColor: Colors.transparent,
           child: Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFFc4f8ea), Color(0xFFfef1e0)],
+              gradient: LinearGradient(
+                colors: isDark 
+                    ? [const Color(0xFF2C2C2C), const Color(0xFF1E1E1E)]
+                    : [const Color(0xFFc4f8ea), const Color(0xFFfef1e0)],
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
               ),
               borderRadius: BorderRadius.circular(20.0),
+              border: Border.all(color: isDark ? Colors.white10 : Colors.transparent),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 10,
-                  offset: const Offset(0, 5),
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 15,
+                  offset: const Offset(0, 8),
                 )
               ],
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                const Icon(Icons.info_outline, color: Colors.black54, size: 48),
+                Icon(Icons.info_outline, color: isDark ? const Color(0xFF53c6fd) : Colors.black54, size: 48),
                 const SizedBox(height: 16),
-                const Text(
+                Text(
                   'Sélection requise',
                   style: TextStyle(
                     fontSize: 20.0,
                     fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : Colors.black87,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   message,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16.0,
+                    color: isDark ? Colors.white70 : Colors.black87,
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -196,15 +202,18 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: const Text(
+                  child: Text(
                     'Compris',
-                    style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: isDark ? const Color(0xFF53c6fd) : Colors.black, 
+                      fontWeight: FontWeight.bold
+                    ),
                   ),
                 ),
               ],
             ),
           ),
-        ).animate().fadeIn(duration: 300.ms, curve: Curves.easeOut);
+        ).animate().scale(duration: 300.ms, curve: Curves.easeOutBack);
       },
     );
   }
