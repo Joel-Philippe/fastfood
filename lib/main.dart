@@ -147,7 +147,9 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF53c6fd),
           brightness: Brightness.dark,
-          surface: const Color(0xFF121212),
+          surface: const Color(0xFF1E1E1E),
+          onSurface: Colors.white,
+          onPrimary: Colors.white, // Texte sur le bouton principal
         ),
         scaffoldBackgroundColor: const Color(0xFF121212),
         appBarTheme: AppBarTheme(
@@ -157,17 +159,22 @@ class MyApp extends StatelessWidget {
           titleTextStyle: const TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFF53c6fd),
-            foregroundColor: Colors.black,
+            foregroundColor: Colors.white, // Changé en blanc pour meilleur contraste
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(30),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
           ),
+        ),
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(color: Colors.white70),
+          bodyMedium: TextStyle(color: Colors.white70),
         ),
       ),
       home: const AuthWrapper(),

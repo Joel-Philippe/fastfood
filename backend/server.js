@@ -140,43 +140,47 @@ app.get('/api/image-proxy', async (req, res) => {
 
 
 // Serve static files from the Flutter Web build directory
-const webPath = path.resolve(__dirname, '..', 'build', 'web');
-if (fs.existsSync(webPath)) {
-  console.log(`Serving static files from: ${webPath}`);
+const findWebPath = () => {
+  const possiblePaths = [
+    path.resolve(__dirname, '..', 'build', 'web'),
+    path.resolve(process.cwd(), 'build', 'web'),
+    '/app/build/web', // Docker absolute path
+    path.resolve(__dirname, 'build', 'web')
+  ];
+  
+  for (const p of possiblePaths) {
+    if (fs.existsSync(p) && fs.existsSync(path.join(p, 'index.html'))) {
+      return p;
+    }
+  }
+  return null;
+};
+
+const webPath = findWebPath();
+if (webPath) {
+  console.log(`Serving static files from detected path: ${webPath}`);
   app.use(express.static(webPath));
 } else {
-  console.error(`ERROR: Static files directory not found at ${webPath}`);
-  // Try alternative path for some environments
-  const altPath = path.resolve(process.cwd(), 'build', 'web');
-  if (fs.existsSync(altPath)) {
-    console.log(`Serving static files from alternative path: ${altPath}`);
-    app.use(express.static(altPath));
-  }
+  console.error(`ERROR: Static files directory (build/web) not found in any expected location.`);
 }
 
 // Catch-all middleware to serve the Flutter Web app for any non-API requests
 app.use((req, res, next) => {
-  // If the request starts with /api, it's a 404 for the API
   if (req.originalUrl.startsWith('/api')) {
     return next();
   }
   
-  // If the request is for a file that looks like a static asset, don't serve index.html
   if (req.originalUrl.match(/\.(js|json|png|jpg|jpeg|gif|ico|svg|css|mp4|mp3|otf|ttf|wasm)$/)) {
     return res.status(404).send('Not found');
   }
   
-  // Resolve absolute path to index.html
-  let indexPath = path.resolve(__dirname, '..', 'build', 'web', 'index.html');
-  if (!fs.existsSync(indexPath)) {
-    indexPath = path.resolve(process.cwd(), 'build', 'web', 'index.html');
-  }
-  
-  if (fs.existsSync(indexPath)) {
+  const currentWebPath = findWebPath();
+  if (currentWebPath) {
+    const indexPath = path.join(currentWebPath, 'index.html');
     res.sendFile(indexPath);
   } else {
-    console.error(`CRITICAL: index.html not found at ${indexPath}`);
-    res.status(500).send(`Frontend error: index.html missing. Check build logs.`);
+    console.error('CRITICAL: index.html not found during catch-all request.');
+    res.status(500).send(`Frontend error: index.html missing. Please ensure your build process completed successfully.`);
   }
 });
 
