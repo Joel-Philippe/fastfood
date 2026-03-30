@@ -68,6 +68,30 @@ app.use('/api/upload', require('./routes/upload'));
 // Integrate settings routes
 app.use('/api/settings', require('./routes/settings'));
 
+// DEBUG ROUTE - A supprimer plus tard
+app.get('/api/debug-files', (req, res) => {
+  const results = {};
+  const pathsToTest = {
+    'cwd': process.cwd(),
+    '__dirname': __dirname,
+    'build_web': path.resolve(__dirname, '..', 'build', 'web'),
+    'app_root': path.resolve(__dirname, '..')
+  };
+
+  for (const [name, p] of Object.entries(pathsToTest)) {
+    try {
+      results[name] = {
+        path: p,
+        exists: fs.existsSync(p),
+        files: fs.existsSync(p) ? fs.readdirSync(p).slice(0, 10) : []
+      };
+    } catch (e) {
+      results[name] = { error: e.message };
+    }
+  }
+  res.json(results);
+});
+
 const https = require('https');
 const axios = require('axios');
 
