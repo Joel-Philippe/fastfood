@@ -270,13 +270,7 @@ class _HomePageState extends State<HomePage> {
     
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          colors: isDark 
-            ? [const Color(0xFF121212), const Color(0xFF1E1E1E)]
-            : [const Color(0xFFFEF1E0), const Color(0xFFF8EDE9)],
-        ),
+        color: isDark ? const Color(0xFF121212) : Colors.white,
       ),
       child: Stack(
         alignment: Alignment.topCenter,
@@ -311,9 +305,14 @@ class _HomePageState extends State<HomePage> {
                   },
                 ),
               ],
+              bottom: _infoPages.isNotEmpty 
+                ? PreferredSize(
+                    preferredSize: const Size.fromHeight(50),
+                    child: _buildInfoPagesMenu(),
+                  )
+                : null,
             ),
             body: _buildBody(),
-            bottomNavigationBar: _infoPages.isNotEmpty ? _buildInfoPagesMenu() : null,
             floatingActionButton: _isRestaurantOpen ? _buildFabCartButton(context) : null,
           ),
           if (_isRestaurantOpen)
@@ -385,7 +384,6 @@ class _HomePageState extends State<HomePage> {
     return Column(
       children: [
         _buildClosingSoonBanner(),
-        _buildInfoPagesMenu(),
         Expanded(
           child: Row(
             children: [
@@ -409,10 +407,13 @@ class _HomePageState extends State<HomePage> {
 
     return Container(
       height: 50,
-      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+        border: Border(bottom: BorderSide(color: isDark ? Colors.white10 : Colors.black12, width: 0.5)),
+      ),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         itemCount: _infoPages.length,
         itemBuilder: (context, index) {
           final page = _infoPages[index];
@@ -420,16 +421,21 @@ class _HomePageState extends State<HomePage> {
             padding: const EdgeInsets.only(right: 12),
             child: InkWell(
               onTap: () => _showInfoPage(page),
-              borderRadius: BorderRadius.circular(20),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              borderRadius: BorderRadius.circular(15),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey[100],
+                  borderRadius: BorderRadius.circular(15),
+                ),
                 child: Row(
                   children: [
                     Icon(_getIconData(page.icon), size: 16, color: const Color(0xFF53c6fd)),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 6),
                     Text(
                       page.title,
                       style: TextStyle(
+                        fontSize: 13,
                         fontWeight: FontWeight.w600,
                         color: isDark ? Colors.white70 : Colors.black87,
                       ),

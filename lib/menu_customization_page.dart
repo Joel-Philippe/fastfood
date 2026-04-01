@@ -82,12 +82,22 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
   }
 
   void _updatePrices() {
-    double optionsPrice = 0.0;
+    double otherOptionsPrice = 0.0;
+    double? sizePrice;
+
     _selectedOptions.forEach((category, options) {
-      optionsPrice += options.fold(0.0, (sum, option) => sum + (option.price > 0 ? option.price : 0.0));
+      if (category == 'sizeOptions' && options.isNotEmpty) {
+        sizePrice = options.first.price;
+      } else {
+        otherOptionsPrice += options.fold(0.0, (sum, option) => sum + (option.price > 0 ? option.price : 0.0));
+      }
     });
 
-    _singleItemPrice = widget.menuItem.price + optionsPrice;
+    // If a size is selected, its price REPLACES the base price.
+    // Otherwise, we use the original menuItem price.
+    double base = sizePrice ?? widget.menuItem.price;
+    _singleItemPrice = base + otherOptionsPrice;
+
     setState(() {
       _totalPrice = _singleItemPrice * _quantity;
     });
