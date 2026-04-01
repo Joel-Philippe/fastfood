@@ -379,6 +379,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
   @override
   Widget build(BuildContext context) {
     final cart = Provider.of<CartProvider>(context);
+    final size = MediaQuery.of(context).size;
+    final isLargeScreen = size.width > 900;
 
     return Scaffold(
       appBar: AppBar(
@@ -398,238 +400,301 @@ class _CheckoutPageState extends State<CheckoutPage> {
           'Paiement',
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           gradient: LinearGradient(
-              colors: [Color(0xFFe63199), Color(0xFFf87e12)],
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-            ),
+            colors: [Color(0xFFe63199), Color(0xFFf87e12)],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16.0),
-          children: [
-            TextFormField(
-              controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'Votre nom',
-                border: OutlineInputBorder(),
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Veuillez entrer votre nom.';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 20),
-            const GradientText(
-              'Type de commande :',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              gradient: LinearGradient(
-              colors: [Color(0xFFe63199), Color(0xFFf87e12)],
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-            ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildOrderTypeChip('À emporter', 'takeaway', Icons.shopping_bag_outlined),
-                _buildOrderTypeChip('Sur place', 'eat_in', Icons.local_dining_outlined),
-                _buildOrderTypeChip('Livraison', 'delivery', Icons.delivery_dining_outlined),
-              ],
-            ),
-            const SizedBox(height: 20),
-            if (_orderType == 'eat_in')
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 10),
-                  const Text('Heure d\'arrivée :', style: TextStyle(fontSize: 16)),
-                  ListTile(
-                    title: Text(_arrivalTime == null ? 'Sélectionner l\'heure' : _arrivalTime!.format(context)),
-                    trailing: const Icon(Icons.access_time),
-                    onTap: () => _selectTime(context),
-                  ),
-                ],
-              ),
-            if (_orderType == 'delivery')
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 10),
-                  const GradientText(
-                    'Adresse de livraison :',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    gradient: LinearGradient(
-              colors: [Color(0xFFe63199), Color(0xFFf87e12)],
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-            ),
-                  ),
-                  const SizedBox(height: 10),
-                  TextFormField(
-                    controller: _streetController,
-                    decoration: const InputDecoration(labelText: 'Rue et numéro', border: OutlineInputBorder()),
-                    validator: (value) {
-                      if (_orderType == 'delivery' && (value == null || value.isEmpty)) {
-                        return 'Veuillez entrer votre rue.';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 10),
-                  TextFormField(
-                    controller: _cityController,
-                    decoration: const InputDecoration(labelText: 'Ville', border: OutlineInputBorder()),
-                    validator: (value) {
-                      if (_orderType == 'delivery' && (value == null || value.isEmpty)) {
-                        return 'Veuillez entrer votre ville.';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 10),
-                  TextFormField(
-                    controller: _postalCodeController,
-                    decoration: const InputDecoration(labelText: 'Code Postal', border: OutlineInputBorder()),
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (_orderType == 'delivery' && (value == null || value.isEmpty)) {
-                        return 'Veuillez entrer votre code postal.';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 10),
-                  TextFormField(
-                    controller: _phoneController,
-                    decoration: const InputDecoration(labelText: 'Numéro de téléphone', border: OutlineInputBorder()),
-                    keyboardType: TextInputType.phone,
-                    validator: (value) {
-                      if (_orderType == 'delivery' && (value == null || value.isEmpty)) {
-                        return 'Veuillez entrer votre numéro de téléphone.';
-                      }
-                      return null;
-                    },
-                  ),
-                ],
-              ),
-            const SizedBox(height: 20),
-            const GradientText(
-              'Résumé de la commande :',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              gradient: LinearGradient(
-              colors: [Color(0xFFe63199), Color(0xFFf87e12)],
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-            ),
-            ),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: cart.items.length,
-              itemBuilder: (context, index) {
-                final cartItem = cart.items.values.toList()[index];
-
-                // Helper to build rows for options and ingredients
-                Widget buildDetailRow(String text, {bool isRemoval = false}) {
-                  return Padding(
-                    padding: const EdgeInsets.only(left: 16, top: 2), // Indent details
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(isRemoval ? '– ' : '+ ', style: TextStyle(color: isRemoval ? Colors.red : Colors.green, fontSize: 14)),
-                        Expanded(
-                          child: Text(
-                            text,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Theme.of(context).brightness == Brightness.dark ? Colors.white60 : Colors.black54,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
-                List<Widget> details = [];
-
-                // Add selected options
-                cartItem.selectedOptions.forEach((category, options) {
-                  for (var option in options) {
-                    details.add(buildDetailRow('${option.name} (${option.price.toStringAsFixed(2)}€)'));
-                  }
-                });
-
-                // Add excluded ingredients
-                for (var ingredient in cartItem.ingredientsToRemove) {
-                  details.add(buildDetailRow('Sans $ingredient', isRemoval: true));
-                }
-
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Column(
+      body: Center(
+        child: Container(
+          constraints: BoxConstraints(maxWidth: isLargeScreen ? 1200 : double.infinity),
+          child: Form(
+            key: _formKey,
+            child: isLargeScreen
+                ? Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        visualDensity: VisualDensity.compact,
-                        title: Text(
-                          '${cartItem.quantity}x ${cartItem.item.name}',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        trailing: Text(
-                          '${(cartItem.item.price * cartItem.quantity).toStringAsFixed(2)} €',
+                      // Left Column: Info & Order Type
+                      Expanded(
+                        flex: 3,
+                        child: ListView(
+                          padding: const EdgeInsets.all(24.0),
+                          children: [
+                            _buildSectionTitle('Vos informations'),
+                            const SizedBox(height: 16),
+                            _buildNameField(),
+                            const SizedBox(height: 32),
+                            _buildSectionTitle('Type de commande'),
+                            const SizedBox(height: 16),
+                            _buildOrderTypeSelector(),
+                            const SizedBox(height: 24),
+                            if (_orderType == 'eat_in') _buildArrivalTimeSelector(),
+                            if (_orderType == 'delivery') _buildDeliveryForm(),
+                          ],
                         ),
                       ),
-                      if (details.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 0, bottom: 4),
+                      // Right Column: Summary & Payment
+                      Expanded(
+                        flex: 2,
+                        child: Container(
+                          margin: const EdgeInsets.all(24.0),
+                          padding: const EdgeInsets.all(24.0),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).cardColor,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: details,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _buildSectionTitle('Résumé de la commande'),
+                              const SizedBox(height: 16),
+                              Flexible(child: _buildOrderItemsList(cart)),
+                              const Divider(height: 32),
+                              _buildTotalRow(cart),
+                              const SizedBox(height: 24),
+                              _buildPaymentButton(cart),
+                            ],
                           ),
                         ),
+                      ),
+                    ],
+                  )
+                : ListView(
+                    padding: const EdgeInsets.all(16.0),
+                    children: [
+                      _buildNameField(),
+                      const SizedBox(height: 20),
+                      _buildSectionTitle('Type de commande :'),
+                      _buildOrderTypeSelector(),
+                      const SizedBox(height: 20),
+                      if (_orderType == 'eat_in') _buildArrivalTimeSelector(),
+                      if (_orderType == 'delivery') _buildDeliveryForm(),
+                      const SizedBox(height: 20),
+                      _buildSectionTitle('Résumé de la commande :'),
+                      _buildOrderItemsList(cart),
+                      const Divider(),
+                      _buildTotalRow(cart),
+                      const SizedBox(height: 20),
+                      _buildPaymentButton(cart),
                     ],
                   ),
-                );
-              },
-            ),
-            const Divider(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const GradientText(
-                  'Total :',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  gradient: LinearGradient(
-              colors: [Color(0xFFe63199), Color(0xFFf87e12)],
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-            ),
-                ),
-                Text('${cart.totalAmount.toStringAsFixed(2)} €', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-              ],
-            ),
-            const SizedBox(height: 20),
-            GradientButton(
-              onPressed: cart.itemCount > 0 ? () => _initiatePayment(cart) : null,
-              gradient: const LinearGradient(
-                colors: [Color(0xFF9c4dea), Color(0xFFff80b1)],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ),
-              text: 'Payer et passer la commande',
-              icon: Icons.credit_card,
-            ),
-          ],
+          ),
         ),
       ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return GradientText(
+      title,
+      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      gradient: const LinearGradient(
+        colors: [Color(0xFFe63199), Color(0xFFf87e12)],
+        begin: Alignment.centerLeft,
+        end: Alignment.centerRight,
+      ),
+    );
+  }
+
+  Widget _buildNameField() {
+    return TextFormField(
+      controller: _nameController,
+      decoration: const InputDecoration(
+        labelText: 'Votre nom',
+        border: OutlineInputBorder(),
+      ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Veuillez entrer votre nom.';
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget _buildOrderTypeSelector() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        _buildOrderTypeChip('À emporter', 'takeaway', Icons.shopping_bag_outlined),
+        _buildOrderTypeChip('Sur place', 'eat_in', Icons.local_dining_outlined),
+        _buildOrderTypeChip('Livraison', 'delivery', Icons.delivery_dining_outlined),
+      ],
+    );
+  }
+
+  Widget _buildArrivalTimeSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 10),
+        const Text('Heure d\'arrivée :', style: TextStyle(fontSize: 16)),
+        ListTile(
+          title: Text(_arrivalTime == null ? 'Sélectionner l\'heure' : _arrivalTime!.format(context)),
+          trailing: const Icon(Icons.access_time),
+          onTap: () => _selectTime(context),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDeliveryForm() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 10),
+        _buildSectionTitle('Adresse de livraison :'),
+        const SizedBox(height: 10),
+        TextFormField(
+          controller: _streetController,
+          decoration: const InputDecoration(labelText: 'Rue et numéro', border: OutlineInputBorder()),
+          validator: (value) {
+            if (_orderType == 'delivery' && (value == null || value.isEmpty)) {
+              return 'Veuillez entrer votre rue.';
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: 10),
+        TextFormField(
+          controller: _cityController,
+          decoration: const InputDecoration(labelText: 'Ville', border: OutlineInputBorder()),
+          validator: (value) {
+            if (_orderType == 'delivery' && (value == null || value.isEmpty)) {
+              return 'Veuillez entrer votre ville.';
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: 10),
+        TextFormField(
+          controller: _postalCodeController,
+          decoration: const InputDecoration(labelText: 'Code Postal', border: OutlineInputBorder()),
+          keyboardType: TextInputType.number,
+          validator: (value) {
+            if (_orderType == 'delivery' && (value == null || value.isEmpty)) {
+              return 'Veuillez entrer votre code postal.';
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: 10),
+        TextFormField(
+          controller: _phoneController,
+          decoration: const InputDecoration(labelText: 'Numéro de téléphone', border: OutlineInputBorder()),
+          keyboardType: TextInputType.phone,
+          validator: (value) {
+            if (_orderType == 'delivery' && (value == null || value.isEmpty)) {
+              return 'Veuillez entrer votre numéro de téléphone.';
+            }
+            return null;
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildOrderItemsList(CartProvider cart) {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: cart.items.length,
+      itemBuilder: (context, index) {
+        final cartItem = cart.items.values.toList()[index];
+
+        Widget buildDetailRow(String text, {bool isRemoval = false}) {
+          return Padding(
+            padding: const EdgeInsets.only(left: 16, top: 2),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(isRemoval ? '– ' : '+ ', style: TextStyle(color: isRemoval ? Colors.red : Colors.green, fontSize: 14)),
+                Expanded(
+                  child: Text(
+                    text,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).brightness == Brightness.dark ? Colors.white60 : Colors.black54,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        List<Widget> details = [];
+        cartItem.selectedOptions.forEach((category, options) {
+          for (var option in options) {
+            details.add(buildDetailRow('${option.name} (${option.price.toStringAsFixed(2)}€)'));
+          }
+        });
+        for (var ingredient in cartItem.ingredientsToRemove) {
+          details.add(buildDetailRow('Sans $ingredient', isRemoval: true));
+        }
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                visualDensity: VisualDensity.compact,
+                title: Text(
+                  '${cartItem.quantity}x ${cartItem.item.name}',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                trailing: Text(
+                  '${(cartItem.item.price * cartItem.quantity).toStringAsFixed(2)} €',
+                ),
+              ),
+              if (details.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 0, bottom: 4),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: details,
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildTotalRow(CartProvider cart) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        _buildSectionTitle('Total :'),
+        Text('${cart.totalAmount.toStringAsFixed(2)} €', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+      ],
+    );
+  }
+
+  Widget _buildPaymentButton(CartProvider cart) {
+    return GradientButton(
+      onPressed: cart.itemCount > 0 ? () => _initiatePayment(cart) : null,
+      gradient: const LinearGradient(
+        colors: [Color(0xFF9c4dea), Color(0xFFff80b1)],
+        begin: Alignment.centerLeft,
+        end: Alignment.centerRight,
+      ),
+      text: 'Payer et passer la commande',
+      icon: Icons.credit_card,
     );
   }
 }
