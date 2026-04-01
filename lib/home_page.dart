@@ -270,7 +270,7 @@ class _HomePageState extends State<HomePage> {
               title: ClipRRect(
                 borderRadius: BorderRadius.circular(20), // Rounded corners for the logo
                 child: Image.asset(
-                  'assets/images/locos.png',
+                  'assets/images/five-minutes-logo.png',
                   height: 40,
                 ),
               ),
@@ -429,24 +429,43 @@ class _HomePageState extends State<HomePage> {
       return const Center(child: Text('Aucun article dans cette catégorie.'));
     }
     
-    return GridView.builder(
-      padding: const EdgeInsets.all(10.0),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 1,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
-        childAspectRatio: 0.9,
-      ),
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        final item = items[index];
-        return MenuItemCard(
-          item: item,
-          onAddItem: _onAddItem,
-          index: index,
-          cardTextColor: selectedCategoryColor,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Determine number of columns based on width
+        int crossAxisCount = 1;
+        double childAspectRatio = 0.9;
+        
+        if (constraints.maxWidth > 1200) {
+          crossAxisCount = 4;
+          childAspectRatio = 0.85;
+        } else if (constraints.maxWidth > 900) {
+          crossAxisCount = 3;
+          childAspectRatio = 0.85;
+        } else if (constraints.maxWidth > 600) {
+          crossAxisCount = 2;
+          childAspectRatio = 0.85;
+        }
+
+        return GridView.builder(
+          padding: const EdgeInsets.all(10.0),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: 15,
+            mainAxisSpacing: 15,
+            childAspectRatio: childAspectRatio,
+          ),
+          itemCount: items.length,
+          itemBuilder: (context, index) {
+            final item = items[index];
+            return MenuItemCard(
+              item: item,
+              onAddItem: _onAddItem,
+              index: index,
+              cardTextColor: selectedCategoryColor,
+            );
+          },
         );
-      },
+      }
     );
   }
 

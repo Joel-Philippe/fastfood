@@ -220,7 +220,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
         await Stripe.instance.initPaymentSheet(
           paymentSheetParameters: SetupPaymentSheetParameters(
             paymentIntentClientSecret: clientSecret,
-            merchantDisplayName: 'Tacos Locos',
+            merchantDisplayName: 'Five Minutes',
             style: isDark ? ThemeMode.dark : ThemeMode.light,
             appearance: PaymentSheetAppearance(
               colors: PaymentSheetAppearanceColors(

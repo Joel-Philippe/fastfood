@@ -242,8 +242,13 @@ class _ManageOptionsPageState extends State<ManageOptionsPage> {
                     controller: priceController,
                     style: TextStyle(color: isDark ? Colors.white : Colors.black87),
                     decoration: _buildInputDecoration(label: 'Prix', icon: Icons.euro_symbol),
-                    keyboardType: TextInputType.number,
-                    validator: (v) => (v == null || double.tryParse(v) == null) ? 'Prix invalide' : null,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    validator: (v) {
+                      if (v == null || v.isEmpty) return 'Prix requis';
+                      final price = double.tryParse(v.replaceAll(',', '.'));
+                      if (price == null) return 'Prix invalide';
+                      return null;
+                    }
                   ),
                   const SizedBox(height: 32),
                   Row(
@@ -257,7 +262,7 @@ class _ManageOptionsPageState extends State<ManageOptionsPage> {
                           if (!formKey.currentState!.validate()) return;
                           try {
                             final newName = nameController.text;
-                            final newPrice = double.parse(priceController.text);
+                            final newPrice = double.parse(priceController.text.replaceAll(',', '.'));
                             if (isEditing) {
                               await _mongoService.updateOption(widget.collectionName, option.id, newName, newPrice);
                             } else {

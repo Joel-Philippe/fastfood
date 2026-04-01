@@ -218,8 +218,13 @@ class _ManageMenuItemPageState extends State<ManageMenuItemPage> {
             controller: _priceController, 
             style: TextStyle(color: isDark ? Colors.white : Colors.black87),
             decoration: _buildInputDecoration(label: 'Prix', icon: Icons.euro_symbol), 
-            keyboardType: TextInputType.number, 
-            validator: (v) => double.tryParse(v!) == null ? 'Prix invalide' : null
+            keyboardType: const TextInputType.numberWithOptions(decimal: true), 
+            validator: (v) {
+              if (v == null || v.isEmpty) return 'Prix requis';
+              final price = double.tryParse(v.replaceAll(',', '.'));
+              if (price == null) return 'Prix invalide';
+              return null;
+            }
           ),
           const SizedBox(height: 16),
           TextFormField(

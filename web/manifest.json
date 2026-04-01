@@ -1,6 +1,6 @@
 {
-    "name": "fast_food_app",
-    "short_name": "fast_food_app",
+    "name": "Five Minutes",
+    "short_name": "Five Minutes",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
