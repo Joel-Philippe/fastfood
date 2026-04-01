@@ -326,13 +326,25 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
         ),
       );
     }
-    return ListView.builder(
-      padding: const EdgeInsets.all(8),
-      itemCount: filteredOrders.length,
-      itemBuilder: (context, index) {
-        final order = filteredOrders[index];
-        return _buildOrderCard(order);
-      },
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final crossAxisCount = constraints.maxWidth > 900 ? 2 : 1;
+        
+        return GridView.builder(
+          padding: const EdgeInsets.all(8),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            childAspectRatio: constraints.maxWidth > 900 ? 1.8 : 1.3,
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
+          ),
+          itemCount: filteredOrders.length,
+          itemBuilder: (context, index) {
+            final order = filteredOrders[index];
+            return _buildOrderCard(order);
+          },
+        );
+      }
     );
   }
 

@@ -19,22 +19,22 @@ class CartItem {
 
   // Method to get total price for this cart item, accounting for size and options
   double get totalPrice {
-    // Calculate the sum of prices for selected options with price > 0
-    double optionsPrice = 0.0;
+    double otherOptionsPrice = 0.0;
+    double? sizePrice;
+
     selectedOptions.forEach((category, options) {
-      optionsPrice += options.fold(0.0, (sum, option) =>
-          sum + (option.price > 0 ? option.price : 0.0)
-      );
+      if (category == 'sizeOptions' && options.isNotEmpty) {
+        // The first selected size determines the base price
+        sizePrice = options.first.price;
+      } else {
+        // Other options (sauces, extras) are added to the price
+        otherOptionsPrice += options.fold(0.0, (sum, option) => sum + (option.price > 0 ? option.price : 0.0));
+      }
     });
 
-    // If the calculated options price is 0 (meaning either no options are selected,
-    // or all selected options have a price of 0), use the item's base price.
-    // Otherwise, use the calculated options price.
-    if (optionsPrice == 0.0) {
-      return item.price * quantity;
-    } else {
-      return optionsPrice * quantity;
-    }
+    // Use selected size price as base, otherwise use default item price
+    double base = sizePrice ?? item.price;
+    return (base + otherOptionsPrice) * quantity;
   }
 }
 

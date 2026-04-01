@@ -89,10 +89,12 @@ class _RegisterPageState extends State<RegisterPage> {
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 450), // Centered and limited width for PC
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(40),
                   child: Image.asset(

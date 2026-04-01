@@ -223,47 +223,52 @@ class _ManageMenuPageState extends State<ManageMenuPage> with SingleTickerProvid
       return Center(child: Text('Aucun article de menu.', style: TextStyle(fontSize: 16, color: isDark ? Colors.white38 : Colors.black54)));
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: _menuItems!.length,
-      itemBuilder: (context, index) {
-        final item = _menuItems![index];
-        return _buildListItemCard(
-          title: item.name,
-          subtitle: '${item.price.toStringAsFixed(2)} €',
-          leading:
-              item.imageUrl != null && item.imageUrl!.isNotEmpty
-                  ? ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                    _proxiedImageUrl(item.imageUrl!),
-                    width: 50,
-                    height: 50,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => const Center(
-                      child: Icon(Icons.broken_image, size: 40, color: Colors.grey),
-                    ),
+    return Center(
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 1000),
+        child: ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: _menuItems!.length,
+          itemBuilder: (context, index) {
+            final item = _menuItems![index];
+            return _buildListItemCard(
+              title: item.name,
+              subtitle: '${item.price.toStringAsFixed(2)} €',
+              leading:
+                  item.imageUrl != null && item.imageUrl!.isNotEmpty
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.network(
+                        _proxiedImageUrl(item.imageUrl!),
+                        width: 50,
+                        height: 50,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => const Center(
+                          child: Icon(Icons.broken_image, size: 40, color: Colors.grey),
+                        ),
+                      ),
+                        )
+                      : null,
+              actions: [
+                Row(mainAxisSize: MainAxisSize.min, children: [
+                  IconButton(
+                    icon: const Icon(Icons.edit_outlined, color: Color(0xFF53c6fd)),
+                    onPressed: () async {
+                      await Navigator.push(context, MaterialPageRoute(builder: (context) => ManageMenuItemPage(menuItem: item)));
+                    },
                   ),
-                    )
-                  : null,
-          actions: [
-            Row(mainAxisSize: MainAxisSize.min, children: [
-              IconButton(
-                icon: const Icon(Icons.edit_outlined, color: Color(0xFF53c6fd)),
-                onPressed: () async {
-                  await Navigator.push(context, MaterialPageRoute(builder: (context) => ManageMenuItemPage(menuItem: item)));
-                },
-              ),
-              IconButton(
-                icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
-                onPressed: () async {
-                  await _mongoService.deleteMenuItem(item.id);
-                },
-              ),
-            ])
-          ],
-        );
-      },
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                    onPressed: () async {
+                      await _mongoService.deleteMenuItem(item.id);
+                    },
+                  ),
+                ])
+              ],
+            );
+          },
+        ),
+      ),
     );
   }
 
