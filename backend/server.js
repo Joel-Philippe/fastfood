@@ -68,6 +68,7 @@ app.use('/api/upload', require('./routes/upload'));
 
 // Integrate settings routes
 app.use('/api/settings', require('./routes/settings'));
+app.use('/api/info-pages', require('./routes/infoPages'));
 
 // DEBUG ROUTE - A supprimer plus tard
 app.get('/api/debug-files', (req, res) => {

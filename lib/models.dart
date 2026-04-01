@@ -232,3 +232,42 @@ class RestaurantSettings {
     };
   }
 }
+
+class InfoPage {
+  final String id;
+  final String title;
+  final String content;
+  final String icon;
+  final int order;
+  final bool isVisible;
+
+  InfoPage({
+    required this.id,
+    required this.title,
+    required this.content,
+    this.icon = 'info',
+    this.order = 0,
+    this.isVisible = true,
+  });
+
+  factory InfoPage.fromMap(Map<String, dynamic> map) {
+    return InfoPage(
+      id: map['_id'] as String,
+      title: map['title'] as String,
+      content: map['content'] as String,
+      icon: map['icon'] as String? ?? 'info',
+      order: (map['order'] as num?)?.toInt() ?? 0,
+      isVisible: map['isVisible'] as bool? ?? true,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'title': title,
+      'content': content,
+      'icon': icon,
+      'order': order,
+      'isVisible': isVisible,
+    };
+  }
+}

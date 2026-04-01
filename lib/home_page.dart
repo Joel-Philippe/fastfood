@@ -575,3 +575,83 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
+
+class _InfoPageViewer extends StatelessWidget {
+  final InfoPage page;
+  const _InfoPageViewer({required this.page});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return DraggableScrollableSheet(
+      initialChildSize: 0.7,
+      maxChildSize: 0.9,
+      minChildSize: 0.5,
+      builder: (context, scrollController) => Container(
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
+        ),
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(color: Colors.grey[400], borderRadius: BorderRadius.circular(2)),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Icon(_getIconData(page.icon), color: const Color(0xFF53c6fd), size: 32),
+                const SizedBox(width: 16),
+                Text(page.title, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            const Divider(height: 40),
+            Expanded(
+              child: SingleChildScrollView(
+                controller: scrollController,
+                child: Text(
+                  page.content,
+                  style: TextStyle(fontSize: 16, height: 1.6, color: isDark ? Colors.white70 : Colors.black87),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  IconData _getIconData(String iconName) {
+    switch (iconName) {
+      case 'info': return Icons.info_outline;
+      case 'restaurant': return Icons.restaurant;
+      case 'delivery': return Icons.delivery_dining;
+      case 'contact': return Icons.contact_support_outlined;
+      case 'history': return Icons.history;
+      case 'star': return Icons.star_border;
+      default: return Icons.info_outline;
+    }
+  }
+}
+,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              : const SizedBox.shrink(key: ValueKey('EmptyFab')),
+        );
+      },
+    );
+  }
+}

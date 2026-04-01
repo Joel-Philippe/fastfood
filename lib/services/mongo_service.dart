@@ -401,5 +401,63 @@ class MongoService {
     if (response.statusCode != 200) {
       throw Exception('Failed to update settings');
     }
-  }
-}
+    }
+
+    // --- Info Pages Management ---
+
+    Future<List<InfoPage>> getInfoPages() async {
+    final response = await http.get(Uri.parse('$_baseUrl/info-pages'));
+    if (response.statusCode == 200) {
+      Iterable l = json.decode(response.body);
+      return List<InfoPage>.from(l.map((model) => InfoPage.fromMap(model)));
+    } else {
+      throw Exception('Failed to load info pages');
+    }
+    }
+
+    Future<List<InfoPage>> getInfoPagesAdmin() async {
+    final headers = await _getAuthHeaders();
+    final response = await http.get(Uri.parse('$_baseUrl/info-pages/admin'), headers: headers);
+    if (response.statusCode == 200) {
+      Iterable l = json.decode(response.body);
+      return List<InfoPage>.from(l.map((model) => InfoPage.fromMap(model)));
+    } else {
+      throw Exception('Failed to load all info pages');
+    }
+    }
+
+    Future<void> addInfoPage(InfoPage page) async {
+    final headers = await _getAuthHeaders();
+    final response = await http.post(
+      Uri.parse('$_baseUrl/info-pages'),
+      headers: headers,
+      body: json.encode(page.toMap()),
+    );
+    if (response.statusCode != 201) {
+      throw Exception('Failed to add info page');
+    }
+    }
+
+    Future<void> updateInfoPage(String id, InfoPage page) async {
+    final headers = await _getAuthHeaders();
+    final response = await http.put(
+      Uri.parse('$_baseUrl/info-pages/$id'),
+      headers: headers,
+      body: json.encode(page.toMap()),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update info page');
+    }
+    }
+
+    Future<void> deleteInfoPage(String id) async {
+    final headers = await _getAuthHeaders();
+    final response = await http.delete(
+      Uri.parse('$_baseUrl/info-pages/$id'),
+      headers: headers,
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to delete info page');
+    }
+    }
+    }
