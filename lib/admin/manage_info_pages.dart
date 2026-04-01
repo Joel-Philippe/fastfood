@@ -53,29 +53,47 @@ class _ManageInfoPagesState extends State<ManageInfoPages> {
           }
 
           final pages = snapshot.data!;
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: pages.length,
-            itemBuilder: (context, index) {
-              final page = pages[index];
-              return Card(
-                margin: const EdgeInsets.symmetric(vertical: 8),
-                color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                child: ListTile(
-                  leading: Icon(_getIconData(page.icon), color: accentColor),
-                  title: Text(page.title, style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87)),
-                  subtitle: Text(page.isVisible ? 'Visible' : 'Masquée', style: TextStyle(color: page.isVisible ? Colors.green : Colors.red)),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(icon: const Icon(Icons.edit_outlined, color: accentColor), onPressed: () => _showPageDialog(page: page)),
-                      IconButton(icon: const Icon(Icons.delete_outline, color: Colors.redAccent), onPressed: () => _deletePage(page.id)),
-                    ],
-                  ),
-                ),
-              );
-            },
+          return Center(
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 1200),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final crossAxisCount = constraints.maxWidth > 800 ? 2 : 1;
+                  return GridView.builder(
+                    padding: const EdgeInsets.all(16),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: crossAxisCount,
+                      childAspectRatio: 3.0,
+                      mainAxisSpacing: 12,
+                      crossAxisSpacing: 12,
+                    ),
+                    itemCount: pages.length,
+                    itemBuilder: (context, index) {
+                      final page = pages[index];
+                      return Card(
+                        margin: const EdgeInsets.symmetric(vertical: 0),
+                        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        child: Center(
+                          child: ListTile(
+                            leading: Icon(_getIconData(page.icon), color: accentColor),
+                            title: Text(page.title, style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87)),
+                            subtitle: Text(page.isVisible ? 'Visible' : 'Masquée', style: TextStyle(color: page.isVisible ? Colors.green : Colors.red)),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(icon: const Icon(Icons.edit_outlined, color: accentColor), onPressed: () => _showPageDialog(page: page)),
+                                IconButton(icon: const Icon(Icons.delete_outline, color: Colors.redAccent), onPressed: () => _deletePage(page.id)),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
           );
         },
       ),

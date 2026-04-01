@@ -121,26 +121,42 @@ class _ManageOptionsPageState extends State<ManageOptionsPage> {
         }
 
         final options = snapshot.data!;
-        return ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: options.length,
-          itemBuilder: (context, index) {
-            final option = options[index];
-            return _buildListItemCard(
-              title: option.name,
-              subtitle: 'Prix: ${option.price.toStringAsFixed(2)} €',
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.edit_outlined, color: Color(0xFF53c6fd)),
-                  onPressed: () => _showOptionDialog(option: option),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
-                  onPressed: () => _deleteOption(option.id),
-                ),
-              ],
-            );
-          },
+        return Center(
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 1200),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final crossAxisCount = constraints.maxWidth > 800 ? 3 : (constraints.maxWidth > 600 ? 2 : 1);
+                return GridView.builder(
+                  padding: const EdgeInsets.all(16),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: crossAxisCount,
+                    childAspectRatio: 2.5,
+                    mainAxisSpacing: 12,
+                    crossAxisSpacing: 12,
+                  ),
+                  itemCount: options.length,
+                  itemBuilder: (context, index) {
+                    final option = options[index];
+                    return _buildListItemCard(
+                      title: option.name,
+                      subtitle: 'Prix: ${option.price.toStringAsFixed(2)} €',
+                      actions: [
+                        IconButton(
+                          icon: const Icon(Icons.edit_outlined, color: Color(0xFF53c6fd)),
+                          onPressed: () => _showOptionDialog(option: option),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                          onPressed: () => _deleteOption(option.id),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            ),
+          ),
         );
       },
     );

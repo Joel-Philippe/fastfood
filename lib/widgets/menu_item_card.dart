@@ -99,32 +99,37 @@ class _MenuItemCardState extends State<MenuItemCard> {
                       // Text content
                       Padding(
                         padding: const EdgeInsets.all(10.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Price
-                            Text(
-                              '${widget.item.price.toStringAsFixed(2)} €',
-                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                            ),
-                            const SizedBox(height: 4),
-                            // Title
-                            Text(
-                              widget.item.name,
-                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 4),
-                            // Description
-                            if (widget.item.description != null && widget.item.description!.isNotEmpty)
+                        child: SizedBox(
+                          height: 80, // Fixed height for alignment
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Price
                               Text(
-                                widget.item.description!,
-                                style: const TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.bold),
-                                maxLines: 2,
+                                '${widget.item.price.toStringAsFixed(2)} €',
+                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                              ),
+                              const SizedBox(height: 4),
+                              // Title
+                              Text(
+                                widget.item.name,
+                                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                                maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                          ],
+                              const SizedBox(height: 4),
+                              // Description
+                              if (widget.item.description != null && widget.item.description!.isNotEmpty)
+                                Expanded(
+                                  child: Text(
+                                    widget.item.description!,
+                                    style: const TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.w500),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                            ],
+                          ),
                         ),
                       ),
                     ],
