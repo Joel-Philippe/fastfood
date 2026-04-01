@@ -248,6 +248,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget _buildLoggedOutView() {
     const accentColor = Color(0xFF53c6fd);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     const buttonGradient = LinearGradient(
       colors: [Color(0xFF9c4dea), Color(0xFFff80b1)],
       begin: Alignment.centerLeft,
@@ -258,12 +259,16 @@ class _ProfilePageState extends State<ProfilePage> {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Icon(Icons.person_off, size: 80, color: Colors.black38),
+        Icon(Icons.person_off, size: 80, color: isDark ? Colors.white24 : Colors.black38),
         const SizedBox(height: 20),
-        const Text(
+        Text(
           'Vous n\'êtes pas connecté',
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black54),
+          style: TextStyle(
+            fontSize: 24, 
+            fontWeight: FontWeight.bold, 
+            color: isDark ? Colors.white70 : Colors.black54
+          ),
         ),
         const SizedBox(height: 40),
         GradientButton(
