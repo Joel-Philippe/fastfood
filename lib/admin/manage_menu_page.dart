@@ -8,6 +8,7 @@ import 'package:fast_food_app/admin/manage_menu_item_page.dart';
 import 'package:fast_food_app/admin/manage_options_page.dart';
 import 'package:fast_food_app/admin/manage_categories_page.dart';
 import 'package:fast_food_app/admin/manage_hours_page.dart';
+import 'package:fast_food_app/admin/manage_info_pages.dart';
 import 'package:fast_food_app/models.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 

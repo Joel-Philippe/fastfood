@@ -47,7 +47,7 @@ class CartProvider with ChangeNotifier {
 
   double get totalAmount => _items.values.fold(0.0, (sum, item) => sum + item.totalPrice);
 
-  void addItem(MenuItem item, {Map<String, List<Option>> selectedOptions = const {}, Set<String> ingredientsToRemove = const {}, Option? selectedSize}) {
+  void addItem(MenuItem item, {Map<String, List<Option>> selectedOptions = const {}, Set<String> ingredientsToRemove = const {}, Option? selectedSize, int quantity = 1}) {
     // Create a canonical representation of the options and ingredients to remove
     final sortedIdOptions = selectedOptions.map((key, value) {
       final ids = value.map((opt) => opt.id).toList()..sort();
@@ -74,7 +74,7 @@ class CartProvider with ChangeNotifier {
         key,
         (existingItem) => CartItem(
           item: existingItem.item,
-          quantity: existingItem.quantity + 1,
+          quantity: existingItem.quantity + quantity,
           selectedOptions: existingItem.selectedOptions,
           ingredientsToRemove: existingItem.ingredientsToRemove,
           selectedSize: existingItem.selectedSize, // Ensure selectedSize is passed back
@@ -85,6 +85,7 @@ class CartProvider with ChangeNotifier {
         key,
         () => CartItem(
           item: item,
+          quantity: quantity,
           selectedOptions: selectedOptions,
           ingredientsToRemove: ingredientsToRemove,
           selectedSize: selectedSize, // Pass selectedSize to new CartItem
