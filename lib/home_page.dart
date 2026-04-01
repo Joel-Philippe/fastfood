@@ -311,14 +311,9 @@ class _HomePageState extends State<HomePage> {
                   },
                 ),
               ],
-              bottom: _infoPages.isNotEmpty 
-                ? PreferredSize(
-                    preferredSize: const Size.fromHeight(50),
-                    child: _buildInfoPagesMenu(),
-                  )
-                : null,
             ),
             body: _buildBody(),
+            bottomNavigationBar: _infoPages.isNotEmpty ? _buildInfoPagesMenu() : null,
             floatingActionButton: _isRestaurantOpen ? _buildFabCartButton(context) : null,
           ),
           if (_isRestaurantOpen)
