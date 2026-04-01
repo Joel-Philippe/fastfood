@@ -667,42 +667,85 @@ class _InfoPageViewer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final size = MediaQuery.of(context).size;
+    final isLargeScreen = size.width > 900;
+
     return DraggableScrollableSheet(
-      initialChildSize: 0.7,
-      maxChildSize: 0.9,
+      initialChildSize: 0.85,
+      maxChildSize: 0.95,
       minChildSize: 0.5,
       builder: (context, scrollController) => Container(
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
+          color: isDark ? const Color(0xFF121212) : const Color(0xFFF8F9FA),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
         ),
-        padding: const EdgeInsets.all(24),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(color: Colors.grey[400], borderRadius: BorderRadius.circular(2)),
-              ),
+            // Handle bar
+            const SizedBox(height: 12),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(color: Colors.grey[400], borderRadius: BorderRadius.circular(2)),
             ),
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                Icon(_getIconData(page.icon), color: const Color(0xFF53c6fd), size: 32),
-                const SizedBox(width: 16),
-                Text(page.title, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-              ],
-            ),
-            const Divider(height: 40),
+            const SizedBox(height: 20),
+            // Content
             Expanded(
-              child: SingleChildScrollView(
+              child: ListView(
                 controller: scrollController,
-                child: Text(
-                  page.content,
-                  style: TextStyle(fontSize: 16, height: 1.6, color: isDark ? Colors.white70 : Colors.black87),
+                padding: EdgeInsets.symmetric(
+                  horizontal: isLargeScreen ? size.width * 0.2 : 24,
+                  vertical: 20,
                 ),
+                children: [
+                  // Icon & Title
+                  Center(
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF53c6fd).withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(_getIconData(page.icon), color: const Color(0xFF53c6fd), size: 48),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    page.title,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, letterSpacing: -0.5),
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    width: 60,
+                    height: 3,
+                    margin: const EdgeInsets.symmetric(horizontal: 100),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(colors: [Color(0xFF53c6fd), Color(0xFF9c4dea)]),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                  // Formatted Text Content
+                  Text(
+                    page.content,
+                    style: TextStyle(
+                      fontSize: 17,
+                      height: 1.8,
+                      color: isDark ? Colors.white70 : Colors.black87,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                  const SizedBox(height: 60),
+                  // Dismiss button
+                  Center(
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Fermer la lecture', style: TextStyle(color: Color(0xFF53c6fd), fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                ],
               ),
             ),
           ],

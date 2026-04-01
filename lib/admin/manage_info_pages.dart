@@ -122,10 +122,27 @@ class _ManageInfoPagesState extends State<ManageInfoPages> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextField(controller: titleController, decoration: const InputDecoration(labelText: 'Titre'), style: TextStyle(color: isDark ? Colors.white : Colors.black87)),
-                const SizedBox(height: 16),
-                TextField(controller: contentController, decoration: const InputDecoration(labelText: 'Contenu'), maxLines: 5, style: TextStyle(color: isDark ? Colors.white : Colors.black87)),
-                const SizedBox(height: 16),
+                TextField(
+                  controller: titleController, 
+                  decoration: const InputDecoration(
+                    labelText: 'Titre de la page',
+                    hintText: 'Ex: Notre Histoire, Nos Engagements...',
+                    border: OutlineInputBorder(),
+                  ), 
+                  style: TextStyle(color: isDark ? Colors.white : Colors.black87)
+                ),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: contentController, 
+                  decoration: const InputDecoration(
+                    labelText: 'Contenu de la page',
+                    hintText: 'Rédigez ici les informations détaillées pour vos clients...',
+                    border: OutlineInputBorder(),
+                    alignLabelWithHint: true,
+                  ), 
+                  maxLines: 12, // Agrandissement pour la rédaction
+                  style: TextStyle(color: isDark ? Colors.white70 : Colors.black87),
+                ),
                 DropdownButton<String>(
                   value: selectedIcon,
                   dropdownColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
