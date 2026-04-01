@@ -16,6 +16,7 @@ import 'package:fast_food_app/widgets/category_card_widget.dart';
 import 'package:fast_food_app/profile_page.dart';
 import 'package:fast_food_app/widgets/restaurant_closed_widget.dart';
 import 'package:fast_food_app/services/websocket_service.dart';
+import 'package:fast_food_app/widgets/gradient_text.dart';
 
 class HomePage extends StatefulWidget {
   final MongoService? mongoService;
@@ -48,11 +49,14 @@ class _HomePageState extends State<HomePage> {
   final AuthService _authService = AuthService();
   StreamSubscription? _socketSubscription;
 
+  List<InfoPage> _infoPages = [];
+
   @override
   void initState() {
     super.initState();
     _confettiController = ConfettiController(duration: const Duration(milliseconds: 300));
     _fetchData();
+    _fetchInfoPages();
     _initWebSocket();
     // Periodically check the restaurant status
     _statusTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
@@ -91,16 +95,29 @@ class _HomePageState extends State<HomePage> {
           'MENU_ITEM_CREATED',
           'MENU_ITEM_UPDATED',
           'MENU_ITEM_DELETED',
+          'INFO_PAGE_CREATED',
+          'INFO_PAGE_UPDATED',
+          'INFO_PAGE_DELETED',
         ];
 
         if (type != null && refreshEvents.contains(type)) {
           _fetchData();
+          _fetchInfoPages();
         }
       }, onError: (error) {
         debugPrint("HomePage WebSocket Stream Error: $error");
       });
     } catch (e) {
       debugPrint("HomePage Failed to initialize WebSocket: $e");
+    }
+  }
+
+  Future<void> _fetchInfoPages() async {
+    try {
+      final pages = await (widget.mongoService ?? MongoService()).getInfoPages();
+      if (mounted) setState(() => _infoPages = pages);
+    } catch (e) {
+      debugPrint("Error fetching info pages: $e");
     }
   }
 
@@ -268,7 +285,7 @@ class _HomePageState extends State<HomePage> {
             backgroundColor: Colors.transparent,
             appBar: AppBar(
               title: ClipRRect(
-                borderRadius: BorderRadius.circular(20), // Rounded corners for the logo
+                borderRadius: BorderRadius.circular(20),
                 child: Image.asset(
                   'assets/images/five-minutes-logo.png',
                   height: 40,
@@ -366,6 +383,7 @@ class _HomePageState extends State<HomePage> {
     return Column(
       children: [
         _buildClosingSoonBanner(),
+        _buildInfoPagesMenu(),
         Expanded(
           child: Row(
             children: [
@@ -381,6 +399,73 @@ class _HomePageState extends State<HomePage> {
         ),
       ],
     );
+  }
+
+  Widget _buildInfoPagesMenu() {
+    if (_infoPages.isEmpty) return const SizedBox.shrink();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      height: 50,
+      margin: const EdgeInsets.only(bottom: 8),
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: _infoPages.length,
+        itemBuilder: (context, index) {
+          final page = _infoPages[index];
+          return Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: InkWell(
+              onTap: () => _showInfoPage(page),
+              borderRadius: BorderRadius.circular(20),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.8),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: isDark ? Colors.white10 : Colors.black12),
+                ),
+                child: Row(
+                  children: [
+                    Icon(_getIconData(page.icon), size: 18, color: const Color(0xFF53c6fd)),
+                    const SizedBox(width: 8),
+                    Text(
+                      page.title,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white70 : Colors.black87,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void _showInfoPage(InfoPage page) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _InfoPageViewer(page: page),
+    );
+  }
+
+  IconData _getIconData(String iconName) {
+    switch (iconName) {
+      case 'info': return Icons.info_outline;
+      case 'restaurant': return Icons.restaurant;
+      case 'delivery': return Icons.delivery_dining;
+      case 'contact': return Icons.contact_support_outlined;
+      case 'history': return Icons.history;
+      case 'star': return Icons.star_border;
+      default: return Icons.info_outline;
+    }
   }
 
   Widget _buildCategoryTabs() {
@@ -431,7 +516,6 @@ class _HomePageState extends State<HomePage> {
     
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Determine number of columns based on width
         int crossAxisCount = 1;
         double childAspectRatio = 0.9;
         
@@ -517,7 +601,7 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
                   child: FloatingActionButton(
-                    heroTag: 'cart_fab', // Unique heroTag
+                    heroTag: 'cart_fab',
                     onPressed: () {
                       showModalBottomSheet(
                         context: context,
@@ -637,21 +721,5 @@ class _InfoPageViewer extends StatelessWidget {
       case 'star': return Icons.star_border;
       default: return Icons.info_outline;
     }
-  }
-}
-,
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              : const SizedBox.shrink(key: ValueKey('EmptyFab')),
-        );
-      },
-    );
   }
 }
