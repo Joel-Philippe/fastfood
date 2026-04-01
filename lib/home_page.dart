@@ -292,7 +292,8 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               centerTitle: true,
-              backgroundColor: Colors.transparent,
+              backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+              surfaceTintColor: Colors.transparent,
               elevation: 0,
               actions: [
                 IconButton(
@@ -310,6 +311,12 @@ class _HomePageState extends State<HomePage> {
                   },
                 ),
               ],
+              bottom: _infoPages.isNotEmpty 
+                ? PreferredSize(
+                    preferredSize: const Size.fromHeight(50),
+                    child: _buildInfoPagesMenu(),
+                  )
+                : null,
             ),
             body: _buildBody(),
             floatingActionButton: _isRestaurantOpen ? _buildFabCartButton(context) : null,
@@ -419,16 +426,11 @@ class _HomePageState extends State<HomePage> {
             child: InkWell(
               onTap: () => _showInfoPage(page),
               borderRadius: BorderRadius.circular(20),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.8),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: isDark ? Colors.white10 : Colors.black12),
-                ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 child: Row(
                   children: [
-                    Icon(_getIconData(page.icon), size: 18, color: const Color(0xFF53c6fd)),
+                    Icon(_getIconData(page.icon), size: 16, color: const Color(0xFF53c6fd)),
                     const SizedBox(width: 8),
                     Text(
                       page.title,
@@ -691,61 +693,64 @@ class _InfoPageViewer extends StatelessWidget {
             const SizedBox(height: 20),
             // Content
             Expanded(
-              child: ListView(
-                controller: scrollController,
-                padding: EdgeInsets.symmetric(
-                  horizontal: isLargeScreen ? size.width * 0.2 : 24,
-                  vertical: 20,
-                ),
-                children: [
-                  // Icon & Title
-                  Center(
-                    child: Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF53c6fd).withOpacity(0.1),
-                        shape: BoxShape.circle,
+              child: Center(
+                child: Container(
+                  constraints: const BoxConstraints(maxWidth: 800), // Largeur optimale pour la lecture
+                  child: ListView(
+                    controller: scrollController,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                    children: [
+                      // Icon & Title
+                      Center(
+                        child: Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF53c6fd).withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(_getIconData(page.icon), color: const Color(0xFF53c6fd), size: 48),
+                        ),
                       ),
-                      child: Icon(_getIconData(page.icon), color: const Color(0xFF53c6fd), size: 48),
-                    ),
+                      const SizedBox(height: 24),
+                      Text(
+                        page.title,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, letterSpacing: -0.5),
+                      ),
+                      const SizedBox(height: 16),
+                      Center(
+                        child: Container(
+                          width: 60,
+                          height: 3,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(colors: [Color(0xFF53c6fd), Color(0xFF9c4dea)]),
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 40),
+                      // Formatted Text Content
+                      Text(
+                        page.content,
+                        style: TextStyle(
+                          fontSize: 18, // Texte légèrement plus grand
+                          height: 1.8,
+                          color: isDark ? Colors.white.withOpacity(0.9) : Colors.black87,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                      const SizedBox(height: 60),
+                      // Dismiss button
+                      Center(
+                        child: TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('Fermer la lecture', style: TextStyle(color: Color(0xFF53c6fd), fontWeight: FontWeight.bold)),
+                        ),
+                      ),
+                      const SizedBox(height: 40),
+                    ],
                   ),
-                  const SizedBox(height: 24),
-                  Text(
-                    page.title,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, letterSpacing: -0.5),
-                  ),
-                  const SizedBox(height: 16),
-                  Container(
-                    width: 60,
-                    height: 3,
-                    margin: const EdgeInsets.symmetric(horizontal: 100),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(colors: [Color(0xFF53c6fd), Color(0xFF9c4dea)]),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-                  // Formatted Text Content
-                  Text(
-                    page.content,
-                    style: TextStyle(
-                      fontSize: 17,
-                      height: 1.8,
-                      color: isDark ? Colors.white70 : Colors.black87,
-                      letterSpacing: 0.2,
-                    ),
-                  ),
-                  const SizedBox(height: 60),
-                  // Dismiss button
-                  Center(
-                    child: TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Fermer la lecture', style: TextStyle(color: Color(0xFF53c6fd), fontWeight: FontWeight.bold)),
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-                ],
+                ),
               ),
             ),
           ],
