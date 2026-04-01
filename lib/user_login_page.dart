@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:fast_food_app/services/auth_service.dart';
-import 'package:fast_food_app/services/auth_service.dart';
 import 'package:fast_food_app/home_page.dart'; // To navigate back to home
 import 'package:fast_food_app/register_page.dart'; // To navigate to register
 import 'package:flutter_animate/flutter_animate.dart';
@@ -153,155 +152,146 @@ class _UserLoginPageState extends State<UserLoginPage> {
           child: Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Title
-                  const Text(
-                    'Bienvenue',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: accentColor,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    'Connectez-vous à votre compte',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: isDark ? Colors.white70 : Colors.black54,
-                    ),
-                  ),
-                  const SizedBox(height: 50),
-                  // Email Field
-                  TextField(
-                    controller: _emailController,
-                    style: TextStyle(color: isDark ? Colors.white : Colors.black87),
-                    decoration: InputDecoration(
-                      hintText: 'Email',
-                      hintStyle: TextStyle(color: isDark ? Colors.white38 : Colors.black38),
-                      prefixIcon: const Icon(Icons.email_outlined, color: accentColor),
-                      filled: true,
-                      fillColor: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.8),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: accentColor, width: 2),
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 450), // PC Ergonomics
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Title
+                    const Text(
+                      'Bienvenue',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: accentColor,
                       ),
                     ),
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-                  const SizedBox(height: 20),
-                  // Password Field
-                  TextField(
-                    controller: _passwordController,
-                    style: TextStyle(color: isDark ? Colors.white : Colors.black87),
-                    decoration: InputDecoration(
-                      hintText: 'Mot de passe',
-                      hintStyle: TextStyle(color: isDark ? Colors.white38 : Colors.black38),
-                      prefixIcon: const Icon(Icons.lock_open_outlined, color: accentColor),
-                      filled: true,
-                      fillColor: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.8),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: accentColor, width: 2),
+                    const SizedBox(height: 10),
+                    Text(
+                      'Connectez-vous à votre compte',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: isDark ? Colors.white70 : Colors.black54,
                       ),
                     ),
-                    obscureText: true,
-                  ),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: _showForgotPasswordDialog,
-                      child: const Text(
-                        'Mot de passe oublié ?',
-                        style: TextStyle(color: accentColor, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  // Login Button
-                  _isLoading
-                      ? const Center(child: CircularProgressIndicator())
-                      : GestureDetector(
-                          onTap: _login,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            decoration: BoxDecoration(
-                              gradient: buttonGradient,
-                              borderRadius: BorderRadius.circular(12),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: const Color(0xFF9c4dea).withOpacity(0.4),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 5),
-                                ),
-                              ],
-                            ),
-                            child: const Center(
-                              child: Text(
-                                'Connexion',
-                                style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          ),
+                    const SizedBox(height: 50),
+                    // Email Field
+                    TextField(
+                      controller: _emailController,
+                      style: TextStyle(color: isDark ? Colors.white : Colors.black87),
+                      decoration: InputDecoration(
+                        hintText: 'Email',
+                        hintStyle: TextStyle(color: isDark ? Colors.white38 : Colors.black38),
+                        prefixIcon: const Icon(Icons.email_outlined, color: accentColor),
+                        filled: true,
+                        fillColor: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.8),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
                         ),
-                  const SizedBox(height: 20),
-                  // Bottom Links
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const RegisterPage()),
-                          );
-                        },
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: accentColor, width: 2),
+                        ),
+                      ),
+                      keyboardType: TextInputType.emailAddress,
+                    ),
+                    const SizedBox(height: 20),
+                    // Password Field
+                    TextField(
+                      controller: _passwordController,
+                      style: TextStyle(color: isDark ? Colors.white : Colors.black87),
+                      decoration: InputDecoration(
+                        hintText: 'Mot de passe',
+                        hintStyle: TextStyle(color: isDark ? Colors.white38 : Colors.black38),
+                        prefixIcon: const Icon(Icons.lock_open_outlined, color: accentColor),
+                        filled: true,
+                        fillColor: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.8),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: accentColor, width: 2),
+                        ),
+                      ),
+                      obscureText: true,
+                    ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: _showForgotPasswordDialog,
                         child: const Text(
-                          'S\'inscrire',
+                          'Mot de passe oublié ?',
                           style: TextStyle(color: accentColor, fontWeight: FontWeight.bold),
                         ),
                       ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(builder: (context) => const HomePage()),
-                            (route) => false,
-                          );
-                        },
-                        child: Text(
-                          'Retour',
-                          style: TextStyle(color: isDark ? Colors.white38 : Colors.black54),
+                    ),
+                    const SizedBox(height: 20),
+                    // Login Button
+                    _isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : GestureDetector(
+                            onTap: _login,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              decoration: BoxDecoration(
+                                gradient: buttonGradient,
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(0xFF9c4dea).withOpacity(0.4),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 5),
+                                  ),
+                                ],
+                              ),
+                              child: const Center(
+                                child: Text(
+                                  'Connexion',
+                                  style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ),
+                          ),
+                    const SizedBox(height: 20),
+                    // Bottom Links
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const RegisterPage()),
+                            );
+                          },
+                          child: const Text(
+                            'S\'inscrire',
+                            style: TextStyle(color: accentColor, fontWeight: FontWeight.bold),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(builder: (context) => const HomePage()),
+                              (route) => false,
+                            );
+                          },
+                          child: Text(
+                            'Retour',
+                            style: TextStyle(color: isDark ? Colors.white38 : Colors.black54),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-,
-                    ],
-                  ),
-                ],
               ),
             ),
           ),
