@@ -263,8 +263,8 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
       left: 0,
       right: 0,
       child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: isLargeScreen ? size.width * 0.2 : 24,
+        padding: const EdgeInsets.symmetric(
+          horizontal: 24,
           vertical: 20,
         ),
         decoration: BoxDecoration(
@@ -461,6 +461,16 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+        title: const Text('Sélection requise'),
+        content: Text(message),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('OK')),
+        ],
+      ),
+    );
+  }
+}
+      backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
         title: const Text('Sélection requise'),
         content: Text(message),
         actions: [

@@ -326,28 +326,25 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
         ),
       );
     }
-    return Center(
-      child: Container(
-        constraints: const BoxConstraints(maxWidth: 1400), // Largeur max pour PC
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final crossAxisCount = constraints.maxWidth > 1100 ? 3 : (constraints.maxWidth > 700 ? 2 : 1);
-            
-            return GridView.builder(
-              padding: const EdgeInsets.all(16),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: crossAxisCount,
-                childAspectRatio: constraints.maxWidth > 1100 ? 1.4 : (constraints.maxWidth > 700 ? 1.3 : 1.1),
-                mainAxisSpacing: 16,
-                crossAxisSpacing: 16,
-              ),
-              itemCount: filteredOrders.length,
-              itemBuilder: (context, index) {
-                final order = filteredOrders[index];
-                return _buildOrderCard(order);
-              },
-            );
-          },
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Center(
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 1400),
+          child: Wrap(
+            spacing: 16,
+            runSpacing: 16,
+            children: filteredOrders.map((order) {
+              return SizedBox(
+                width: MediaQuery.of(context).size.width > 1100 
+                    ? (1400 - 64) / 3 // 3 colonnes sur grand PC
+                    : (MediaQuery.of(context).size.width > 700 
+                        ? (MediaQuery.of(context).size.width - 48) / 2 // 2 colonnes sur tablette
+                        : MediaQuery.of(context).size.width - 32), // 1 colonne sur mobile
+                child: _buildOrderCard(order),
+              );
+            }).toList(),
+          ),
         ),
       ),
     );
