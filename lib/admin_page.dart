@@ -81,73 +81,78 @@ class _AdminPageState extends State<AdminPage> {
             ),
           ),
           child: SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Custom App Bar
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back, color: accentColor, size: 28),
-                        onPressed: () => Navigator.pop(context, _hasChanges),
+            child: Center(
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 800),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Custom App Bar
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+                      child: Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.arrow_back, color: accentColor, size: 28),
+                            onPressed: () => Navigator.pop(context, _hasChanges),
+                          ),
+                          const SizedBox(width: 10),
+                          const Text(
+                            'Administration',
+                            style: TextStyle(
+                              fontSize: 26,
+                              fontWeight: FontWeight.bold,
+                              color: accentColor,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 10),
-                      const Text(
-                        'Administration',
-                        style: TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                          color: accentColor,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                    // Grid of admin options
+                    Expanded(
+                      child: GridView.count(
+                        crossAxisCount: MediaQuery.of(context).size.width > 600 ? 2 : 1,
+                        padding: const EdgeInsets.all(24),
+                        mainAxisSpacing: 20,
+                        crossAxisSpacing: 20,
+                        childAspectRatio: MediaQuery.of(context).size.width > 600 ? 1.5 : 1.0,
+                        children: [
+                          _buildAdminCard(
+                            label: 'Tableau de bord\nCommandes',
+                            icon: Icons.dashboard_rounded,
+                            onTap: () async {
+                              final result = await Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => const AdminDashboardPage()),
+                              );
+                              if (result == true) {
+                                setState(() {
+                                  _hasChanges = true;
+                                });
+                              }
+                            },
+                          ),
+                          _buildAdminCard(
+                            label: 'Gérer le Menu',
+                            icon: Icons.restaurant_menu_rounded,
+                            onTap: () async {
+                              final result = await Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => const ManageMenuPage()),
+                              );
+                              if (result == true) {
+                                setState(() {
+                                  _hasChanges = true;
+                                });
+                              }
+                            },
+                          ),
+                        ],
+                      ).animate().slideY(begin: 0.2, duration: 600.ms, curve: Curves.easeOut).fadeIn(),
+                    ),
+                  ],
                 ),
-                // Grid of admin options
-                Expanded(
-                  child: GridView.count(
-                    crossAxisCount: 2,
-                    padding: const EdgeInsets.all(24),
-                    mainAxisSpacing: 20,
-                    crossAxisSpacing: 20,
-                    children: [
-                      _buildAdminCard(
-                        label: 'Tableau de bord\nCommandes',
-                        icon: Icons.dashboard_rounded,
-                        onTap: () async {
-                          final result = await Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const AdminDashboardPage()),
-                          );
-                          if (result == true) {
-                            setState(() {
-                              _hasChanges = true;
-                            });
-                          }
-                        },
-                      ),
-                      _buildAdminCard(
-                        label: 'Gérer le Menu',
-                        icon: Icons.restaurant_menu_rounded,
-                        onTap: () async {
-                          final result = await Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const ManageMenuPage()),
-                          );
-                          if (result == true) {
-                            setState(() {
-                              _hasChanges = true;
-                            });
-                          }
-                        },
-                      ),
-                      // Add more admin cards here if needed in the future
-                    ],
-                  ).animate().slideY(begin: 0.2, duration: 600.ms, curve: Curves.easeOut).fadeIn(),
-                ),
-              ],
+              ),
             ),
           ),
         ),

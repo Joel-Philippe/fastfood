@@ -159,161 +159,178 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
     }
 
     final orders = _orders!;
-    return ListView.builder(
-      padding: const EdgeInsets.only(top: 8, bottom: 24),
-      itemCount: orders.length,
-      itemBuilder: (context, index) {
-        final order = orders[index];
-        const accentColor = Color(0xFF53c6fd);
+    return Center(
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 1200),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final crossAxisCount = constraints.maxWidth > 900 ? 2 : 1;
+            
+            return GridView.builder(
+              padding: const EdgeInsets.only(top: 8, bottom: 24, left: 8, right: 8),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount,
+                childAspectRatio: constraints.maxWidth > 900 ? 1.5 : 1.1,
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
+              ),
+              itemCount: orders.length,
+              itemBuilder: (context, index) {
+                final order = orders[index];
+                return _buildOrderCard(order, index);
+              },
+            );
+          },
+        ),
+      ),
+    );
+  }
 
-        return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          padding: const EdgeInsets.all(16.0),
-          decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF1E1E1E).withOpacity(0.8) : Colors.white.withOpacity(0.8),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: isDark ? Colors.white10 : Colors.transparent),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              )
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Commande #${order.id.substring(order.id.length - 6)}',
-                      style: TextStyle(
+  Widget _buildOrderCard(Order order, int index) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    const accentColor = Color(0xFF53c6fd);
+
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E1E1E).withOpacity(0.8) : Colors.white.withOpacity(0.8),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: isDark ? Colors.white10 : Colors.transparent),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          )
+        ],
+      ),
+      child: SingleChildScrollView( // Allow scrolling inside card if too long
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    'Commande #${order.id.substring(order.id.length - 6)}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: accentColor.withOpacity(0.8),
+                    ),
+                  ),
+                ),
+                Row(
+                  children: [
+                    const Icon(Icons.euro, color: Colors.green, size: 20),
+                    const SizedBox(width: 4),
+                    Text(
+                      order.totalAmount.toStringAsFixed(2),
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
-                        color: accentColor.withOpacity(0.8),
+                        color: Colors.green,
                       ),
                     ),
+                  ],
+                ),
+              ],
+            ),
+            const Divider(height: 24),
+            Row(
+              children: [
+                Icon(Icons.calendar_today, color: isDark ? Colors.white60 : Colors.black54, size: 16),
+                const SizedBox(width: 8),
+                Text(
+                  DateFormat('dd/MM/yyyy à HH:mm').format(order.orderDate.toLocal()),
+                  style: TextStyle(color: isDark ? Colors.white60 : Colors.black54, fontSize: 14),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(Icons.flag, color: isDark ? Colors.white60 : Colors.black54, size: 16),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: _getStatusColor(order.status).withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  Row(
-                    children: [
-                      const Icon(Icons.euro, color: Colors.green, size: 20),
-                      const SizedBox(width: 4),
-                      Text(
-                        order.totalAmount.toStringAsFixed(2),
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                          color: Colors.green,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              const Divider(height: 24),
-              Row(
-                children: [
-                  Icon(Icons.calendar_today, color: isDark ? Colors.white60 : Colors.black54, size: 16),
-                  const SizedBox(width: 8),
-                  Text(
-                    DateFormat('dd/MM/yyyy à HH:mm').format(order.orderDate.toLocal()),
-                    style: TextStyle(color: isDark ? Colors.white60 : Colors.black54, fontSize: 14),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Icon(Icons.flag, color: isDark ? Colors.white60 : Colors.black54, size: 16),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: _getStatusColor(order.status).withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      _getFrenchStatus(order.status),
-                      style: TextStyle(
-                        color: _getStatusColor(order.status),
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12
-                      ),
+                  child: Text(
+                    _getFrenchStatus(order.status),
+                    style: TextStyle(
+                      color: _getStatusColor(order.status),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12
                     ),
                   ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Articles :',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: isDark ? Colors.white70 : Colors.black54),
-              ),
-              const SizedBox(height: 4),
-              ...order.items.values.map((item) {
-                // Helper to build rows for options and ingredients
-                Widget buildDetailRow(String text, {bool isRemoval = false}) {
-                  return Padding(
-                    padding: const EdgeInsets.only(left: 24, top: 2), // Indent details
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(isRemoval ? '– ' : '+ ', style: TextStyle(color: isRemoval ? Colors.red : Colors.green)),
-                        Expanded(
-                          child: Text(
-                            text,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: isDark ? Colors.white60 : Colors.black54,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
-                List<Widget> details = [];
-
-                // Add selected options
-                item.selectedOptions.forEach((category, options) {
-                  for (var option in options) {
-                    details.add(buildDetailRow('${option.name} (${option.price.toStringAsFixed(2)}€)'));
-                  }
-                });
-
-                // Add excluded ingredients
-                for (var ingredient in item.ingredientsToRemove) {
-                  details.add(buildDetailRow('Sans $ingredient', isRemoval: true));
-                }
-
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Articles :',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: isDark ? Colors.white70 : Colors.black54),
+            ),
+            const SizedBox(height: 4),
+            ...order.items.values.map((item) {
+              Widget buildDetailRow(String text, {bool isRemoval = false}) {
                 return Padding(
-                  padding: const EdgeInsets.only(left: 8.0, top: 8.0),
-                  child: Column(
+                  padding: const EdgeInsets.only(left: 24, top: 2),
+                  child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        '${item.quantity}x ${item.item.name}',
-                        style: TextStyle(
-                          color: isDark ? Colors.white : Colors.black87,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
+                      Text(isRemoval ? '– ' : '+ ', style: TextStyle(color: isRemoval ? Colors.red : Colors.green)),
+                      Expanded(
+                        child: Text(
+                          text,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark ? Colors.white60 : Colors.black54,
+                          ),
                         ),
                       ),
-                      if (details.isNotEmpty)
-                        ...details,
                     ],
                   ),
                 );
-              }),
-            ],
-          ),
-        ).animate().fadeIn(delay: (100 * index).ms, duration: 400.ms, curve: Curves.easeOut);
-      },
-    );
+              }
+
+              List<Widget> details = [];
+              item.selectedOptions.forEach((category, options) {
+                for (var option in options) {
+                  details.add(buildDetailRow('${option.name} (${option.price.toStringAsFixed(2)}€)'));
+                }
+              });
+              for (var ingredient in item.ingredientsToRemove) {
+                details.add(buildDetailRow('Sans $ingredient', isRemoval: true));
+              }
+
+              return Padding(
+                padding: const EdgeInsets.only(left: 8.0, top: 8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${item.quantity}x ${item.item.name}',
+                      style: TextStyle(
+                        color: isDark ? Colors.white : Colors.black87,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    if (details.isNotEmpty) ...details,
+                  ],
+                ),
+              );
+            }),
+          ],
+        ),
+      ),
+    ).animate().fadeIn(delay: (100 * index).ms, duration: 400.ms, curve: Curves.easeOut);
   }
 
   String _getFrenchStatus(String status) {

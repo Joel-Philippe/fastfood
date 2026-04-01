@@ -87,17 +87,16 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
 
     _selectedOptions.forEach((category, options) {
       if (category == 'sizeOptions' && options.isNotEmpty) {
+        // The price of the selected size determines the base price
         sizePrice = options.first.price;
       } else {
+        // Other options (extras, etc.) are additive
         otherOptionsPrice += options.fold(0.0, (sum, option) => sum + (option.price > 0 ? option.price : 0.0));
       }
     });
 
-    // If a size is selected, its price REPLACES the base price.
-    // Otherwise, we use the original menuItem price.
-    double base = sizePrice ?? widget.menuItem.price;
-    _singleItemPrice = base + otherOptionsPrice;
-
+    // Use selected size price as base, otherwise use default item price
+    _singleItemPrice = (sizePrice ?? widget.menuItem.price) + otherOptionsPrice;
     setState(() {
       _totalPrice = _singleItemPrice * _quantity;
     });

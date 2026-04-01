@@ -112,56 +112,70 @@ class _ProfilePageState extends State<ProfilePage> {
       end: Alignment.centerRight,
     );
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Icon(Icons.person, size: 80, color: accentColor),
-        const SizedBox(height: 20),
-        Text(
-          'Bienvenue, ${_userName ?? ''}!',
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: accentColor),
-        ),
-        const SizedBox(height: 50),
-        GradientButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const OrderHistoryPage()),
-            );
-          },
-          text: 'Mes Commandes',
-          icon: Icons.receipt_long,
-          gradient: buttonGradient,
-        ),
-        const SizedBox(height: 20),
-        if (_userRole == 'admin')
-          GradientButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const AdminPage()),
-              ).then((_) => _checkAuthStatus());
-            },
-            text: 'Panneau d\'administration',
-            icon: Icons.admin_panel_settings,
-            gradient: buttonGradient,
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Icon(Icons.person, size: 80, color: accentColor),
+          const SizedBox(height: 20),
+          Text(
+            'Bienvenue, ${_userName ?? ''}!',
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: accentColor),
           ),
-        const SizedBox(height: 20),
-        GradientButton(
-          onPressed: _showChangePasswordDialog,
-          text: 'Modifier mon mot de passe',
-          icon: Icons.lock_outline,
-          gradient: buttonGradient,
-        ),
-        const SizedBox(height: 20),
-        _buildOutlinedButton(
-          onPressed: _logout,
-          text: 'Se déconnecter',
-          color: accentColor,
-        ),
-      ],
+          const SizedBox(height: 50),
+          // Limitation de la largeur des boutons pour PC
+          Center(
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 400),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  GradientButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const OrderHistoryPage()),
+                      );
+                    },
+                    text: 'Mes Commandes',
+                    icon: Icons.receipt_long,
+                    gradient: buttonGradient,
+                  ),
+                  const SizedBox(height: 20),
+                  if (_userRole == 'admin') ...[
+                    GradientButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const AdminPage()),
+                        ).then((_) => _checkAuthStatus());
+                      },
+                      text: 'Panneau d\'administration',
+                      icon: Icons.admin_panel_settings,
+                      gradient: buttonGradient,
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                  GradientButton(
+                    onPressed: _showChangePasswordDialog,
+                    text: 'Modifier mon mot de passe',
+                    icon: Icons.lock_outline,
+                    gradient: buttonGradient,
+                  ),
+                  const SizedBox(height: 20),
+                  _buildOutlinedButton(
+                    onPressed: _logout,
+                    text: 'Se déconnecter',
+                    color: accentColor,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
