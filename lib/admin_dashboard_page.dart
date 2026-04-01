@@ -326,25 +326,30 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
         ),
       );
     }
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final crossAxisCount = constraints.maxWidth > 900 ? 2 : 1;
-        
-        return GridView.builder(
-          padding: const EdgeInsets.all(8),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: crossAxisCount,
-            childAspectRatio: constraints.maxWidth > 900 ? 1.8 : 1.3,
-            mainAxisSpacing: 8,
-            crossAxisSpacing: 8,
-          ),
-          itemCount: filteredOrders.length,
-          itemBuilder: (context, index) {
-            final order = filteredOrders[index];
-            return _buildOrderCard(order);
+    return Center(
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 1400), // Largeur max pour PC
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final crossAxisCount = constraints.maxWidth > 1100 ? 3 : (constraints.maxWidth > 700 ? 2 : 1);
+            
+            return GridView.builder(
+              padding: const EdgeInsets.all(16),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount,
+                childAspectRatio: constraints.maxWidth > 1100 ? 1.4 : (constraints.maxWidth > 700 ? 1.3 : 1.1),
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
+              ),
+              itemCount: filteredOrders.length,
+              itemBuilder: (context, index) {
+                final order = filteredOrders[index];
+                return _buildOrderCard(order);
+              },
+            );
           },
-        );
-      }
+        ),
+      ),
     );
   }
 

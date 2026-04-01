@@ -203,6 +203,7 @@ class _ManageCategoriesPageState extends State<ManageCategoriesPage> {
               elevation: 0,
               backgroundColor: Colors.transparent,
               child: Container(
+                constraints: const BoxConstraints(maxWidth: 600), // Max width for dialog
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(

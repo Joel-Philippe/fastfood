@@ -161,7 +161,12 @@ class _ManageMenuItemPageState extends State<ManageMenuItemPage> {
               Expanded(
                 child: _isLoading && _availableCategories.isEmpty
                     ? const Center(child: CircularProgressIndicator(color: Color(0xFF53c6fd)))
-                    : _buildForm(),
+                    : Center(
+                        child: Container(
+                          constraints: const BoxConstraints(maxWidth: 800),
+                          child: _buildForm(),
+                        ),
+                      ),
               ),
             ],
           ),

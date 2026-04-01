@@ -369,6 +369,7 @@ class _ManageMenuPageState extends State<ManageMenuPage> with SingleTickerProvid
           elevation: 0,
           backgroundColor: Colors.transparent,
           child: Container(
+            constraints: const BoxConstraints(maxWidth: 500),
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               gradient: LinearGradient(

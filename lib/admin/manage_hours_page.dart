@@ -93,53 +93,72 @@ class _ManageHoursPageState extends State<ManageHoursPage> {
           return Column(
             children: [
               Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.all(16.0),
-                  children: _dayOrder.keys.map((dayKey) {
-                    final dayHours = _currentSettings!.hours[dayKey]!;
-                    final dayName = _dayOrder[dayKey]!;
+                child: Center(
+                  child: Container(
+                    constraints: const BoxConstraints(maxWidth: 1000),
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final crossAxisCount = constraints.maxWidth > 700 ? 2 : 1;
+                        return GridView.builder(
+                          padding: const EdgeInsets.all(16.0),
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: crossAxisCount,
+                            childAspectRatio: crossAxisCount == 2 ? 2.5 : 2.0,
+                            mainAxisSpacing: 12,
+                            crossAxisSpacing: 12,
+                          ),
+                          itemCount: _dayOrder.length,
+                          itemBuilder: (context, index) {
+                            final dayKey = _dayOrder.keys.elementAt(index);
+                            final dayHours = _currentSettings!.hours[dayKey]!;
+                            final dayName = _dayOrder[dayKey]!;
 
-                    return Card(
-                      margin: const EdgeInsets.symmetric(vertical: 8),
-                      elevation: 2,
-                      shadowColor: Colors.black.withOpacity(0.1),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      color: isDark ? const Color(0xFF1E1E1E).withOpacity(0.8) : Colors.white.withOpacity(0.8),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(dayName, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black54)),
-                                Switch(
-                                  value: dayHours.isOpen,
-                                  onChanged: (bool value) => setState(() => dayHours.isOpen = value),
-                                  activeColor: accentColor,
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            AnimatedOpacity(
-                              opacity: dayHours.isOpen ? 1.0 : 0.4,
-                              duration: const Duration(milliseconds: 300),
-                              child: IgnorePointer(
-                                ignoring: !dayHours.isOpen,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            return Card(
+                              margin: EdgeInsets.zero,
+                              elevation: 2,
+                              shadowColor: Colors.black.withOpacity(0.1),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              color: isDark ? const Color(0xFF1E1E1E).withOpacity(0.8) : Colors.white.withOpacity(0.8),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    _buildTimeSelector('Ouverture', dayHours.openTime, () => _selectTime(context, dayKey, true)),
-                                    _buildTimeSelector('Fermeture', dayHours.closeTime, () => _selectTime(context, dayKey, false)),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(dayName, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black54)),
+                                        Switch(
+                                          value: dayHours.isOpen,
+                                          onChanged: (bool value) => setState(() => dayHours.isOpen = value),
+                                          activeColor: accentColor,
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    AnimatedOpacity(
+                                      opacity: dayHours.isOpen ? 1.0 : 0.4,
+                                      duration: const Duration(milliseconds: 300),
+                                      child: IgnorePointer(
+                                        ignoring: !dayHours.isOpen,
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                          children: [
+                                            _buildTimeSelector('Ouverture', dayHours.openTime, () => _selectTime(context, dayKey, true)),
+                                            _buildTimeSelector('Fermeture', dayHours.closeTime, () => _selectTime(context, dayKey, false)),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }).toList(),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
                 ),
               ),
               Padding(

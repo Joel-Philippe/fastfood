@@ -227,6 +227,7 @@ class _ManageOptionsPageState extends State<ManageOptionsPage> {
           elevation: 0,
           backgroundColor: Colors.transparent,
           child: Container(
+            constraints: const BoxConstraints(maxWidth: 500),
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               gradient: LinearGradient(
