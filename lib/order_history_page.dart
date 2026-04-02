@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:fast_food_app/services/auth_service.dart';
 import 'package:fast_food_app/services/mongo_service.dart';
-import 'package:fast_food_app/services/auth_service.dart';
 import 'package:fast_food_app/services/websocket_service.dart';
 import 'package:fast_food_app/order_model.dart';
 import 'package:intl/intl.dart';

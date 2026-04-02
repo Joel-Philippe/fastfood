@@ -16,7 +16,6 @@ import 'package:fast_food_app/widgets/category_card_widget.dart';
 import 'package:fast_food_app/profile_page.dart';
 import 'package:fast_food_app/widgets/restaurant_closed_widget.dart';
 import 'package:fast_food_app/services/websocket_service.dart';
-import 'package:fast_food_app/widgets/gradient_text.dart';
 
 class HomePage extends StatefulWidget {
   final MongoService? mongoService;

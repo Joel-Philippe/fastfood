@@ -1,6 +1,4 @@
 import 'package:fast_food_app/app_config.dart';
-import 'package:fast_food_app/widgets/gradient_text.dart';
-import 'package:fast_food_app/menu_customization_provider.dart';
 import 'package:fast_food_app/services/mongo_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -170,33 +168,38 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF121212) : const Color(0xFFF8F9FA),
-      body: Stack(
-        children: [
-          CustomScrollView(
-            controller: _scrollController,
-            slivers: [
-              _buildAppBar(isDark),
-              SliverPadding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: isLargeScreen ? size.width * 0.2 : 16,
-                  vertical: 24,
-                ),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
-                    _buildHeader(isDark),
-                    const SizedBox(height: 24),
-                    ...widget.menuItem.optionTypes.map((type) => _buildDynamicOptionSection(type)),
-                    if (widget.menuItem.removableIngredients.isNotEmpty)
-                      _buildIngredientsToRemoveSection(),
-                    _buildQuantitySelector(),
-                    const SizedBox(height: 100), // Space for bottom button
-                  ]),
-                ),
+      body: Center(
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 800),
+          child: Stack(
+            children: [
+              CustomScrollView(
+                controller: _scrollController,
+                slivers: [
+                  _buildAppBar(isDark),
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 24,
+                    ),
+                    sliver: SliverList(
+                      delegate: SliverChildListDelegate([
+                        _buildHeader(isDark),
+                        const SizedBox(height: 24),
+                        ...widget.menuItem.optionTypes.map((type) => _buildDynamicOptionSection(type)),
+                        if (widget.menuItem.removableIngredients.isNotEmpty)
+                          _buildIngredientsToRemoveSection(),
+                        _buildQuantitySelector(),
+                        const SizedBox(height: 100),
+                      ]),
+                    ),
+                  ),
+                ],
               ),
+              _buildBottomAction(isDark, isLargeScreen, size),
             ],
           ),
-          _buildBottomAction(isDark, isLargeScreen, size),
-        ],
+        ),
       ),
     );
   }
@@ -306,7 +309,7 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
                     const Text(' *', style: TextStyle(color: Colors.red)),
                   const Spacer(),
                   if (currentSelections.isNotEmpty)
-                    Icon(Icons.check_circle, color: Colors.green, size: 20),
+                    const Icon(Icons.check_circle, color: Colors.green, size: 20),
                 ],
               ),
             ),
@@ -327,7 +330,11 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
                         if (isSelected) {
                           _selectedOptions[optionType]!.removeWhere((s) => s.id == opt.id);
                         } else {
-                          _selectedOptions[optionType] = [...currentSelections, opt];
+                          if (_selectedOptions[optionType] == null) {
+                            _selectedOptions[optionType] = [opt];
+                          } else {
+                            _selectedOptions[optionType] = [..._selectedOptions[optionType]!, opt];
+                          }
                         }
                       }
                       _updatePrices();
@@ -459,22 +466,15 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (ctx) => AlertDialog(
         backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
         title: const Text('Sélection requise'),
         content: Text(message),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('OK')),
-        ],
-      ),
-    );
-  }
-}
-      backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-        title: const Text('Sélection requise'),
-        content: Text(message),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('OK')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('OK'),
+          ),
         ],
       ),
     );
