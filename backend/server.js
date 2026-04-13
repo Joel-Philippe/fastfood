@@ -148,19 +148,25 @@ const findWebPath = () => {
     path.join(process.cwd(), 'build', 'web'),
     path.resolve(__dirname, 'build', 'web'),
     path.resolve(__dirname, '..', 'build', 'web'),
-    '/app/build/web'
+    '/app/build/web',
+    path.join(__dirname, '..', 'build', 'web')
   ];
   
-  console.log('Checking for web path in:', possiblePaths);
+  console.log('--- DIAGNOSTIC DES CHEMINS WEB ---');
+  console.log('CWD:', process.cwd());
+  console.log('__dirname:', __dirname);
   
   for (const p of possiblePaths) {
     try {
-      if (fs.existsSync(p) && fs.existsSync(path.join(p, 'index.html'))) {
-        console.log(`FOUND VALID WEB PATH: ${p}`);
+      const exists = fs.existsSync(p);
+      const hasIndex = exists && fs.existsSync(path.join(p, 'index.html'));
+      console.log(`Path: ${p} | Exists: ${exists} | Has index.html: ${hasIndex}`);
+      if (hasIndex) {
+        console.log(`>>> SUCCESS: FOUND VALID WEB PATH AT: ${p}`);
         return p;
       }
     } catch (e) {
-      // Ignore errors for individual paths
+      console.log(`Error checking path ${p}: ${e.message}`);
     }
   }
   return null;
