@@ -8,7 +8,14 @@ const User = require('../models/User'); // Make sure the path is correct
 const authMiddleware = require('../middleware/authMiddleware'); // ADDED: Import authMiddleware
 
 const router = express.Router();
-const resend = new Resend(process.env.RESEND_API_KEY);
+
+// Initialize Resend safely
+let resend;
+if (process.env.RESEND_API_KEY) {
+  resend = new Resend(process.env.RESEND_API_KEY);
+} else {
+  console.error('WARNING: RESEND_API_KEY is missing. Email sending will not work.');
+}
 
 // --- Registration Route (optional, to create the first admin) ---
 // POST /api/auth/register
