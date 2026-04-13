@@ -70,148 +70,19 @@ app.use('/api/upload', require('./routes/upload'));
 app.use('/api/settings', require('./routes/settings'));
 app.use('/api/info-pages', require('./routes/infoPages'));
 
-// DEBUG ROUTE - A supprimer plus tard
-app.get('/api/debug-files', (req, res) => {
-  const results = {};
-  const pathsToTest = {
-    'cwd': process.cwd(),
-    '__dirname': __dirname,
-    'build_web': path.resolve(__dirname, '..', 'build', 'web'),
-    'app_root': path.resolve(__dirname, '..')
-  };
-
-  for (const [name, p] of Object.entries(pathsToTest)) {
-    try {
-      results[name] = {
-        path: p,
-        exists: fs.existsSync(p),
-        files: fs.existsSync(p) ? fs.readdirSync(p).slice(0, 10) : []
-      };
-    } catch (e) {
-      results[name] = { error: e.message };
-    }
-  }
-  res.json(results);
-});
-
-const https = require('https');
-const axios = require('axios');
-
-app.get('/api/image-proxy', async (req, res) => {
-      try {
-        const imageUrl = req.query.url;
-        if (!imageUrl) {
-          return res.status(400).send('Image URL is required');
-        }
-  
-        console.log(`Proxying image request for: ${imageUrl}`);
-  
-        const response = await axios({
-          method: 'GET',
-          url: imageUrl,
-          responseType: 'stream',
-          timeout: 30000, // 30 seconds timeout
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-          }
-        });
-        console.log(`Successfully fetched image stream from: ${imageUrl}`);
-    // Pass through relevant headers
-    res.setHeader('Content-Type', response.headers['content-type']);
-    res.setHeader('Content-Length', response.headers['content-length']);
-    
-    response.data.pipe(res);
-
-      } catch (error) {
-        console.error(`Error in image proxy for url: ${req.query.url}`);
-        if (error.response) {
-          // The request was made and the server responded with a status code
-          // that falls out of the range of 2xx
-          console.error('Response data:', error.response.data);
-          console.error('Response status:', error.response.status);
-          console.error('Response headers:', error.response.headers);
-        } else if (error.request) {
-          // The request was made but no response was received
-          console.error('No response received:', error.request);
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          console.error('Error message:', error.message);
-        }
-        res.status(500).send('Error fetching image');
-      }});
-
-
-// Serve static files from the Flutter Web build directory
-const findWebPath = () => {
-  const isDocker = fs.existsSync('/.dockerenv') || fs.existsSync('/proc/1/cgroup') && fs.readFileSync('/proc/1/cgroup', 'utf8').includes('docker');
-  
-  const possiblePaths = [
-    path.resolve(process.cwd(), 'build', 'web'),
-    path.join(process.cwd(), 'build', 'web'),
-    path.resolve(__dirname, 'build', 'web'),
-    path.resolve(__dirname, '..', 'build', 'web'),
-    '/app/build/web',
-    path.join(__dirname, '..', 'build', 'web')
-  ];
-  
-  console.log('--- DIAGNOSTIC DES CHEMINS WEB ---');
-  console.log('CWD:', process.cwd());
-  console.log('__dirname:', __dirname);
-  console.log('Docker détecté:', isDocker);
-  
-  if (!isDocker && process.env.RENDER) {
-    console.error('ATTENTION: Vous êtes sur Render mais Docker ne semble pas être utilisé.');
-    console.error('Le dossier build/web ne sera JAMAIS créé sans Docker.');
-  }
-  
-  for (const p of possiblePaths) {
-    try {
-      const exists = fs.existsSync(p);
-      const hasIndex = exists && fs.existsSync(path.join(p, 'index.html'));
-      console.log(`Path: ${p} | Exists: ${exists} | Has index.html: ${hasIndex}`);
-      if (hasIndex) {
-        console.log(`>>> SUCCESS: FOUND VALID WEB PATH AT: ${p}`);
-        return p;
-      }
-    } catch (e) {
-      console.log(`Error checking path ${p}: ${e.message}`);
-    }
-  }
-  return null;
-};
-
-const webPath = findWebPath();
-if (webPath) {
-  console.log(`Serving static files from detected path: ${webPath}`);
-  app.use(express.static(webPath));
-} else {
-  console.error(`ERROR: Static files directory (build/web) not found in any expected location.`);
-}
-
-// Catch-all middleware to serve the Flutter Web app for any non-API requests
-app.use((req, res, next) => {
-  if (req.originalUrl.startsWith('/api')) {
-    return next();
-  }
-  
-  if (req.originalUrl.match(/\.(js|json|png|jpg|jpeg|gif|ico|svg|css|mp4|mp3|otf|ttf|wasm)$/)) {
-    return res.status(404).send('Not found');
-  }
-  
-  const currentWebPath = findWebPath();
-  if (currentWebPath) {
-    const indexPath = path.join(currentWebPath, 'index.html');
-    res.sendFile(indexPath);
-  } else {
-    console.error('CRITICAL: index.html not found during catch-all request.');
-    res.status(500).send(`Frontend error: index.html missing. Please ensure your build process completed successfully.`);
-  }
+// Root route for API health check
+app.get('/', (req, res) => {
+  res.json({
+    status: 'API is running',
+    message: 'Fast Food App Backend API',
+    timestamp: new Date()
+  });
 });
 
 // Error Handling Middleware
 app.use((err, req, res, next) => {
   console.error('SERVER ERROR:', err.stack);
-  res.status(500).send(`Server Error: ${err.message}`);
+  res.status(500).json({ error: 'Server Error', message: err.message });
 });
 
 const http = require('http');
@@ -224,5 +95,5 @@ createWebSocketServer(server);
 
 // Start the server
 server.listen(PORT, HOST, () => {
-  console.log(`Server (HTTP and WebSocket) running on http://${HOST}:${PORT}`);
+  console.log(`API Server (HTTP and WebSocket) running on http://${HOST}:${PORT}`);
 });
