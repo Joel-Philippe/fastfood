@@ -143,6 +143,8 @@ app.get('/api/image-proxy', async (req, res) => {
 
 // Serve static files from the Flutter Web build directory
 const findWebPath = () => {
+  const isDocker = fs.existsSync('/.dockerenv') || fs.existsSync('/proc/1/cgroup') && fs.readFileSync('/proc/1/cgroup', 'utf8').includes('docker');
+  
   const possiblePaths = [
     path.resolve(process.cwd(), 'build', 'web'),
     path.join(process.cwd(), 'build', 'web'),
@@ -155,6 +157,12 @@ const findWebPath = () => {
   console.log('--- DIAGNOSTIC DES CHEMINS WEB ---');
   console.log('CWD:', process.cwd());
   console.log('__dirname:', __dirname);
+  console.log('Docker détecté:', isDocker);
+  
+  if (!isDocker && process.env.RENDER) {
+    console.error('ATTENTION: Vous êtes sur Render mais Docker ne semble pas être utilisé.');
+    console.error('Le dossier build/web ne sera JAMAIS créé sans Docker.');
+  }
   
   for (const p of possiblePaths) {
     try {
