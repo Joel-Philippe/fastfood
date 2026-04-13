@@ -41,18 +41,18 @@ FROM node:18-slim
 
 WORKDIR /app
 
-# Copie des fichiers compilés du frontend
-COPY --from=build-env /home/flutteruser/app/build/web ./build/web
-
-# Copie du backend
-COPY ./backend ./backend
-
-# Installation des dépendances du backend
-WORKDIR /app/backend
+# Copie du package.json et installation en premier pour profiter du cache Docker
+COPY ./backend/package*.json ./
 RUN npm install --production
+
+# Copie du reste du backend à la racine de /app
+COPY ./backend ./
+
+# Copie des fichiers compilés du frontend dans /app/build/web
+COPY --from=build-env /home/flutteruser/app/build/web ./build/web
 
 # Exposition du port
 EXPOSE 10000
 
-# Commande de démarrage
+# Commande de démarrage (on est déjà dans /app)
 CMD ["node", "server.js"]

@@ -144,11 +144,11 @@ app.get('/api/image-proxy', async (req, res) => {
 // Serve static files from the Flutter Web build directory
 const findWebPath = () => {
   const possiblePaths = [
-    path.resolve(__dirname, '..', 'build', 'web'),
     path.resolve(process.cwd(), 'build', 'web'),
     path.join(process.cwd(), 'build', 'web'),
-    '/app/build/web', // Docker absolute path
-    path.resolve(__dirname, 'build', 'web')
+    path.resolve(__dirname, 'build', 'web'),
+    path.resolve(__dirname, '..', 'build', 'web'),
+    '/app/build/web'
   ];
   
   console.log('Checking for web path in:', possiblePaths);
@@ -156,6 +156,7 @@ const findWebPath = () => {
   for (const p of possiblePaths) {
     try {
       if (fs.existsSync(p) && fs.existsSync(path.join(p, 'index.html'))) {
+        console.log(`FOUND VALID WEB PATH: ${p}`);
         return p;
       }
     } catch (e) {
