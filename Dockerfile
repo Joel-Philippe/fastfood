@@ -51,8 +51,8 @@ COPY ./backend ./
 # Copie des fichiers compilés du frontend dans /app/build/web
 COPY --from=build-env /home/flutteruser/app/build/web ./build/web
 
-# Exposition du port
+# Exposition du port (Render utilise souvent 10000 par défaut)
 EXPOSE 10000
 
-# Commande de démarrage (on est déjà dans /app)
+# Commande de démarrage avec gestion du port via variable d'environnement
 CMD ["node", "server.js"]
