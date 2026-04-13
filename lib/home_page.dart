@@ -402,10 +402,33 @@ class _HomePageState extends State<HomePage> {
           heroTag: 'cart_fab',
           onPressed: () => showModalBottomSheet(context: context, isScrollControlled: true, backgroundColor: Colors.transparent, builder: (context) => const CartBottomSheet()),
           backgroundColor: const Color(0xFF53c6fd),
-          child: Stack(alignment: Alignment.center, children: [
-            const Icon(Icons.shopping_cart, color: Colors.white),
-            if (cart.itemCount > 0) Positioned(top: -4, right: -4, child: Container(padding: const EdgeInsets.all(4), decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle), child: Text('${cart.itemCount}', style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)))),
-          ]),
+          child: Stack(
+            alignment: Alignment.center,
+            clipBehavior: Clip.none, // Permet au badge de dépasser sans être coupé
+            children: [
+              const Icon(Icons.shopping_cart, color: Colors.white, size: 28),
+              if (cart.itemCount > 0)
+                Positioned(
+                  top: -6,
+                  right: -6,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: const Color(0xFF53c6fd), width: 1.5), // Ajout d'une bordure pour mieux le détacher
+                    ),
+                    constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+                    child: Center(
+                      child: Text(
+                        '${cart.itemCount}',
+                        style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ) : const SizedBox.shrink(),
       );
     });

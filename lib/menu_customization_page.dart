@@ -374,19 +374,25 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              label,
-              style: TextStyle(
-                color: isSelected ? Colors.white : (isDark ? Colors.white : Colors.black87),
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            Flexible(
+              child: Text(
+                label,
+                style: TextStyle(
+                  color: isSelected ? Colors.white : (isDark ? Colors.white : Colors.black87),
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
+                softWrap: true, // Autorise le retour à la ligne si le chip devient trop large
               ),
             ),
             if (price > 0)
-              Text(
-                ' (+${price.toStringAsFixed(2)}€)',
-                style: TextStyle(
-                  color: isSelected ? Colors.white.withOpacity(0.8) : Colors.grey,
-                  fontSize: 12,
+              Padding(
+                padding: const EdgeInsets.only(left: 4.0),
+                child: Text(
+                  ' (+${price.toStringAsFixed(2)}€)',
+                  style: TextStyle(
+                    color: isSelected ? Colors.white.withOpacity(0.8) : Colors.grey,
+                    fontSize: 12,
+                  ),
                 ),
               ),
           ],

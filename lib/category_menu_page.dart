@@ -259,35 +259,37 @@ class _CategoryMenuPageState extends State<CategoryMenuPage> with SingleTickerPr
                       alignment: Alignment.center,
                       clipBehavior: Clip.none,
                       children: [
-                        const Icon(Icons.shopping_cart, color: Colors.white),
+                        const Icon(Icons.shopping_cart, color: Colors.white, size: 28),
                         Positioned(
-                          top: -4,
-                          right: -4,
+                          top: -6,
+                          right: -6,
                           child: Container(
                             padding: const EdgeInsets.all(4),
                             decoration: BoxDecoration(
                               color: Colors.red,
                               shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white, width: 1.5),
+                              border: Border.all(color: Colors.white.withOpacity(0.5), width: 1.5),
                             ),
                             constraints: const BoxConstraints(
-                              minWidth: 22,
-                              minHeight: 22,
+                              minWidth: 18,
+                              minHeight: 18,
                             ),
                             child: AnimatedSwitcher(
                               duration: const Duration(milliseconds: 200),
                               transitionBuilder: (Widget child, Animation<double> animation) {
                                 return ScaleTransition(scale: animation, child: child);
                               },
-                              child: Text(
-                                '${cart.itemCount}',
+                              child: Center(
                                 key: ValueKey<int>(cart.itemCount),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
+                                child: Text(
+                                  '${cart.itemCount}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  textAlign: TextAlign.center,
                                 ),
-                                textAlign: TextAlign.center,
                               ),
                             ),
                           ),

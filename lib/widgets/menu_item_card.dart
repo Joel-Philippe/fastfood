@@ -99,10 +99,11 @@ class _MenuItemCardState extends State<MenuItemCard> {
                       // Text content
                       Padding(
                         padding: const EdgeInsets.all(10.0),
-                        child: SizedBox(
-                          height: 80, // Fixed height for alignment
+                        child: Container(
+                          constraints: const BoxConstraints(minHeight: 90), // Minimum height for alignment
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               // Price
                               Text(
@@ -114,19 +115,17 @@ class _MenuItemCardState extends State<MenuItemCard> {
                               Text(
                                 widget.item.name,
                                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-                                maxLines: 1,
+                                maxLines: 2, // Allow up to 2 lines for title
                                 overflow: TextOverflow.ellipsis,
                               ),
                               const SizedBox(height: 4),
                               // Description
                               if (widget.item.description != null && widget.item.description!.isNotEmpty)
-                                Expanded(
-                                  child: Text(
-                                    widget.item.description!,
-                                    style: const TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.w500),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
+                                Text(
+                                  widget.item.description!,
+                                  style: const TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.w500),
+                                  maxLines: 4, // Allow up to 4 lines for description
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                             ],
                           ),

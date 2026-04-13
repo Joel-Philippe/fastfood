@@ -36,10 +36,11 @@ router.post(
   '/create-checkout-session',
   async (req, res) => {
     try {
-      const { amount, currency, success_url, cancel_url, items_summary, metadata } = req.body;
+      const { amount, currency, success_url, cancel_url, items_summary, metadata, customer_email, customer_name, address } = req.body;
 
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
+        customer_email: customer_email,
         line_items: [
           {
             price_data: {
@@ -57,6 +58,10 @@ router.post(
         success_url: success_url,
         cancel_url: cancel_url,
         metadata: metadata || {},
+        billing_address_collection: 'required',
+        shipping_address_collection: {
+          allowed_countries: ['FR'],
+        },
       });
 
       res.json({ url: session.url, id: session.id });

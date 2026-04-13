@@ -159,18 +159,28 @@ class _CheckoutPageState extends State<CheckoutPage> {
             .map((item) => "${item.quantity}x ${item.item.name}")
             .join(", ");
 
+        final userEmail = await _authService.getUserEmail();
+
         final response = await http.post(
           Uri.parse('${AppConfig.baseUrl}/api/stripe/create-checkout-session'),
           headers: {'Content-Type': 'application/json'},
           body: json.encode({
             'amount': (cart.totalAmount * 100).toInt(),
             'currency': 'eur',
+            'customer_email': userEmail,
+            'customer_name': _nameController.text,
+            'address': {
+              'line1': _streetController.text,
+              'city': _cityController.text,
+              'postal_code': _postalCodeController.text,
+              'country': 'FR',
+            },
             'metadata': {
               'orderId': orderId,
             },
             // Using absolute URLs to avoid dart:html dependency for now
-            'success_url': 'https://fastfood-fss9.onrender.com/#/checkout?session_id={CHECKOUT_SESSION_ID}&order_id=$orderId',
-            'cancel_url': 'https://fastfood-fss9.onrender.com/#/checkout',
+            'success_url': 'https://fastfood-fss9.onrender.com/checkout?session_id={CHECKOUT_SESSION_ID}&order_id=$orderId',
+            'cancel_url': 'https://fastfood-fss9.onrender.com/checkout',
             'items_summary': itemsSummary,
           }),
         );

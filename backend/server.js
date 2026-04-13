@@ -146,13 +146,20 @@ const findWebPath = () => {
   const possiblePaths = [
     path.resolve(__dirname, '..', 'build', 'web'),
     path.resolve(process.cwd(), 'build', 'web'),
+    path.join(process.cwd(), 'build', 'web'),
     '/app/build/web', // Docker absolute path
     path.resolve(__dirname, 'build', 'web')
   ];
   
+  console.log('Checking for web path in:', possiblePaths);
+  
   for (const p of possiblePaths) {
-    if (fs.existsSync(p) && fs.existsSync(path.join(p, 'index.html'))) {
-      return p;
+    try {
+      if (fs.existsSync(p) && fs.existsSync(path.join(p, 'index.html'))) {
+        return p;
+      }
+    } catch (e) {
+      // Ignore errors for individual paths
     }
   }
   return null;
