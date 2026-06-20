@@ -1,17 +1,63 @@
 const express = require('express');
 const router = express.Router();
+const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const Order = require('../models/Order');
 const MenuItem = require('../models/MenuItem'); // Needed to populate order items
 const authMiddleware = require('../middleware/authMiddleware');
 const authorizeRoles = require('../middleware/authorizeRoles');
-const { sendUpdateToUser, broadcastToAdmins } = require('../websocket');
+const { sendUpdateToUser, sendUpdateToTrackingToken, broadcastToAdmins } = require('../websocket');
+
+function optionalAuth(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    req.userData = null;
+    return next();
+  }
+
+  try {
+    const token = authHeader.split(' ')[1];
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    req.userData = { userId: decodedToken.userId, role: decodedToken.role };
+  } catch (error) {
+    req.userData = null;
+  }
+  next();
+}
+
+function getPublicOrder(order) {
+  const plainOrder = order.toObject ? order.toObject() : order;
+  return {
+    _id: plainOrder._id,
+    customerName: plainOrder.customerName,
+    customerPhone: plainOrder.customerPhone,
+    orderType: plainOrder.orderType,
+    address: plainOrder.address,
+    arrivalTime: plainOrder.arrivalTime,
+    items: plainOrder.items,
+    totalAmount: plainOrder.totalAmount,
+    orderDate: plainOrder.orderDate,
+    status: plainOrder.status,
+    paymentStatus: plainOrder.paymentStatus,
+    trackingToken: plainOrder.trackingToken,
+  };
+}
+
+async function generateTrackingToken() {
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const token = crypto.randomBytes(24).toString('hex');
+    const existing = await Order.exists({ trackingToken: token });
+    if (!existing) return token;
+  }
+  throw new Error('Unable to generate tracking token');
+}
 
 // POST a new order
 router.post(
   '/',
   [
-    authMiddleware,
+    optionalAuth,
     [
       body('items', 'Items are required').isArray({ min: 1 }),
       body('items.*.itemId', 'Item ID is required').isMongoId(),
@@ -19,6 +65,8 @@ router.post(
       body('items.*.excludedIngredients').optional().isArray(),
       body('totalAmount', 'Total price is required').isNumeric(),
       body('customerName', 'Customer name is required').not().isEmpty(),
+      body('customerPhone').optional().isString(),
+      body('paymentStatus').optional().isIn(['pending', 'paid', 'failed', 'refunded']),
       body('orderType', 'Order type is required').isIn(['takeaway', 'eat_in', 'delivery']),
       body('arrivalTime').optional().isString(),
       // Conditional validation for delivery address
@@ -35,7 +83,7 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { items, totalAmount, customerName, orderType, arrivalTime, address } = req.body;
+    const { items, totalAmount, customerName, customerPhone, orderType, arrivalTime, address, paymentStatus } = req.body;
 
     try {
       const orderItems = await Promise.all(items.map(async (item) => {
@@ -57,12 +105,15 @@ router.post(
       }));
 
       const orderData = {
-        userId: req.userData.userId, // Link the order to the logged-in user
+        userId: req.userData?.userId,
         customerName,
+        customerPhone,
+        trackingToken: await generateTrackingToken(),
         orderType,
         arrivalTime,
         items: orderItems,
         totalAmount,
+        paymentStatus: paymentStatus || 'pending',
         orderDate: new Date(), // Set server time
       };
 
@@ -74,11 +125,12 @@ router.post(
 
       const newOrder = await order.save();
       
-      // Notify all connected admins about the new order
-      broadcastToAdmins({
-        type: 'NEW_ORDER',
-        order: newOrder.toObject(),
-      });
+      if (newOrder.paymentStatus === 'paid') {
+        broadcastToAdmins({
+          type: 'NEW_ORDER',
+          order: newOrder.toObject(),
+        });
+      }
 
       res.status(201).json(newOrder.toObject());
     } catch (err) {
@@ -87,6 +139,20 @@ router.post(
     }
   }
 );
+
+// Public order tracking endpoint. The tracking token is unguessable and does not require login.
+router.get('/track/:trackingToken', async (req, res) => {
+  try {
+    const order = await Order.findOne({ trackingToken: req.params.trackingToken });
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+    res.json(getPublicOrder(order));
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+});
 
 // GET the current user's orders
 router.get('/my-orders', authMiddleware, async (req, res) => {
@@ -102,7 +168,7 @@ router.get('/my-orders', authMiddleware, async (req, res) => {
 // GET all orders (Admin only)
 router.get('/', authMiddleware, authorizeRoles('admin'), async (req, res) => {
   try {
-    const orders = await Order.find().sort({ orderDate: -1 });
+    const orders = await Order.find({ paymentStatus: 'paid' }).sort({ orderDate: -1 });
     const plainOrders = orders.map(o => o.toObject());
 
     // ### START DEBUG LOGGING ###
@@ -180,6 +246,14 @@ router.patch(
         
         // 2. Broadcast WebSocket update to all connected admins
         broadcastToAdmins(updatePayload);
+
+        // 2.b Send live update to public tracking page
+        if (updatedOrder.trackingToken) {
+          sendUpdateToTrackingToken(updatedOrder.trackingToken, {
+            type: 'PUBLIC_ORDER_STATUS_UPDATE',
+            order: getPublicOrder(updatedOrder),
+          });
+        }
 
         // 3. Send Push Notification to the user
         const notificationContent = getStatusNotificationMessage(updatedOrder.status);

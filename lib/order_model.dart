@@ -28,12 +28,15 @@ class Address {
 class Order {
   final String id;
   final String customerName;
+  final String? customerPhone;
+  final String? trackingToken;
   final String orderType; // 'takeaway', 'eat_in', or 'delivery'
   final String? arrivalTime; // Only if orderType is 'eat_in'
   final Map<String, CartItem> items;
   final double totalAmount;
   final DateTime orderDate;
   String status; // e.g., 'pending', 'preparing', 'ready', 'out_for_delivery', 'completed'
+  final String paymentStatus;
 
   // Delivery details are now in a dedicated Address object
   final Address? address;
@@ -41,12 +44,15 @@ class Order {
   Order({
     required this.id,
     required this.customerName,
+    this.customerPhone,
+    this.trackingToken,
     required this.orderType,
     this.arrivalTime,
     required this.items,
     required this.totalAmount,
     required this.orderDate,
     this.status = 'pending',
+    this.paymentStatus = 'pending',
     this.address,
   });
 
@@ -54,6 +60,7 @@ class Order {
   Map<String, dynamic> toMap() {
     final map = <String, dynamic>{
       'customerName': customerName,
+      if (customerPhone != null && customerPhone!.isNotEmpty) 'customerPhone': customerPhone,
       'orderType': orderType,
       // 'arrivalTime' is handled conditionally below
       'items': items.values.map((cartItem) => {
@@ -72,6 +79,7 @@ class Order {
       'totalAmount': totalAmount,
       'orderDate': orderDate.toIso8601String(),
       'status': status,
+      'paymentStatus': paymentStatus,
     };
 
     if (arrivalTime != null) {
@@ -148,12 +156,15 @@ class Order {
     return Order(
       id: data['_id'] ?? id,
       customerName: data['customerName'] ?? '',
+      customerPhone: data['customerPhone'],
+      trackingToken: data['trackingToken'],
       orderType: data['orderType'] ?? 'takeaway',
       arrivalTime: data['arrivalTime'],
       items: items,
       totalAmount: (data['totalAmount'] as num?)?.toDouble() ?? 0.0,
       orderDate: DateTime.parse(data['orderDate'] ?? DateTime.now().toIso8601String()),
       status: data['status'] ?? 'pending',
+      paymentStatus: data['paymentStatus'] ?? 'pending',
       address: addressData != null ? Address.fromMap(addressData) : null,
     );
   }

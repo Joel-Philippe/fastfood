@@ -16,6 +16,7 @@ import 'firebase_options.dart';
 
 import 'package:fast_food_app/services/local_notification_service.dart';
 import 'package:fast_food_app/reset_password_page.dart';
+import 'package:fast_food_app/order_tracking_page.dart';
 
 // Handler for background messages
 @pragma('vm:entry-point')
@@ -204,6 +205,15 @@ class MyApp extends StatelessWidget {
           if (token != null) {
             return MaterialPageRoute(
               builder: (context) => ResetPasswordPage(token: token),
+            );
+          }
+        }
+        if (settings.name != null && settings.name!.startsWith('/track/')) {
+          final uri = Uri.parse(settings.name!);
+          final token = uri.pathSegments.length >= 2 ? uri.pathSegments[1] : null;
+          if (token != null && token.isNotEmpty) {
+            return MaterialPageRoute(
+              builder: (context) => OrderTrackingPage(trackingToken: token),
             );
           }
         }

@@ -46,6 +46,7 @@ app.use(cors({
   optionsSuccessStatus: 204,
   allowedHeaders: 'Content-Type,Authorization',
 }));
+app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json()); // For parsing application/json
 
 // Connect to MongoDB

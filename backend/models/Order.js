@@ -15,6 +15,8 @@ const orderItemSchema = new mongoose.Schema({
 const orderSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: false }, // Link to the user who placed the order
   customerName: { type: String, required: true },
+  customerPhone: { type: String },
+  trackingToken: { type: String, required: true, unique: true, index: true },
   orderType: { type: String, required: true, enum: ['takeaway', 'eat_in', 'delivery'] },
   address: {
     street: { type: String },
@@ -26,6 +28,9 @@ const orderSchema = new mongoose.Schema({
   items: [orderItemSchema], // Array of sub-documents
   totalAmount: { type: Number, required: true },
   orderDate: { type: Date, default: Date.now },
+  paymentStatus: { type: String, default: 'pending', enum: ['pending', 'paid', 'failed', 'refunded'] },
+  stripeSessionId: { type: String },
+  paidAt: { type: Date },
   status: { type: String, default: 'pending', enum: ['pending', 'preparing', 'ready', 'out_for_delivery', 'completed', 'cancelled'] },
 });
 

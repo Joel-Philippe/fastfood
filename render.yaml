@@ -15,6 +15,10 @@ services:
         sync: false
       - key: FIREBASE_SERVICE_ACCOUNT
         sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
       - key: ALLOW_ADMIN_CREATION
         value: "false"
       - key: CLOUDINARY_CLOUD_NAME

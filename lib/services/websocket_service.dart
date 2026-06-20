@@ -49,6 +49,41 @@ class WebSocketService {
     }
   }
 
+  void connectToOrderTracking(String trackingToken) {
+    disconnect();
+
+    final uri = Uri.parse(AppConfig.baseUrl);
+    final wsScheme = uri.scheme == 'https' ? 'wss' : 'ws';
+    final wsUrl = uri.replace(scheme: wsScheme, path: '/').toString();
+
+    try {
+      _channel = WebSocketChannel.connect(
+        Uri.parse('$wsUrl?trackingToken=$trackingToken'),
+      );
+
+      debugPrint('Public order tracking WebSocket connected to $wsUrl');
+
+      _channel!.stream.listen(
+        (message) {
+          try {
+            final decodedMessage = json.decode(message) as Map<String, dynamic>;
+            _socketResponseController.add(decodedMessage);
+          } catch (e) {
+            debugPrint('Error decoding tracking WebSocket message: $e');
+          }
+        },
+        onDone: () {
+          debugPrint('Public order tracking WebSocket closed.');
+        },
+        onError: (error) {
+          debugPrint('Public order tracking WebSocket error: $error');
+        },
+      );
+    } catch (e) {
+      debugPrint('Failed to connect public order tracking WebSocket: $e');
+    }
+  }
+
   void disconnect() {
     if (_channel != null) {
       _channel!.sink.close();

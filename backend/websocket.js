@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const url = require('url');
 
 const clients = new Map(); // Map to store userId -> WebSocket connection
+const trackingClients = new Map(); // Map trackingToken -> Set<WebSocket>
 const adminClients = new Set(); // Set to store admin WebSocket connections
 
 function createWebSocketServer(server) {
@@ -11,6 +12,35 @@ function createWebSocketServer(server) {
   wss.on('connection', (ws, req) => {
     const parameters = new url.URL(req.url, `http://${req.headers.host}`).searchParams;
     const token = parameters.get('token');
+    const trackingToken = parameters.get('trackingToken');
+
+    if (trackingToken) {
+      if (!trackingClients.has(trackingToken)) {
+        trackingClients.set(trackingToken, new Set());
+      }
+      trackingClients.get(trackingToken).add(ws);
+      console.log(`Public tracking client connected: ${trackingToken}`);
+
+      ws.on('close', () => {
+        const clientSet = trackingClients.get(trackingToken);
+        if (clientSet) {
+          clientSet.delete(ws);
+          if (clientSet.size === 0) trackingClients.delete(trackingToken);
+        }
+        console.log(`Public tracking client disconnected: ${trackingToken}`);
+      });
+
+      ws.on('error', (error) => {
+        console.error(`WebSocket error for tracking token ${trackingToken}:`, error);
+        const clientSet = trackingClients.get(trackingToken);
+        if (clientSet) {
+          clientSet.delete(ws);
+          if (clientSet.size === 0) trackingClients.delete(trackingToken);
+        }
+      });
+
+      return;
+    }
 
     if (!token) {
       console.log('WebSocket connection rejected: No token provided.');
@@ -79,7 +109,25 @@ function sendUpdateToUser(userId, data) {
   return false; // Indicate that the message was not sent
 }
 
-module.exports = { createWebSocketServer, sendUpdateToUser, broadcastToAdmins, broadcastToAllUsers };
+function sendUpdateToTrackingToken(trackingToken, data) {
+  const clientSet = trackingClients.get(trackingToken);
+  if (!clientSet || clientSet.size === 0) {
+    console.log(`Could not send tracking update: no public client for ${trackingToken}.`);
+    return false;
+  }
+
+  let sent = false;
+  clientSet.forEach(client => {
+    if (client.readyState === client.OPEN) {
+      client.send(JSON.stringify(data));
+      sent = true;
+    }
+  });
+  console.log(`Sent public tracking update to ${clientSet.size} client(s) for ${trackingToken}.`);
+  return sent;
+}
+
+module.exports = { createWebSocketServer, sendUpdateToUser, sendUpdateToTrackingToken, broadcastToAdmins, broadcastToAllUsers };
 
 function broadcastToAdmins(data) {
   adminClients.forEach(client => {

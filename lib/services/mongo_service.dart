@@ -29,6 +29,18 @@ class MongoService {
     };
   }
 
+  Future<Map<String, String>> _getOptionalAuthHeaders() async {
+    final token = await _authService.getToken();
+    if (token == null || await _authService.isTokenExpired(token)) {
+      return {'Content-Type': 'application/json'};
+    }
+
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+  }
+
   // --- Image Upload ---
   Future<String> uploadImage(File? imageFile, {Uint8List? imageBytes, String? fileName}) async {
     final headers = await _getAuthHeaders();
@@ -332,8 +344,8 @@ class MongoService {
 
   // --- Order Management ---
 
-  Future<void> placeOrder(Order order) async {
-    final headers = await _getAuthHeaders();
+  Future<Order> placeOrder(Order order) async {
+    final headers = await _getOptionalAuthHeaders();
     final response = await http.post(
       Uri.parse('$_baseUrl/orders'),
       headers: headers,
@@ -342,6 +354,20 @@ class MongoService {
     if (response.statusCode != 201) {
       throw Exception('Failed to place order');
     }
+    final decoded = json.decode(response.body);
+    return Order.fromMap(decoded, decoded['_id']);
+  }
+
+  Future<Order> getOrderByTrackingToken(String trackingToken) async {
+    final response = await http.get(Uri.parse('$_baseUrl/orders/track/$trackingToken'));
+    if (response.statusCode == 200) {
+      final decoded = json.decode(response.body);
+      return Order.fromMap(decoded, decoded['_id']);
+    }
+    if (response.statusCode == 404) {
+      throw Exception('Commande introuvable.');
+    }
+    throw Exception('Failed to load tracked order');
   }
 
   Future<List<Order>> getMyOrders() async {

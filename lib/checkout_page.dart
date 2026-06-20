@@ -2,18 +2,20 @@ import 'package:fast_food_app/app_config.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fast_food_app/cart_provider.dart';
-import 'package:fast_food_app/order_confirmation_page.dart';
-import 'package:fast_food_app/order_model.dart' as AppModels; // Import Order model and our Address class with a prefix
+import 'package:fast_food_app/order_model.dart'
+    as AppModels; // Import Order model and our Address class with a prefix
 import 'package:fast_food_app/services/mongo_service.dart'; // Import MongoService
 import 'dart:math'; // For generating a random order ID
-import 'package:flutter_stripe/flutter_stripe.dart' hide Address; // Import Flutter Stripe and hide its Address to avoid conflict
+import 'package:flutter_stripe/flutter_stripe.dart'
+    hide
+        Address; // Import Flutter Stripe and hide its Address to avoid conflict
 import 'dart:convert'; // For json.encode/decode
 import 'package:http/http.dart' as http; // For making HTTP requests
 import 'package:fast_food_app/widgets/gradient_widgets.dart';
 import 'package:fast_food_app/services/auth_service.dart'; // Import AuthService
-import 'package:fast_food_app/user_login_page.dart'; // Add this import
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:url_launcher/url_launcher.dart';
+import 'package:fast_food_app/order_tracking_page.dart';
 // import 'dart:html' as html; // To get the current URL for success/cancel redirects
 
 class CheckoutPage extends StatefulWidget {
@@ -112,35 +114,24 @@ class _CheckoutPageState extends State<CheckoutPage> {
       return; // Form is not valid
     }
 
-    // --- AUTH CHECK ---
-    final isAuthenticated = await _authService.isAuthenticated();
-    if (!isAuthenticated) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Veuillez vous connecter pour commander.')),
-      );
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => UserLoginPage()),
-      );
-      return;
-    }
-
     try {
       if (kIsWeb) {
         // --- Web Payment Logic (Stripe Checkout) ---
-        
+
         // 1. Create the order in MongoDB FIRST (with status pending)
         final orderId = (Random().nextInt(900000) + 100000).toString();
         final newOrder = AppModels.Order(
           id: orderId,
           customerName: _nameController.text,
+          customerPhone: _phoneController.text,
           orderType: _orderType,
-          arrivalTime: _orderType == 'eat_in' ? _arrivalTime?.format(context) : null,
+          arrivalTime:
+              _orderType == 'eat_in' ? _arrivalTime?.format(context) : null,
           items: Map.from(cart.items),
           totalAmount: cart.totalAmount,
           orderDate: DateTime.now(),
           status: 'pending',
+          paymentStatus: 'pending',
           address: _orderType == 'delivery'
               ? AppModels.Address(
                   street: _streetController.text,
@@ -152,7 +143,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
         );
 
         // Save to DB before redirecting
-        await _mongoService.placeOrder(newOrder);
+        final placedOrder = await _mongoService.placeOrder(newOrder);
+        final trackingToken = placedOrder.trackingToken;
+        if (trackingToken == null || trackingToken.isEmpty) {
+          throw Exception('Tracking token not received.');
+        }
 
         // 2. Create Stripe Checkout Session
         final itemsSummary = cart.items.values
@@ -176,17 +171,20 @@ class _CheckoutPageState extends State<CheckoutPage> {
               'country': 'FR',
             },
             'metadata': {
-              'orderId': orderId,
+              'orderId': placedOrder.id,
+              'trackingToken': trackingToken,
             },
             // Using absolute URLs to avoid dart:html dependency for now
-            'success_url': 'https://fastfood-fss9.onrender.com/checkout?session_id={CHECKOUT_SESSION_ID}&order_id=$orderId',
-            'cancel_url': 'https://fastfood-fss9.onrender.com/checkout',
+            'success_url':
+                '${AppConfig.baseUrl}/#/track/$trackingToken?payment=success',
+            'cancel_url': '${AppConfig.baseUrl}/#/checkout',
             'items_summary': itemsSummary,
           }),
         );
 
         if (response.statusCode != 200) {
-          throw Exception('Failed to create checkout session: ${response.body}');
+          throw Exception(
+              'Failed to create checkout session: ${response.body}');
         }
 
         final responseBody = json.decode(response.body);
@@ -224,7 +222,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
         }
 
         final isDark = Theme.of(context).brightness == Brightness.dark;
-        
+
         // 2. Initialize the Payment Sheet
         if (!mounted) return;
         await Stripe.instance.initPaymentSheet(
@@ -236,7 +234,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
               colors: PaymentSheetAppearanceColors(
                 background: isDark ? const Color(0xFF121212) : Colors.white,
                 primary: const Color(0xFF53c6fd),
-                componentBackground: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+                componentBackground:
+                    isDark ? const Color(0xFF1E1E1E) : Colors.white,
                 componentDivider: isDark ? Colors.white10 : Colors.grey[200],
                 primaryText: isDark ? Colors.white : Colors.black,
                 secondaryText: isDark ? Colors.white70 : Colors.black54,
@@ -257,7 +256,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
         // If payment is successful on mobile, proceed to place the order
         await _placeOrder(cart);
       }
-
     } on StripeException catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -278,12 +276,15 @@ class _CheckoutPageState extends State<CheckoutPage> {
     final newOrder = AppModels.Order(
       id: orderId,
       customerName: _nameController.text,
+      customerPhone: _phoneController.text,
       orderType: _orderType,
-      arrivalTime: _orderType == 'eat_in' ? _arrivalTime?.format(context) : null,
+      arrivalTime:
+          _orderType == 'eat_in' ? _arrivalTime?.format(context) : null,
       items: Map.from(cart.items),
       totalAmount: cart.totalAmount,
       orderDate: DateTime.now(),
       status: 'pending',
+      paymentStatus: 'paid',
       address: _orderType == 'delivery'
           ? AppModels.Address(
               street: _streetController.text,
@@ -295,23 +296,18 @@ class _CheckoutPageState extends State<CheckoutPage> {
     );
 
     try {
-      await _mongoService.placeOrder(newOrder);
+      final placedOrder = await _mongoService.placeOrder(newOrder);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Commande passée avec succès !')),
+        const SnackBar(content: Text('Commande passÃ©e avec succÃ¨s !')),
       );
 
       if (!mounted) return;
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-          builder: (context) => OrderConfirmationPage(
-            orderId: newOrder.id,
-            customerName: newOrder.customerName,
-            orderType: newOrder.orderType,
-            arrivalTime: newOrder.arrivalTime,
-            orderItems: newOrder.items,
-            totalAmount: newOrder.totalAmount,
+          builder: (context) => OrderTrackingPage(
+            trackingToken: placedOrder.trackingToken ?? '',
           ),
         ),
         (route) => route.isFirst,
@@ -337,14 +333,18 @@ class _CheckoutPageState extends State<CheckoutPage> {
           margin: const EdgeInsets.symmetric(horizontal: 4),
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
           decoration: BoxDecoration(
-            color: isSelected 
-                ? const Color(0xFF53c6fd) 
-                : (Theme.of(context).brightness == Brightness.dark ? const Color(0xFF2C2C2C) : Colors.white),
+            color: isSelected
+                ? const Color(0xFF53c6fd)
+                : (Theme.of(context).brightness == Brightness.dark
+                    ? const Color(0xFF2C2C2C)
+                    : Colors.white),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: isSelected 
-                  ? const Color(0xFF53c6fd) 
-                  : (Theme.of(context).brightness == Brightness.dark ? Colors.grey[700]! : Colors.grey[300]!),
+              color: isSelected
+                  ? const Color(0xFF53c6fd)
+                  : (Theme.of(context).brightness == Brightness.dark
+                      ? Colors.grey[700]!
+                      : Colors.grey[300]!),
               width: 1.5,
             ),
             boxShadow: isSelected
@@ -375,7 +375,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 label,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: isSelected ? Colors.white : (Theme.of(context).brightness == Brightness.dark ? Colors.white70 : Colors.black87),
+                  color: isSelected
+                      ? Colors.white
+                      : (Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white70
+                          : Colors.black87),
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
               ),
@@ -420,7 +424,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
       ),
       body: Center(
         child: Container(
-          constraints: BoxConstraints(maxWidth: isLargeScreen ? 1200 : double.infinity),
+          constraints:
+              BoxConstraints(maxWidth: isLargeScreen ? 1200 : double.infinity),
           child: Form(
             key: _formKey,
             child: isLargeScreen
@@ -436,12 +441,15 @@ class _CheckoutPageState extends State<CheckoutPage> {
                             _buildSectionTitle('Vos informations'),
                             const SizedBox(height: 16),
                             _buildNameField(),
+                            const SizedBox(height: 16),
+                            _buildPhoneField(),
                             const SizedBox(height: 32),
                             _buildSectionTitle('Type de commande'),
                             const SizedBox(height: 16),
                             _buildOrderTypeSelector(),
                             const SizedBox(height: 24),
-                            if (_orderType == 'eat_in') _buildArrivalTimeSelector(),
+                            if (_orderType == 'eat_in')
+                              _buildArrivalTimeSelector(),
                             if (_orderType == 'delivery') _buildDeliveryForm(),
                           ],
                         ),
@@ -467,7 +475,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              _buildSectionTitle('Résumé de la commande'),
+                              _buildSectionTitle('RÃ©sumÃ© de la commande'),
                               const SizedBox(height: 16),
                               Flexible(child: _buildOrderItemsList(cart)),
                               const Divider(height: 32),
@@ -484,6 +492,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     padding: const EdgeInsets.all(16.0),
                     children: [
                       _buildNameField(),
+                      const SizedBox(height: 12),
+                      _buildPhoneField(),
                       const SizedBox(height: 20),
                       _buildSectionTitle('Type de commande :'),
                       _buildOrderTypeSelector(),
@@ -491,7 +501,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       if (_orderType == 'eat_in') _buildArrivalTimeSelector(),
                       if (_orderType == 'delivery') _buildDeliveryForm(),
                       const SizedBox(height: 20),
-                      _buildSectionTitle('Résumé de la commande :'),
+                      _buildSectionTitle('RÃ©sumÃ© de la commande :'),
                       _buildOrderItemsList(cart),
                       const Divider(),
                       _buildTotalRow(cart),
@@ -533,13 +543,32 @@ class _CheckoutPageState extends State<CheckoutPage> {
     );
   }
 
+  Widget _buildPhoneField() {
+    return TextFormField(
+      controller: _phoneController,
+      decoration: const InputDecoration(
+        labelText: 'Votre tÃ©lÃ©phone',
+        border: OutlineInputBorder(),
+      ),
+      keyboardType: TextInputType.phone,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Veuillez entrer votre numÃ©ro de tÃ©lÃ©phone.';
+        }
+        return null;
+      },
+    );
+  }
+
   Widget _buildOrderTypeSelector() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        _buildOrderTypeChip('À emporter', 'takeaway', Icons.shopping_bag_outlined),
+        _buildOrderTypeChip(
+            'Ã€ emporter', 'takeaway', Icons.shopping_bag_outlined),
         _buildOrderTypeChip('Sur place', 'eat_in', Icons.local_dining_outlined),
-        _buildOrderTypeChip('Livraison', 'delivery', Icons.delivery_dining_outlined),
+        _buildOrderTypeChip(
+            'Livraison', 'delivery', Icons.delivery_dining_outlined),
       ],
     );
   }
@@ -549,9 +578,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 10),
-        const Text('Heure d\'arrivée :', style: TextStyle(fontSize: 16)),
+        const Text('Heure d\'arrivÃ©e :', style: TextStyle(fontSize: 16)),
         ListTile(
-          title: Text(_arrivalTime == null ? 'Sélectionner l\'heure' : _arrivalTime!.format(context)),
+          title: Text(_arrivalTime == null
+              ? 'SÃ©lectionner l\'heure'
+              : _arrivalTime!.format(context)),
           trailing: const Icon(Icons.access_time),
           onTap: () => _selectTime(context),
         ),
@@ -568,7 +599,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
         const SizedBox(height: 10),
         TextFormField(
           controller: _streetController,
-          decoration: const InputDecoration(labelText: 'Rue et numéro', border: OutlineInputBorder()),
+          decoration: const InputDecoration(
+              labelText: 'Rue et numÃ©ro', border: OutlineInputBorder()),
           validator: (value) {
             if (_orderType == 'delivery' && (value == null || value.isEmpty)) {
               return 'Veuillez entrer votre rue.';
@@ -579,7 +611,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
         const SizedBox(height: 10),
         TextFormField(
           controller: _cityController,
-          decoration: const InputDecoration(labelText: 'Ville', border: OutlineInputBorder()),
+          decoration: const InputDecoration(
+              labelText: 'Ville', border: OutlineInputBorder()),
           validator: (value) {
             if (_orderType == 'delivery' && (value == null || value.isEmpty)) {
               return 'Veuillez entrer votre ville.';
@@ -590,7 +623,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
         const SizedBox(height: 10),
         TextFormField(
           controller: _postalCodeController,
-          decoration: const InputDecoration(labelText: 'Code Postal', border: OutlineInputBorder()),
+          decoration: const InputDecoration(
+              labelText: 'Code Postal', border: OutlineInputBorder()),
           keyboardType: TextInputType.number,
           validator: (value) {
             if (_orderType == 'delivery' && (value == null || value.isEmpty)) {
@@ -602,11 +636,13 @@ class _CheckoutPageState extends State<CheckoutPage> {
         const SizedBox(height: 10),
         TextFormField(
           controller: _phoneController,
-          decoration: const InputDecoration(labelText: 'Numéro de téléphone', border: OutlineInputBorder()),
+          decoration: const InputDecoration(
+              labelText: 'NumÃ©ro de tÃ©lÃ©phone',
+              border: OutlineInputBorder()),
           keyboardType: TextInputType.phone,
           validator: (value) {
             if (_orderType == 'delivery' && (value == null || value.isEmpty)) {
-              return 'Veuillez entrer votre numéro de téléphone.';
+              return 'Veuillez entrer votre numÃ©ro de tÃ©lÃ©phone.';
             }
             return null;
           },
@@ -629,13 +665,18 @@ class _CheckoutPageState extends State<CheckoutPage> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(isRemoval ? '– ' : '+ ', style: TextStyle(color: isRemoval ? Colors.red : Colors.green, fontSize: 14)),
+                Text(isRemoval ? 'â€“ ' : '+ ',
+                    style: TextStyle(
+                        color: isRemoval ? Colors.red : Colors.green,
+                        fontSize: 14)),
                 Expanded(
                   child: Text(
                     text,
                     style: TextStyle(
                       fontSize: 12,
-                      color: Theme.of(context).brightness == Brightness.dark ? Colors.white60 : Colors.black54,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white60
+                          : Colors.black54,
                     ),
                   ),
                 ),
@@ -647,7 +688,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
         List<Widget> details = [];
         cartItem.selectedOptions.forEach((category, options) {
           for (var option in options) {
-            details.add(buildDetailRow('${option.name} (${option.price.toStringAsFixed(2)}€)'));
+            details.add(buildDetailRow(
+                '${option.name} (${option.price.toStringAsFixed(2)}â‚¬)'));
           }
         });
         for (var ingredient in cartItem.ingredientsToRemove) {
@@ -667,7 +709,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 trailing: Text(
-                  '${(cartItem.item.price * cartItem.quantity).toStringAsFixed(2)} €',
+                  '${(cartItem.item.price * cartItem.quantity).toStringAsFixed(2)} â‚¬',
                 ),
               ),
               if (details.isNotEmpty)
@@ -690,7 +732,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _buildSectionTitle('Total :'),
-        Text('${cart.totalAmount.toStringAsFixed(2)} €', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        Text('${cart.totalAmount.toStringAsFixed(2)} â‚¬',
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
       ],
     );
   }

@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const Order = require('../models/Order');
+const { broadcastToAdmins, sendUpdateToTrackingToken } = require('../websocket');
 
 router.post(
   '/create-payment-intent',
@@ -71,5 +73,61 @@ router.post(
     }
   }
 );
+
+router.post('/webhook', async (req, res) => {
+  const signature = req.headers['stripe-signature'];
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+  if (!webhookSecret) {
+    return res.status(500).send('Stripe webhook secret is not configured');
+  }
+
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(req.body, signature, webhookSecret);
+  } catch (error) {
+    console.error('Stripe webhook signature verification failed:', error.message);
+    return res.status(400).send(`Webhook Error: ${error.message}`);
+  }
+
+  try {
+    if (event.type === 'checkout.session.completed') {
+      const session = event.data.object;
+      const orderId = session.metadata?.orderId;
+
+      if (orderId) {
+        const updatedOrder = await Order.findByIdAndUpdate(
+          orderId,
+          {
+            paymentStatus: 'paid',
+            stripeSessionId: session.id,
+            paidAt: new Date(),
+          },
+          { new: true }
+        );
+
+        if (updatedOrder) {
+          const payload = {
+            type: 'NEW_ORDER',
+            order: updatedOrder.toObject(),
+          };
+          broadcastToAdmins(payload);
+
+          if (updatedOrder.trackingToken) {
+            sendUpdateToTrackingToken(updatedOrder.trackingToken, {
+              type: 'PUBLIC_ORDER_STATUS_UPDATE',
+              order: updatedOrder.toObject(),
+            });
+          }
+        }
+      }
+    }
+
+    res.json({ received: true });
+  } catch (error) {
+    console.error('Stripe webhook handling failed:', error);
+    res.status(500).send('Webhook handler failed');
+  }
+});
 
 module.exports = router;
