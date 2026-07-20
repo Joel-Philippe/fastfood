@@ -48,12 +48,12 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
 
     _isEditing = widget.cartItem != null;
     _quantity = widget.cartItem?.quantity ?? 1;
-    _ingredientsToRemove = Set<String>.from(widget.cartItem?.ingredientsToRemove ?? {});
-    _selectedOptions = Map<String, List<Option>>.from(
-      widget.cartItem?.selectedOptions.map(
-        (key, value) => MapEntry(key, List<Option>.from(value))
-      ) ?? {}
-    );
+    _ingredientsToRemove =
+        Set<String>.from(widget.cartItem?.ingredientsToRemove ?? {});
+    _selectedOptions = Map<String, List<Option>>.from(widget
+            .cartItem?.selectedOptions
+            .map((key, value) => MapEntry(key, List<Option>.from(value))) ??
+        {});
 
     _optionFutures = {
       for (var type in widget.menuItem.optionTypes)
@@ -89,7 +89,8 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
         sizePrice = options.first.price;
       } else {
         // Other options (extras, etc.) are additive
-        otherOptionsPrice += options.fold(0.0, (sum, option) => sum + (option.price > 0 ? option.price : 0.0));
+        otherOptionsPrice += options.fold(0.0,
+            (sum, option) => sum + (option.price > 0 ? option.price : 0.0));
       }
     });
 
@@ -99,7 +100,7 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
       _totalPrice = _singleItemPrice * _quantity;
     });
   }
-  
+
   void _setQuantity(int newQuantity) {
     if (newQuantity >= 1) {
       setState(() {
@@ -117,25 +118,31 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
     final List<String> missingSelections = [];
     for (String optionType in _requiredOptionTypes) {
       if (widget.menuItem.optionTypes.contains(optionType)) {
-        if (_selectedOptions[optionType] == null || _selectedOptions[optionType]!.isEmpty) {
-          missingSelections.add(_getOptionDisplayTitle(optionType).replaceAll('Avec ', '').toLowerCase());
+        if (_selectedOptions[optionType] == null ||
+            _selectedOptions[optionType]!.isEmpty) {
+          missingSelections.add(_getOptionDisplayTitle(optionType)
+              .replaceAll('Avec ', '')
+              .toLowerCase());
         }
       }
     }
 
     if (missingSelections.isNotEmpty) {
-      _showMissingSelectionDialog('Veuillez sélectionner: ${missingSelections.join(', ')}');
+      _showMissingSelectionDialog(
+          'Veuillez sélectionner: ${missingSelections.join(', ')}');
       return;
     }
 
     final cart = Provider.of<CartProvider>(context, listen: false);
-    if (_isEditing && widget.cartItemKey != null) cart.removeItem(widget.cartItemKey!);
+    if (_isEditing && widget.cartItemKey != null)
+      cart.removeItem(widget.cartItemKey!);
 
     Option? selectedSize;
-    if (_selectedOptions.containsKey('sizeOptions') && _selectedOptions['sizeOptions']!.isNotEmpty) {
+    if (_selectedOptions.containsKey('sizeOptions') &&
+        _selectedOptions['sizeOptions']!.isNotEmpty) {
       selectedSize = _selectedOptions['sizeOptions']!.first;
     }
-    
+
     cart.addItem(
       widget.menuItem,
       selectedOptions: _selectedOptions,
@@ -152,11 +159,16 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
       return widget.menuItem.optionDisplayTitles![optionType]!;
     }
     switch (optionType) {
-      case 'sizeOptions': return 'Taille';
-      case 'garnishOptions': return 'Garniture';
-      case 'sauceOptions': return 'Sauce';
-      case 'drinkOptions': return 'Boisson';
-      default: return optionType.replaceAll('Options', '');
+      case 'sizeOptions':
+        return 'Taille';
+      case 'garnishOptions':
+        return 'Garniture';
+      case 'sauceOptions':
+        return 'Sauce';
+      case 'drinkOptions':
+        return 'Boisson';
+      default:
+        return optionType.replaceAll('Options', '');
     }
   }
 
@@ -167,7 +179,8 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
     final isLargeScreen = size.width > 900;
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF121212) : const Color(0xFFF8F9FA),
+      backgroundColor:
+          isDark ? const Color(0xFF121212) : const Color(0xFFFCF1F1),
       body: Center(
         child: Container(
           constraints: const BoxConstraints(maxWidth: 800),
@@ -186,7 +199,8 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
                       delegate: SliverChildListDelegate([
                         _buildHeader(isDark),
                         const SizedBox(height: 24),
-                        ...widget.menuItem.optionTypes.map((type) => _buildDynamicOptionSection(type)),
+                        ...widget.menuItem.optionTypes
+                            .map((type) => _buildDynamicOptionSection(type)),
                         if (widget.menuItem.removableIngredients.isNotEmpty)
                           _buildIngredientsToRemoveSection(),
                         _buildQuantitySelector(),
@@ -209,10 +223,12 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
       expandedHeight: 300.0,
       pinned: true,
       elevation: 0,
-      backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+      backgroundColor:
+          isDark ? const Color(0xFF1E1E1E) : const Color(0xFFFFFCDD),
       leading: Container(
         margin: const EdgeInsets.all(8),
-        decoration: BoxDecoration(color: Colors.black26, borderRadius: BorderRadius.circular(12)),
+        decoration: BoxDecoration(
+            color: Colors.black26, borderRadius: BorderRadius.circular(12)),
         child: IconButton(
           icon: const Icon(Icons.close, color: Colors.white),
           onPressed: () => Navigator.pop(context),
@@ -242,19 +258,24 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
             Expanded(
               child: Text(
                 widget.menuItem.name,
-                style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
             ),
             Text(
               '${_singleItemPrice.toStringAsFixed(2)} €',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: _accentColor),
+              style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: _accentColor),
             ),
           ],
         ),
         const SizedBox(height: 8),
         Text(
           widget.menuItem.description ?? '',
-          style: TextStyle(fontSize: 16, color: isDark ? Colors.white70 : Colors.black54),
+          style: TextStyle(
+              fontSize: 16, color: isDark ? Colors.white70 : Colors.black54),
         ),
       ],
     ).animate().fadeIn().slideX(begin: -0.1);
@@ -271,16 +292,24 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
           vertical: 20,
         ),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, -5))],
+          color: isDark ? const Color(0xFF1E1E1E) : const Color(0xFFFFFCDD),
+          boxShadow: [
+            BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 10,
+                offset: const Offset(0, -5))
+          ],
         ),
         child: SafeArea(
           top: false,
           child: GradientButton(
             onPressed: _saveChanges,
-            text: _isEditing ? 'Mettre à jour (${_totalPrice.toStringAsFixed(2)} €)' : 'Ajouter au panier (${_totalPrice.toStringAsFixed(2)} €)',
+            text: _isEditing
+                ? 'Mettre à jour (${_totalPrice.toStringAsFixed(2)} €)'
+                : 'Ajouter au panier (${_totalPrice.toStringAsFixed(2)} €)',
             icon: Icons.shopping_basket_outlined,
-            gradient: const LinearGradient(colors: [Color(0xFF53c6fd), Color(0xFF9c4dea)]),
+            gradient: const LinearGradient(
+                colors: [Color(0xFF53c6fd), Color(0xFF9c4dea)]),
           ),
         ),
       ),
@@ -304,12 +333,15 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: Row(
                 children: [
-                  Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text(title,
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold)),
                   if (_requiredOptionTypes.contains(optionType))
                     const Text(' *', style: TextStyle(color: Colors.red)),
                   const Spacer(),
                   if (currentSelections.isNotEmpty)
-                    const Icon(Icons.check_circle, color: Colors.green, size: 20),
+                    const Icon(Icons.check_circle,
+                        color: Colors.green, size: 20),
                 ],
               ),
             ),
@@ -328,12 +360,16 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
                         _selectedOptions[optionType] = [opt];
                       } else {
                         if (isSelected) {
-                          _selectedOptions[optionType]!.removeWhere((s) => s.id == opt.id);
+                          _selectedOptions[optionType]!
+                              .removeWhere((s) => s.id == opt.id);
                         } else {
                           if (_selectedOptions[optionType] == null) {
                             _selectedOptions[optionType] = [opt];
                           } else {
-                            _selectedOptions[optionType] = [..._selectedOptions[optionType]!, opt];
+                            _selectedOptions[optionType] = [
+                              ..._selectedOptions[optionType]!,
+                              opt
+                            ];
                           }
                         }
                       }
@@ -363,13 +399,24 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? _accentColor : (isDark ? Colors.white.withOpacity(0.05) : Colors.white),
+          color: isSelected
+              ? _accentColor
+              : (isDark ? Colors.white.withOpacity(0.05) : Colors.white),
           borderRadius: BorderRadius.circular(15),
           border: Border.all(
-            color: isSelected ? _accentColor : (isDark ? Colors.white10 : Colors.grey.shade300),
+            color: isSelected
+                ? _accentColor
+                : (isDark ? Colors.white10 : Colors.grey.shade300),
             width: 2,
           ),
-          boxShadow: isSelected ? [BoxShadow(color: _accentColor.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4))] : [],
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                      color: _accentColor.withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4))
+                ]
+              : [],
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -378,10 +425,13 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
               child: Text(
                 label,
                 style: TextStyle(
-                  color: isSelected ? Colors.white : (isDark ? Colors.white : Colors.black87),
+                  color: isSelected
+                      ? Colors.white
+                      : (isDark ? Colors.white : Colors.black87),
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
-                softWrap: true, // Autorise le retour à la ligne si le chip devient trop large
+                softWrap:
+                    true, // Autorise le retour à la ligne si le chip devient trop large
               ),
             ),
             if (price > 0)
@@ -390,7 +440,9 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
                 child: Text(
                   ' (+${price.toStringAsFixed(2)}€)',
                   style: TextStyle(
-                    color: isSelected ? Colors.white.withOpacity(0.8) : Colors.grey,
+                    color: isSelected
+                        ? Colors.white.withOpacity(0.8)
+                        : Colors.grey,
                     fontSize: 12,
                   ),
                 ),
@@ -407,7 +459,8 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
       children: [
         const Padding(
           padding: EdgeInsets.symmetric(vertical: 16.0),
-          child: Text('Retirer des ingrédients', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          child: Text('Retirer des ingrédients',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         ),
         Wrap(
           spacing: 12,
@@ -420,8 +473,10 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
               isSelected: isRemoved,
               onTap: () {
                 setState(() {
-                  if (isRemoved) _ingredientsToRemove.remove(ing);
-                  else _ingredientsToRemove.add(ing);
+                  if (isRemoved)
+                    _ingredientsToRemove.remove(ing);
+                  else
+                    _ingredientsToRemove.add(ing);
                 });
               },
             );
@@ -443,13 +498,17 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text('Quantité', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const Text('Quantité',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           Row(
             children: [
-              _buildQtyBtn(Icons.remove, () => _setQuantity(_quantity - 1), _quantity > 1),
+              _buildQtyBtn(Icons.remove, () => _setQuantity(_quantity - 1),
+                  _quantity > 1),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Text('$_quantity', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                child: Text('$_quantity',
+                    style: const TextStyle(
+                        fontSize: 20, fontWeight: FontWeight.bold)),
               ),
               _buildQtyBtn(Icons.add, () => _setQuantity(_quantity + 1), true),
             ],
@@ -473,7 +532,8 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+        backgroundColor:
+            isDark ? const Color(0xFF1E1E1E) : const Color(0xFFFFFCDD),
         title: const Text('Sélection requise'),
         content: Text(message),
         actions: [

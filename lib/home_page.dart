@@ -53,7 +53,8 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _confettiController = ConfettiController(duration: const Duration(milliseconds: 300));
+    _confettiController =
+        ConfettiController(duration: const Duration(milliseconds: 300));
     _fetchData();
     _fetchInfoPages();
     _initWebSocket();
@@ -83,9 +84,16 @@ class _HomePageState extends State<HomePage> {
         if (!mounted) return;
         final type = message['type'] as String?;
         const refreshEvents = [
-          'SETTINGS_UPDATED', 'CATEGORY_CREATED', 'CATEGORY_UPDATED', 'CATEGORY_DELETED',
-          'MENU_ITEM_CREATED', 'MENU_ITEM_UPDATED', 'MENU_ITEM_DELETED',
-          'INFO_PAGE_CREATED', 'INFO_PAGE_UPDATED', 'INFO_PAGE_DELETED',
+          'SETTINGS_UPDATED',
+          'CATEGORY_CREATED',
+          'CATEGORY_UPDATED',
+          'CATEGORY_DELETED',
+          'MENU_ITEM_CREATED',
+          'MENU_ITEM_UPDATED',
+          'MENU_ITEM_DELETED',
+          'INFO_PAGE_CREATED',
+          'INFO_PAGE_UPDATED',
+          'INFO_PAGE_DELETED',
         ];
         if (type != null && refreshEvents.contains(type)) {
           _fetchData();
@@ -99,7 +107,8 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _fetchInfoPages() async {
     try {
-      final pages = await (widget.mongoService ?? MongoService()).getInfoPages();
+      final pages =
+          await (widget.mongoService ?? MongoService()).getInfoPages();
       if (mounted) setState(() => _infoPages = pages);
     } catch (e) {
       debugPrint("Error fetching info pages: $e");
@@ -127,7 +136,9 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _groupedItems = groupedItems;
         _allMenuItems = groupedItems.values.expand((items) => items).toList();
-        if (_groupedItems.isNotEmpty && (_selectedCategory == null || !_groupedItems.containsKey(_selectedCategory))) {
+        if (_groupedItems.isNotEmpty &&
+            (_selectedCategory == null ||
+                !_groupedItems.containsKey(_selectedCategory))) {
           _selectedCategory = _groupedItems.keys.first;
         }
         _isLoading = false;
@@ -155,9 +166,12 @@ class _HomePageState extends State<HomePage> {
     }
     final openParts = todayHours.openTime.split(':');
     final closeParts = todayHours.closeTime.split(':');
-    final openTime = DateTime(now.year, now.month, now.day, int.parse(openParts[0]), int.parse(openParts[1]));
-    var closeTime = DateTime(now.year, now.month, now.day, int.parse(closeParts[0]), int.parse(closeParts[1]));
-    if (closeTime.isBefore(openTime)) closeTime = closeTime.add(const Duration(days: 1));
+    final openTime = DateTime(now.year, now.month, now.day,
+        int.parse(openParts[0]), int.parse(openParts[1]));
+    var closeTime = DateTime(now.year, now.month, now.day,
+        int.parse(closeParts[0]), int.parse(closeParts[1]));
+    if (closeTime.isBefore(openTime))
+      closeTime = closeTime.add(const Duration(days: 1));
     if (now.isAfter(openTime) && now.isBefore(closeTime)) {
       final timeToClose = closeTime.difference(now);
       setState(() {
@@ -183,7 +197,8 @@ class _HomePageState extends State<HomePage> {
         timer.cancel();
         _checkRestaurantStatus();
       } else {
-        setState(() => _timeUntilClosing = _timeUntilClosing! - const Duration(seconds: 1));
+        setState(() => _timeUntilClosing =
+            _timeUntilClosing! - const Duration(seconds: 1));
       }
     });
   }
@@ -194,7 +209,8 @@ class _HomePageState extends State<HomePage> {
       final dayHours = _settings!.hours[dayIndex.toString()];
       if (dayHours != null && dayHours.isOpen) {
         final openParts = dayHours.openTime.split(':');
-        var nextOpen = DateTime(now.year, now.month, now.day + i, int.parse(openParts[0]), int.parse(openParts[1]));
+        var nextOpen = DateTime(now.year, now.month, now.day + i,
+            int.parse(openParts[0]), int.parse(openParts[1]));
         if (i == 0 && now.isBefore(nextOpen)) return nextOpen.difference(now);
         if (i > 0) return nextOpen.difference(now);
       }
@@ -206,7 +222,16 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      decoration: BoxDecoration(color: isDark ? const Color(0xFF121212) : Colors.white),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF121212) : null,
+        gradient: isDark
+            ? null
+            : const LinearGradient(
+                colors: [Color(0xFFFCF1F1), Color(0xFFFFFCDD)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+      ),
       child: Stack(
         alignment: Alignment.topCenter,
         children: [
@@ -215,25 +240,36 @@ class _HomePageState extends State<HomePage> {
             appBar: AppBar(
               title: ClipRRect(
                 borderRadius: BorderRadius.circular(20),
-                child: Image.asset('assets/images/five-minutes-logo.png', height: 40),
+                child: Image.asset('assets/images/five-minutes-logo.png',
+                    height: 40),
               ),
               centerTitle: true,
-              backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+              backgroundColor:
+                  isDark ? const Color(0xFF1E1E1E) : const Color(0xFFFCF1F1),
               surfaceTintColor: Colors.transparent,
               elevation: 0,
               actions: [
                 IconButton(
-                  icon: const Icon(Icons.person_outline, color: Color(0xFF18e9fe)),
-                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfilePage())).then((_) {
+                  icon: const Icon(Icons.person_outline,
+                      color: Color(0xFF18e9fe)),
+                  onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const ProfilePage())).then((_) {
                     setState(() => _isLoading = true);
                     _fetchData();
                   }),
                 ),
               ],
-              bottom: _infoPages.isNotEmpty ? PreferredSize(preferredSize: const Size.fromHeight(50), child: _buildInfoPagesMenu()) : null,
+              bottom: _infoPages.isNotEmpty
+                  ? PreferredSize(
+                      preferredSize: const Size.fromHeight(50),
+                      child: _buildInfoPagesMenu())
+                  : null,
             ),
             body: _buildBody(),
-            floatingActionButton: _isRestaurantOpen ? _buildFabCartButton(context) : null,
+            floatingActionButton:
+                _isRestaurantOpen ? _buildFabCartButton(context) : null,
           ),
           if (_isRestaurantOpen)
             Align(
@@ -260,7 +296,11 @@ class _HomePageState extends State<HomePage> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       height: 50,
-      decoration: BoxDecoration(border: Border(bottom: BorderSide(color: isDark ? Colors.white10 : Colors.black12, width: 0.5))),
+      decoration: BoxDecoration(
+          border: Border(
+              bottom: BorderSide(
+                  color: isDark ? Colors.white10 : Colors.black12,
+                  width: 0.5))),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -273,16 +313,24 @@ class _HomePageState extends State<HomePage> {
               onTap: () => _showInfoPage(page),
               borderRadius: BorderRadius.circular(15),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey[100],
+                  color: isDark
+                      ? Colors.white.withOpacity(0.05)
+                      : Colors.grey[100],
                   borderRadius: BorderRadius.circular(15),
                 ),
                 child: Row(
                   children: [
-                    Icon(_getIconData(page.icon), size: 16, color: const Color(0xFF53c6fd)),
+                    Icon(_getIconData(page.icon),
+                        size: 16, color: const Color(0xFF53c6fd)),
                     const SizedBox(width: 6),
-                    Text(page.title, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: isDark ? Colors.white70 : Colors.black87)),
+                    Text(page.title,
+                        style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? Colors.white70 : Colors.black87)),
                   ],
                 ),
               ),
@@ -304,30 +352,43 @@ class _HomePageState extends State<HomePage> {
 
   IconData _getIconData(String iconName) {
     switch (iconName) {
-      case 'info': return Icons.info_outline;
-      case 'restaurant': return Icons.restaurant;
-      case 'delivery': return Icons.delivery_dining;
-      case 'contact': return Icons.contact_support_outlined;
-      case 'history': return Icons.history;
-      case 'star': return Icons.star_border;
-      default: return Icons.info_outline;
+      case 'info':
+        return Icons.info_outline;
+      case 'restaurant':
+        return Icons.restaurant;
+      case 'delivery':
+        return Icons.delivery_dining;
+      case 'contact':
+        return Icons.contact_support_outlined;
+      case 'history':
+        return Icons.history;
+      case 'star':
+        return Icons.star_border;
+      default:
+        return Icons.info_outline;
     }
   }
 
   Widget _buildBody() {
     if (_isLoading) return const Center(child: CircularProgressIndicator());
     if (_error != null) return Center(child: Text(_error!));
-    if (!_isRestaurantOpen && _timeUntilOpening != null) return RestaurantClosedWidget(timeUntilOpening: _timeUntilOpening!);
-    if (_allMenuItems.isEmpty) return const Center(child: Text('Aucun article disponible.'));
+    if (!_isRestaurantOpen && _timeUntilOpening != null)
+      return RestaurantClosedWidget(timeUntilOpening: _timeUntilOpening!);
+    if (_allMenuItems.isEmpty)
+      return const Center(child: Text('Aucun article disponible.'));
 
-    final Color selectedColor = _selectedCategory != null && _selectedCategory!.fontColor != null
-        ? Color(int.parse(_selectedCategory!.fontColor!.substring(1, 7), radix: 16) + 0xFF000000)
-        : Theme.of(context).colorScheme.primary;
+    final Color selectedColor =
+        _selectedCategory != null && _selectedCategory!.fontColor != null
+            ? Color(int.parse(_selectedCategory!.fontColor!.substring(1, 7),
+                    radix: 16) +
+                0xFF000000)
+            : Theme.of(context).colorScheme.primary;
 
     return Column(
       children: [
         if (_timeUntilClosing != null) _buildClosingSoonBanner(),
-        Expanded(child: Row(children: [
+        Expanded(
+            child: Row(children: [
           SizedBox(width: 100, child: _buildCategoryTabs()),
           Expanded(child: _buildMenuItemsList(selectedColor)),
         ])),
@@ -341,7 +402,11 @@ class _HomePageState extends State<HomePage> {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8),
       color: Colors.amber.shade700,
-      child: Center(child: Text('Fermeture dans ${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')} !', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
+      child: Center(
+          child: Text(
+              'Fermeture dans ${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')} !',
+              style: const TextStyle(
+                  color: Colors.white, fontWeight: FontWeight.bold))),
     );
   }
 
@@ -369,14 +434,24 @@ class _HomePageState extends State<HomePage> {
     final items = _groupedItems[_selectedCategory] ?? [];
     return LayoutBuilder(builder: (context, constraints) {
       int cols = 1;
-      if (constraints.maxWidth > 1200) cols = 4;
-      else if (constraints.maxWidth > 900) cols = 3;
+      if (constraints.maxWidth > 1200)
+        cols = 4;
+      else if (constraints.maxWidth > 900)
+        cols = 3;
       else if (constraints.maxWidth > 600) cols = 2;
       return GridView.builder(
         padding: const EdgeInsets.all(10),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: cols, crossAxisSpacing: 15, mainAxisSpacing: 15, childAspectRatio: 0.85),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: cols,
+            crossAxisSpacing: 15,
+            mainAxisSpacing: 15,
+            childAspectRatio: 0.85),
         itemCount: items.length,
-        itemBuilder: (context, index) => MenuItemCard(item: items[index], onAddItem: _onAddItem, index: index, cardTextColor: selectedColor),
+        itemBuilder: (context, index) => MenuItemCard(
+            item: items[index],
+            onAddItem: _onAddItem,
+            index: index,
+            cardTextColor: selectedColor),
       );
     });
   }
@@ -384,12 +459,20 @@ class _HomePageState extends State<HomePage> {
   void _onAddItem(BuildContext context, MenuItem item, Color confettiColor) {
     _confettiController.play();
     if (item.category == 'menus' || item.optionTypes.isNotEmpty) {
-      Navigator.push(context, MaterialPageRoute(builder: (context) => MenuCustomizationPage(menuItem: item)));
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => MenuCustomizationPage(menuItem: item)));
     } else {
       Provider.of<CartProvider>(context, listen: false).addItem(item);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        backgroundColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF2C2C2C) : Colors.white,
-        content: GradientText('${item.name} ajouté !', style: const TextStyle(fontSize: 14), gradient: const LinearGradient(colors: [Color(0xFFE05601), Color(0xFFF87E12)])),
+        backgroundColor: Theme.of(context).brightness == Brightness.dark
+            ? const Color(0xFF2C2C2C)
+            : const Color(0xFFFFFCDD),
+        content: GradientText('${item.name} ajouté !',
+            style: const TextStyle(fontSize: 14),
+            gradient: const LinearGradient(
+                colors: [Color(0xFFE05601), Color(0xFFF87E12)])),
       ));
     }
   }
@@ -398,38 +481,53 @@ class _HomePageState extends State<HomePage> {
     return Consumer<CartProvider>(builder: (context, cart, child) {
       return AnimatedSwitcher(
         duration: const Duration(milliseconds: 300),
-        child: cart.itemCount > 0 ? FloatingActionButton(
-          heroTag: 'cart_fab',
-          onPressed: () => showModalBottomSheet(context: context, isScrollControlled: true, backgroundColor: Colors.transparent, builder: (context) => const CartBottomSheet()),
-          backgroundColor: const Color(0xFF53c6fd),
-          child: Stack(
-            alignment: Alignment.center,
-            clipBehavior: Clip.none, // Permet au badge de dépasser sans être coupé
-            children: [
-              const Icon(Icons.shopping_cart, color: Colors.white, size: 28),
-              if (cart.itemCount > 0)
-                Positioned(
-                  top: -6,
-                  right: -6,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: const Color(0xFF53c6fd), width: 1.5), // Ajout d'une bordure pour mieux le détacher
-                    ),
-                    constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
-                    child: Center(
-                      child: Text(
-                        '${cart.itemCount}',
-                        style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+        child: cart.itemCount > 0
+            ? FloatingActionButton(
+                heroTag: 'cart_fab',
+                onPressed: () => showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (context) => const CartBottomSheet()),
+                backgroundColor: const Color(0xFF53c6fd),
+                child: Stack(
+                  alignment: Alignment.center,
+                  clipBehavior:
+                      Clip.none, // Permet au badge de dépasser sans être coupé
+                  children: [
+                    const Icon(Icons.shopping_cart,
+                        color: Colors.white, size: 28),
+                    if (cart.itemCount > 0)
+                      Positioned(
+                        top: -6,
+                        right: -6,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                                color: const Color(0xFF53c6fd),
+                                width:
+                                    1.5), // Ajout d'une bordure pour mieux le détacher
+                          ),
+                          constraints:
+                              const BoxConstraints(minWidth: 18, minHeight: 18),
+                          child: Center(
+                            child: Text(
+                              '${cart.itemCount}',
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
+                  ],
                 ),
-            ],
-          ),
-        ) : const SizedBox.shrink(),
+              )
+            : const SizedBox.shrink(),
       );
     });
   }
@@ -446,28 +544,85 @@ class _InfoPageViewer extends StatelessWidget {
       maxChildSize: 0.95,
       minChildSize: 0.5,
       builder: (context, scrollController) => Container(
-        decoration: BoxDecoration(color: isDark ? const Color(0xFF121212) : const Color(0xFFF8F9FA), borderRadius: const BorderRadius.vertical(top: Radius.circular(30))),
-        child: Center(child: Container(constraints: const BoxConstraints(maxWidth: 800), child: ListView(
-          controller: scrollController,
-          padding: const EdgeInsets.all(24),
-          children: [
-            Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey[400], borderRadius: BorderRadius.circular(2)))),
-            const SizedBox(height: 24),
-            Center(child: Container(padding: const EdgeInsets.all(20), decoration: BoxDecoration(color: const Color(0xFF53c6fd).withOpacity(0.1), shape: BoxShape.circle), child: Icon(_getIconData(page.icon), color: const Color(0xFF53c6fd), size: 48))),
-            const SizedBox(height: 24),
-            Text(page.title, textAlign: TextAlign.center, style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 16),
-            Center(child: Container(width: 60, height: 3, decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF53c6fd), Color(0xFF9c4dea)]), borderRadius: BorderRadius.circular(2)))),
-            const SizedBox(height: 40),
-            Text(page.content, style: TextStyle(fontSize: 18, height: 1.8, color: isDark ? Colors.white.withOpacity(0.9) : Colors.black87)),
-            const SizedBox(height: 60),
-            Center(child: TextButton(onPressed: () => Navigator.pop(context), child: const Text('Fermer la lecture', style: TextStyle(color: Color(0xFF53c6fd), fontWeight: FontWeight.bold)))),
-          ],
-        ))),
+        decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF121212) : const Color(0xFFFFFCDD),
+            borderRadius:
+                const BorderRadius.vertical(top: Radius.circular(30))),
+        child: Center(
+            child: Container(
+                constraints: const BoxConstraints(maxWidth: 800),
+                child: ListView(
+                  controller: scrollController,
+                  padding: const EdgeInsets.all(24),
+                  children: [
+                    Center(
+                        child: Container(
+                            width: 40,
+                            height: 4,
+                            decoration: BoxDecoration(
+                                color: Colors.grey[400],
+                                borderRadius: BorderRadius.circular(2)))),
+                    const SizedBox(height: 24),
+                    Center(
+                        child: Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                                color: const Color(0xFF53c6fd).withOpacity(0.1),
+                                shape: BoxShape.circle),
+                            child: Icon(_getIconData(page.icon),
+                                color: const Color(0xFF53c6fd), size: 48))),
+                    const SizedBox(height: 24),
+                    Text(page.title,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                            fontSize: 32, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 16),
+                    Center(
+                        child: Container(
+                            width: 60,
+                            height: 3,
+                            decoration: BoxDecoration(
+                                gradient: const LinearGradient(colors: [
+                                  Color(0xFF53c6fd),
+                                  Color(0xFF9c4dea)
+                                ]),
+                                borderRadius: BorderRadius.circular(2)))),
+                    const SizedBox(height: 40),
+                    Text(page.content,
+                        style: TextStyle(
+                            fontSize: 18,
+                            height: 1.8,
+                            color: isDark
+                                ? Colors.white.withOpacity(0.9)
+                                : Colors.black87)),
+                    const SizedBox(height: 60),
+                    Center(
+                        child: TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Fermer la lecture',
+                                style: TextStyle(
+                                    color: Color(0xFF53c6fd),
+                                    fontWeight: FontWeight.bold)))),
+                  ],
+                ))),
       ),
     );
   }
+
   IconData _getIconData(String n) {
-    switch (n) { case 'restaurant': return Icons.restaurant; case 'delivery': return Icons.delivery_dining; case 'contact': return Icons.contact_support; case 'history': return Icons.history; case 'star': return Icons.star; default: return Icons.info; }
+    switch (n) {
+      case 'restaurant':
+        return Icons.restaurant;
+      case 'delivery':
+        return Icons.delivery_dining;
+      case 'contact':
+        return Icons.contact_support;
+      case 'history':
+        return Icons.history;
+      case 'star':
+        return Icons.star;
+      default:
+        return Icons.info;
+    }
   }
 }

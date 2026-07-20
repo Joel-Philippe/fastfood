@@ -232,7 +232,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
             style: isDark ? ThemeMode.dark : ThemeMode.light,
             appearance: PaymentSheetAppearance(
               colors: PaymentSheetAppearanceColors(
-                background: isDark ? const Color(0xFF121212) : Colors.white,
+                background:
+                    isDark ? const Color(0xFF121212) : const Color(0xFFFCF1F1),
                 primary: const Color(0xFF53c6fd),
                 componentBackground:
                     isDark ? const Color(0xFF1E1E1E) : Colors.white,

@@ -1,5 +1,6 @@
 import 'package:fast_food_app/app_config.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:fast_food_app/cart_provider.dart';
@@ -25,7 +26,8 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   debugPrint('Handling a background message: ${message.messageId}');
 }
 
-final LocalNotificationService localNotificationService = LocalNotificationService();
+final LocalNotificationService localNotificationService =
+    LocalNotificationService();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -71,9 +73,8 @@ Future<void> _setupFirebaseMessaging() async {
       sound: true,
     );
 
-    if (settings.authorizationStatus == AuthorizationStatus.authorized || 
+    if (settings.authorizationStatus == AuthorizationStatus.authorized ||
         settings.authorizationStatus == AuthorizationStatus.provisional) {
-      
       String? token;
       try {
         token = await messaging.getToken();
@@ -108,6 +109,41 @@ Future<void> _setupFirebaseMessaging() async {
   }
 }
 
+const _lightShellStart = Color(0xFFFCF1F1);
+const _lightShellEnd = Color(0xFFFFFCDD);
+const _darkShell = Color(0xFF0B0F14);
+
+Widget _appShellForTheme(BuildContext context, Widget? child) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+  final navigationColor = isDark ? _darkShell : _lightShellEnd;
+
+  SystemChrome.setSystemUIOverlayStyle(
+    SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      systemNavigationBarColor: navigationColor,
+      systemNavigationBarDividerColor: navigationColor,
+      statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+      statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+      systemNavigationBarIconBrightness:
+          isDark ? Brightness.light : Brightness.dark,
+    ),
+  );
+
+  return DecoratedBox(
+    decoration: BoxDecoration(
+      color: isDark ? _darkShell : null,
+      gradient: isDark
+          ? null
+          : const LinearGradient(
+              colors: [_lightShellStart, _lightShellEnd],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+    ),
+    child: child ?? const SizedBox.shrink(),
+  );
+}
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -116,17 +152,29 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Five Minutes',
       debugShowCheckedModeBanner: false,
+      builder: _appShellForTheme,
       themeMode: ThemeMode.system,
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF53c6fd),
           brightness: Brightness.light,
-          surface: Colors.white,
+          surface: _lightShellStart,
           onSurface: Colors.black87,
         ),
+        scaffoldBackgroundColor: _lightShellStart,
+        canvasColor: _lightShellStart,
+        drawerTheme: const DrawerThemeData(
+          backgroundColor: _lightShellStart,
+          surfaceTintColor: Colors.transparent,
+        ),
+        bottomSheetTheme: const BottomSheetThemeData(
+          backgroundColor: _lightShellEnd,
+          modalBackgroundColor: _lightShellEnd,
+          surfaceTintColor: Colors.transparent,
+        ),
         appBarTheme: AppBarTheme(
-          backgroundColor: Colors.white,
+          backgroundColor: _lightShellStart,
           foregroundColor: const Color(0xFF53c6fd),
           elevation: 0,
           titleTextStyle: const TextStyle(
@@ -136,9 +184,10 @@ class MyApp extends StatelessWidget {
           ),
         ),
         cardTheme: CardThemeData(
-          color: Colors.white,
+          color: _lightShellStart,
           elevation: 2,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
@@ -162,6 +211,16 @@ class MyApp extends StatelessWidget {
           secondary: const Color(0xFF53c6fd),
         ),
         scaffoldBackgroundColor: const Color(0xFF121212),
+        canvasColor: const Color(0xFF121212),
+        drawerTheme: const DrawerThemeData(
+          backgroundColor: Color(0xFF121212),
+          surfaceTintColor: Colors.transparent,
+        ),
+        bottomSheetTheme: const BottomSheetThemeData(
+          backgroundColor: Color(0xFF121212),
+          modalBackgroundColor: Color(0xFF121212),
+          surfaceTintColor: Colors.transparent,
+        ),
         appBarTheme: AppBarTheme(
           backgroundColor: const Color(0xFF1E1E1E),
           foregroundColor: Colors.white,
@@ -175,7 +234,8 @@ class MyApp extends StatelessWidget {
         cardTheme: CardThemeData(
           color: const Color(0xFF1E1E1E),
           elevation: 4,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         ),
         listTileTheme: const ListTileThemeData(
           iconColor: Colors.white70,
@@ -194,12 +254,14 @@ class MyApp extends StatelessWidget {
         textTheme: const TextTheme(
           bodyLarge: TextStyle(color: Colors.white),
           bodyMedium: TextStyle(color: Colors.white70),
-          titleLarge: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          titleLarge:
+              TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
       ),
       home: const AuthWrapper(),
       onGenerateRoute: (settings) {
-        if (settings.name != null && settings.name!.startsWith('/reset-password')) {
+        if (settings.name != null &&
+            settings.name!.startsWith('/reset-password')) {
           final uri = Uri.parse(settings.name!);
           final token = uri.queryParameters['token'];
           if (token != null) {
@@ -210,7 +272,8 @@ class MyApp extends StatelessWidget {
         }
         if (settings.name != null && settings.name!.startsWith('/track/')) {
           final uri = Uri.parse(settings.name!);
-          final token = uri.pathSegments.length >= 2 ? uri.pathSegments[1] : null;
+          final token =
+              uri.pathSegments.length >= 2 ? uri.pathSegments[1] : null;
           if (token != null && token.isNotEmpty) {
             return MaterialPageRoute(
               builder: (context) => OrderTrackingPage(trackingToken: token),
