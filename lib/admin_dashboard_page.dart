@@ -519,6 +519,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   Widget _buildOrderCardDetails(Order order) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final secondaryTextColor = isDark ? Colors.white60 : Colors.black54;
+    const adminOrderAccent = Color(0xFFC7A5FF);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -585,7 +586,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                   style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 20,
-                      color: isDark ? Colors.white : Colors.black87),
+                      color: adminOrderAccent),
                 ),
                 if (details.isNotEmpty)
                   Padding(
@@ -642,7 +643,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 20,
-                        color: isDark ? Colors.white : Colors.black87),
+                        color: adminOrderAccent),
                     softWrap: false,
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1)),
