@@ -373,6 +373,29 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     );
   }
 
+  String _formatFrenchOrderDate(DateTime date) {
+    final parisDate = _toParisTime(date);
+    return DateFormat('dd/MM/yy HH:mm').format(parisDate);
+  }
+
+  DateTime _toParisTime(DateTime date) {
+    final utcDate = date.toUtc();
+    final offsetHours = _isFrenchSummerTime(utcDate) ? 2 : 1;
+    return utcDate.add(Duration(hours: offsetHours));
+  }
+
+  bool _isFrenchSummerTime(DateTime utcDate) {
+    final year = utcDate.year;
+    final summerStart = _lastSundayUtc(year, DateTime.march, 1);
+    final summerEnd = _lastSundayUtc(year, DateTime.october, 1);
+    return !utcDate.isBefore(summerStart) && utcDate.isBefore(summerEnd);
+  }
+
+  DateTime _lastSundayUtc(int year, int month, int hour) {
+    final lastDay = DateTime.utc(year, month + 1, 0, hour);
+    return lastDay.subtract(Duration(days: lastDay.weekday % 7));
+  }
+
   Widget _buildOrderCard(Order order) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
@@ -417,7 +440,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                 '#${order.id.substring(order.id.length - 6)}',
                 style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 18,
+                    fontSize: 22,
                     color: isDark ? Colors.white : Colors.black87),
                 softWrap: false,
                 overflow: TextOverflow.ellipsis,
@@ -428,7 +451,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                 '${order.totalAmount.toStringAsFixed(2)} €',
                 style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 18,
+                    fontSize: 22,
                     color: isDark ? Colors.white : Colors.black87),
                 softWrap: false,
                 overflow: TextOverflow.ellipsis,
@@ -445,7 +468,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
             Flexible(
                 child: Text(order.customerName,
                     style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 20,
                         color: isDark ? Colors.white60 : Colors.black54),
                     softWrap: false,
                     overflow: TextOverflow.ellipsis,
@@ -479,7 +502,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                 _translateStatus(order.status),
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 14,
+                  fontSize: 18,
                   color: _getStatusColor(order.status),
                 ),
                 softWrap: false,
@@ -504,25 +527,34 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
         Text('Articles:',
             style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 16,
+                fontSize: 20,
                 color: isDark ? Colors.white : Colors.black87)),
         ...order.items.values.map((cartItem) {
           Widget buildDetailRow(String text, {bool isRemoval = false}) {
+            final detailColor = isRemoval
+                ? (isDark ? Colors.red.shade300 : Colors.red.shade700)
+                : (isDark ? Colors.green.shade300 : Colors.green.shade700);
+
             return Padding(
-              padding: const EdgeInsets.only(left: 16, top: 2),
+              padding: const EdgeInsets.only(left: 16, top: 4),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(isRemoval ? '– ' : '+ ',
-                      style: TextStyle(
-                          color: isRemoval ? Colors.red : Colors.green,
-                          fontSize: 15)),
+                  Text(
+                    isRemoval ? '– ' : '+ ',
+                    style: TextStyle(
+                      color: detailColor,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                   Expanded(
                     child: Text(
                       text,
                       style: TextStyle(
-                        fontSize: 14,
-                        color: secondaryTextColor,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: detailColor,
                       ),
                     ),
                   ),
@@ -552,7 +584,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                   '${cartItem.quantity}x ${cartItem.item.name}',
                   style: TextStyle(
                       fontWeight: FontWeight.w600,
-                      fontSize: 16,
+                      fontSize: 20,
                       color: isDark ? Colors.white : Colors.black87),
                 ),
                 if (details.isNotEmpty)
@@ -572,12 +604,12 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
           Text('Adresse de livraison:',
               style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 16,
+                  fontSize: 20,
                   color: isDark ? Colors.white : Colors.black87)),
           Flexible(
               child: Text(order.address!.street,
                   style: TextStyle(
-                      fontSize: 15,
+                      fontSize: 18,
                       color: isDark ? Colors.white70 : Colors.black87),
                   softWrap: false,
                   overflow: TextOverflow.ellipsis,
@@ -585,7 +617,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
           Flexible(
               child: Text('${order.address!.postalCode} ${order.address!.city}',
                   style: TextStyle(
-                      fontSize: 15,
+                      fontSize: 18,
                       color: isDark ? Colors.white70 : Colors.black87),
                   softWrap: false,
                   overflow: TextOverflow.ellipsis,
@@ -593,7 +625,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
           Flexible(
               child: Text('Tél: ${order.address!.phone}',
                   style: TextStyle(
-                      fontSize: 15,
+                      fontSize: 18,
                       color: isDark ? Colors.white70 : Colors.black87),
                   softWrap: false,
                   overflow: TextOverflow.ellipsis,
@@ -604,12 +636,12 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text('Type de commande:',
-                style: TextStyle(fontSize: 15, color: secondaryTextColor)),
+                style: TextStyle(fontSize: 18, color: secondaryTextColor)),
             Flexible(
                 child: Text(_translateStatus(order.orderType),
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                        fontSize: 20,
                         color: isDark ? Colors.white : Colors.black87),
                     softWrap: false,
                     overflow: TextOverflow.ellipsis,
@@ -620,13 +652,12 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text('Date:',
-                style: TextStyle(fontSize: 15, color: secondaryTextColor)),
+                style: TextStyle(fontSize: 18, color: secondaryTextColor)),
             Flexible(
-                child: Text(
-                    DateFormat('dd/MM/yy HH:mm').format(order.orderDate),
+                child: Text(_formatFrenchOrderDate(order.orderDate),
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                        fontSize: 20,
                         color: isDark ? Colors.white : Colors.black87),
                     softWrap: false,
                     overflow: TextOverflow.ellipsis,
