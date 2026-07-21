@@ -37,7 +37,8 @@ class AuthService {
         }
       } else {
         final errorBody = json.decode(response.body);
-        final errorMessage = errorBody['message'] ?? 'Login failed with status code: ${response.statusCode}';
+        final errorMessage = errorBody['message'] ??
+            'Login failed with status code: ${response.statusCode}';
         throw Exception(errorMessage);
       }
     } catch (e) {
@@ -63,7 +64,8 @@ class AuthService {
 
       if (response.statusCode != 201) {
         final errorBody = json.decode(response.body);
-        final errorMessage = errorBody['message'] ?? 'Registration failed with status code: ${response.statusCode}';
+        final errorMessage = errorBody['message'] ??
+            'Registration failed with status code: ${response.statusCode}';
         throw AuthException(errorMessage);
       }
     } catch (e) {
@@ -89,6 +91,15 @@ class AuthService {
     if (token != null && !JwtDecoder.isExpired(token)) {
       final decodedToken = JwtDecoder.decode(token);
       return decodedToken['userName'];
+    }
+    return null;
+  }
+
+  Future<String?> getUserEmail() async {
+    final token = await getToken();
+    if (token != null && !JwtDecoder.isExpired(token)) {
+      final decodedToken = JwtDecoder.decode(token);
+      return decodedToken['email'];
     }
     return null;
   }
@@ -122,7 +133,8 @@ class AuthService {
 
       if (response.statusCode != 200) {
         final errorBody = json.decode(response.body);
-        final errorMessage = errorBody['message'] ?? 'Failed to update FCM token with status: ${response.statusCode}';
+        final errorMessage = errorBody['message'] ??
+            'Failed to update FCM token with status: ${response.statusCode}';
         throw AuthException(errorMessage);
       }
       debugPrint('FCM token successfully sent to backend.');
@@ -152,7 +164,8 @@ class AuthService {
 
       if (response.statusCode != 200) {
         final errorBody = json.decode(response.body);
-        final errorMessage = errorBody['message'] ?? 'Failed to update password with status: ${response.statusCode}';
+        final errorMessage = errorBody['message'] ??
+            'Failed to update password with status: ${response.statusCode}';
         throw AuthException(errorMessage);
       }
     } catch (e) {
@@ -171,7 +184,8 @@ class AuthService {
 
       if (response.statusCode != 200) {
         final errorBody = json.decode(response.body);
-        final errorMessage = errorBody['message'] ?? 'Failed to send reset email.';
+        final errorMessage =
+            errorBody['message'] ?? 'Failed to send reset email.';
         throw AuthException(errorMessage);
       }
     } catch (e) {
@@ -193,7 +207,8 @@ class AuthService {
 
       if (response.statusCode != 200) {
         final errorBody = json.decode(response.body);
-        final errorMessage = errorBody['message'] ?? 'Failed to reset password.';
+        final errorMessage =
+            errorBody['message'] ?? 'Failed to reset password.';
         throw AuthException(errorMessage);
       }
     } catch (e) {

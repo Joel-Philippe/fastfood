@@ -221,65 +221,61 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return _AnimatedLightHomeBackground(
-      isDark: isDark,
-      colors: const [Color(0xFFFCF1F1), Color(0xFFFFFCDD)],
-      child: Stack(
-        alignment: Alignment.topCenter,
-        children: [
-          Scaffold(
-            backgroundColor: Colors.transparent,
-            appBar: AppBar(
-              title: ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: Image.asset('assets/images/five-minutes-logo.png',
-                    height: 40),
-              ),
-              centerTitle: true,
-              backgroundColor:
-                  isDark ? const Color(0xFF1E1E1E) : Colors.transparent,
-              surfaceTintColor: Colors.transparent,
-              elevation: 0,
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.person_outline,
-                      color: Color(0xFF18e9fe)),
-                  onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const ProfilePage())).then((_) {
-                    setState(() => _isLoading = true);
-                    _fetchData();
-                  }),
-                ),
-              ],
-              bottom: _infoPages.isNotEmpty
-                  ? PreferredSize(
-                      preferredSize: const Size.fromHeight(50),
-                      child: _buildInfoPagesMenu())
-                  : null,
+    return Stack(
+      alignment: Alignment.topCenter,
+      children: [
+        Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(
+            title: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: Image.asset('assets/images/five-minutes-logo.png',
+                  height: 40),
             ),
-            body: _buildBody(),
-            floatingActionButton:
-                _isRestaurantOpen ? _buildFabCartButton(context) : null,
+            centerTitle: true,
+            backgroundColor:
+                isDark ? const Color(0xFF1E1E1E) : Colors.transparent,
+            surfaceTintColor: Colors.transparent,
+            elevation: 0,
+            actions: [
+              IconButton(
+                icon:
+                    const Icon(Icons.person_outline, color: Color(0xFF18e9fe)),
+                onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const ProfilePage())).then((_) {
+                  setState(() => _isLoading = true);
+                  _fetchData();
+                }),
+              ),
+            ],
+            bottom: _infoPages.isNotEmpty
+                ? PreferredSize(
+                    preferredSize: const Size.fromHeight(50),
+                    child: _buildInfoPagesMenu())
+                : null,
           ),
-          if (_isRestaurantOpen)
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: ConfettiWidget(
-                  confettiController: _confettiController,
-                  blastDirection: -pi / 2,
-                  emissionFrequency: 0.05,
-                  numberOfParticles: 10,
-                  gravity: 0.2,
-                  shouldLoop: false,
-                ),
+          body: _buildBody(),
+          floatingActionButton:
+              _isRestaurantOpen ? _buildFabCartButton(context) : null,
+        ),
+        if (_isRestaurantOpen)
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: ConfettiWidget(
+                confettiController: _confettiController,
+                blastDirection: -pi / 2,
+                emissionFrequency: 0.05,
+                numberOfParticles: 10,
+                gravity: 0.2,
+                shouldLoop: false,
               ),
             ),
-        ],
-      ),
+          ),
+      ],
     );
   }
 
@@ -310,7 +306,7 @@ class _HomePageState extends State<HomePage> {
                 decoration: BoxDecoration(
                   color: isDark
                       ? Colors.white.withOpacity(0.05)
-                      : Colors.white.withOpacity(0.42),
+                      : Colors.white.withOpacity(0.36),
                   borderRadius: BorderRadius.circular(15),
                 ),
                 child: Row(
@@ -460,7 +456,7 @@ class _HomePageState extends State<HomePage> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         backgroundColor: Theme.of(context).brightness == Brightness.dark
             ? const Color(0xFF2C2C2C)
-            : Colors.white.withOpacity(0.42),
+            : Colors.white.withOpacity(0.36),
         content: GradientText('${item.name} ajouté !',
             style: const TextStyle(fontSize: 14),
             gradient: const LinearGradient(
@@ -536,83 +532,6 @@ class _HomePageState extends State<HomePage> {
             : const SizedBox.shrink(),
       );
     });
-  }
-}
-
-class _AnimatedLightHomeBackground extends StatefulWidget {
-  final bool isDark;
-  final List<Color> colors;
-  final Widget child;
-
-  const _AnimatedLightHomeBackground({
-    required this.isDark,
-    required this.colors,
-    required this.child,
-  });
-
-  @override
-  State<_AnimatedLightHomeBackground> createState() =>
-      _AnimatedLightHomeBackgroundState();
-}
-
-class _AnimatedLightHomeBackgroundState
-    extends State<_AnimatedLightHomeBackground>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 18),
-    )..repeat(reverse: true);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (widget.isDark) {
-      return Container(
-        color: const Color(0xFF121212),
-        child: widget.child,
-      );
-    }
-
-    final start = widget.colors[0];
-    final end = widget.colors[1];
-    final softColors = <Color>[
-      Colors.white,
-      Color.lerp(start, Colors.white, 0.34)!,
-      Color.lerp(end, Colors.white, 0.50)!,
-      Colors.white,
-      Color.lerp(start, end, 0.45)!.withOpacity(0.72),
-      Color.lerp(end, Colors.white, 0.28)!,
-    ];
-
-    return AnimatedBuilder(
-      animation: _controller,
-      child: widget.child,
-      builder: (context, child) {
-        final t = _controller.value * 2 * pi;
-        return Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: softColors,
-              stops: const [0.0, 0.18, 0.38, 0.58, 0.78, 1.0],
-              begin: Alignment(cos(t) * 0.65, sin(t) * 0.65),
-              end: Alignment(cos(t + pi) * 0.65, sin(t + pi) * 0.65),
-            ),
-          ),
-          child: child,
-        );
-      },
-    );
   }
 }
 

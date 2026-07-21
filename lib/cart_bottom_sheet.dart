@@ -64,7 +64,7 @@ class CartBottomSheet extends StatelessWidget {
       builder: (BuildContext context, ScrollController scrollController) {
         return Container(
           decoration: BoxDecoration(
-            color: theme.scaffoldBackgroundColor,
+            color: isDark ? theme.scaffoldBackgroundColor : Colors.transparent,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: Column(
@@ -233,7 +233,7 @@ class CartBottomSheet extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: isDark
                       ? const Color(0xFF1E1E1E)
-                      : const Color(0xFFFFFCDD),
+                      : Colors.white.withOpacity(0.56),
                   boxShadow: [
                     BoxShadow(
                         color: Colors.black.withOpacity(isDark ? 0.3 : 0.1),

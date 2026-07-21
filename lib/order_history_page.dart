@@ -19,7 +19,7 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
   final MongoService _mongoService = MongoService();
   final AuthService _authService = AuthService();
   final WebSocketService _webSocketService = WebSocketService();
-  
+
   StreamSubscription? _socketSubscription;
   List<Order>? _orders;
   bool _isLoading = true;
@@ -62,16 +62,18 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
       if (token == null) {
         return;
       }
-      
+
       _webSocketService.connect(token);
-      
+
       _socketSubscription = _webSocketService.stream.listen((message) {
         if (message['type'] == 'ORDER_STATUS_UPDATE') {
           final updatedOrderData = message['order'];
           if (updatedOrderData != null && _orders != null) {
-            final updatedOrder = Order.fromMap(updatedOrderData, updatedOrderData['_id']);
+            final updatedOrder =
+                Order.fromMap(updatedOrderData, updatedOrderData['_id']);
             setState(() {
-              final index = _orders!.indexWhere((order) => order.id == updatedOrder.id);
+              final index =
+                  _orders!.indexWhere((order) => order.id == updatedOrder.id);
               if (index != -1) {
                 _orders![index] = updatedOrder;
               }
@@ -81,7 +83,6 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
       }, onError: (error) {
         debugPrint("WebSocket Stream Error: $error");
       });
-
     } catch (e) {
       debugPrint("Failed to initialize WebSocket: $e");
     }
@@ -93,15 +94,7 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: isDark
-              ? [const Color(0xFF121212), const Color(0xFF1E1E1E)]
-              : [const Color(0xFFfcf1f1), const Color(0xFFfffcdd)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
+      decoration: const BoxDecoration(color: Colors.transparent),
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
@@ -132,7 +125,10 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
     }
 
     if (_error != null) {
-      return Center(child: Text('Erreur: $_error', style: TextStyle(color: isDark ? Colors.white70 : Colors.black87)));
+      return Center(
+          child: Text('Erreur: $_error',
+              style:
+                  TextStyle(color: isDark ? Colors.white70 : Colors.black87)));
     }
 
     if (_orders == null || _orders!.isEmpty) {
@@ -140,11 +136,15 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.receipt_long, size: 100, color: isDark ? Colors.grey[800] : Colors.grey[300]),
+            Icon(Icons.receipt_long,
+                size: 100, color: isDark ? Colors.grey[800] : Colors.grey[300]),
             const SizedBox(height: 24),
             Text(
               'Aucune commande trouvée',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: isDark ? Colors.white70 : Colors.black54),
+              style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white70 : Colors.black54),
             ),
             const SizedBox(height: 8),
             const Text(
@@ -164,9 +164,10 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
         child: LayoutBuilder(
           builder: (context, constraints) {
             final crossAxisCount = constraints.maxWidth > 900 ? 2 : 1;
-            
+
             return GridView.builder(
-              padding: const EdgeInsets.only(top: 8, bottom: 24, left: 8, right: 8),
+              padding:
+                  const EdgeInsets.only(top: 8, bottom: 24, left: 8, right: 8),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: crossAxisCount,
                 childAspectRatio: constraints.maxWidth > 900 ? 1.5 : 1.1,
@@ -192,7 +193,9 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E1E1E).withOpacity(0.8) : Colors.white.withOpacity(0.8),
+        color: isDark
+            ? const Color(0xFF1E1E1E).withOpacity(0.8)
+            : Colors.white.withOpacity(0.8),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: isDark ? Colors.white10 : Colors.transparent),
         boxShadow: [
@@ -203,7 +206,8 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
           )
         ],
       ),
-      child: SingleChildScrollView( // Allow scrolling inside card if too long
+      child: SingleChildScrollView(
+        // Allow scrolling inside card if too long
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -240,21 +244,27 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
             const Divider(height: 24),
             Row(
               children: [
-                Icon(Icons.calendar_today, color: isDark ? Colors.white60 : Colors.black54, size: 16),
+                Icon(Icons.calendar_today,
+                    color: isDark ? Colors.white60 : Colors.black54, size: 16),
                 const SizedBox(width: 8),
                 Text(
-                  DateFormat('dd/MM/yyyy à HH:mm').format(order.orderDate.toLocal()),
-                  style: TextStyle(color: isDark ? Colors.white60 : Colors.black54, fontSize: 14),
+                  DateFormat('dd/MM/yyyy à HH:mm')
+                      .format(order.orderDate.toLocal()),
+                  style: TextStyle(
+                      color: isDark ? Colors.white60 : Colors.black54,
+                      fontSize: 14),
                 ),
               ],
             ),
             const SizedBox(height: 8),
             Row(
               children: [
-                Icon(Icons.flag, color: isDark ? Colors.white60 : Colors.black54, size: 16),
+                Icon(Icons.flag,
+                    color: isDark ? Colors.white60 : Colors.black54, size: 16),
                 const SizedBox(width: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
                     color: _getStatusColor(order.status).withOpacity(0.2),
                     borderRadius: BorderRadius.circular(12),
@@ -262,10 +272,9 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
                   child: Text(
                     _getFrenchStatus(order.status),
                     style: TextStyle(
-                      color: _getStatusColor(order.status),
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12
-                    ),
+                        color: _getStatusColor(order.status),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12),
                   ),
                 ),
               ],
@@ -273,7 +282,10 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
             const SizedBox(height: 16),
             Text(
               'Articles :',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: isDark ? Colors.white70 : Colors.black54),
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: isDark ? Colors.white70 : Colors.black54),
             ),
             const SizedBox(height: 4),
             ...order.items.values.map((item) {
@@ -283,7 +295,9 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(isRemoval ? '– ' : '+ ', style: TextStyle(color: isRemoval ? Colors.red : Colors.green)),
+                      Text(isRemoval ? '– ' : '+ ',
+                          style: TextStyle(
+                              color: isRemoval ? Colors.red : Colors.green)),
                       Expanded(
                         child: Text(
                           text,
@@ -301,11 +315,13 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
               List<Widget> details = [];
               item.selectedOptions.forEach((category, options) {
                 for (var option in options) {
-                  details.add(buildDetailRow('${option.name} (${option.price.toStringAsFixed(2)}€)'));
+                  details.add(buildDetailRow(
+                      '${option.name} (${option.price.toStringAsFixed(2)}€)'));
                 }
               });
               for (var ingredient in item.ingredientsToRemove) {
-                details.add(buildDetailRow('Sans $ingredient', isRemoval: true));
+                details
+                    .add(buildDetailRow('Sans $ingredient', isRemoval: true));
               }
 
               return Padding(
@@ -329,7 +345,8 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
           ],
         ),
       ),
-    ).animate().fadeIn(delay: (100 * index).ms, duration: 400.ms, curve: Curves.easeOut);
+    ).animate().fadeIn(
+        delay: (100 * index).ms, duration: 400.ms, curve: Curves.easeOut);
   }
 
   String _getFrenchStatus(String status) {
