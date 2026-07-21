@@ -37,6 +37,9 @@ class _MenuItemCardState extends State<MenuItemCard> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardColor = isDark ? widget.cardTextColor : Colors.white;
+    final textColor = isDark ? Colors.white : Colors.black;
     final defaultShadowColor =
         Theme.of(context).shadowColor; // Use theme's shadow color
 
@@ -48,9 +51,10 @@ class _MenuItemCardState extends State<MenuItemCard> {
           children: [
             Card(
               elevation: 8,
-              color: widget
-                  .cardTextColor, // Use category color for card background
-              shadowColor: widget.cardTextColor.withOpacity(0.5),
+              color: cardColor, // Light mode cards stay white for readability
+              shadowColor: isDark
+                  ? widget.cardTextColor.withOpacity(0.5)
+                  : Colors.black.withOpacity(0.12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -94,7 +98,7 @@ class _MenuItemCardState extends State<MenuItemCard> {
                                               Brightness.dark
                                           ? Colors.grey[700]!
                                           : Colors.grey[100]!,
-                                  child: Container(color: Colors.white),
+                                  child: Container(color: cardColor),
                                 );
                               },
                               errorBuilder: (context, error, stackTrace) {
@@ -130,19 +134,19 @@ class _MenuItemCardState extends State<MenuItemCard> {
                               // Price
                               Text(
                                 '${widget.item.price.toStringAsFixed(2)} €',
-                                style: const TextStyle(
+                                style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.white),
+                                    color: Colors.black),
                               ),
                               const SizedBox(height: 4),
                               // Title
                               Text(
                                 widget.item.name,
-                                style: const TextStyle(
+                                style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.white),
+                                    color: textColor),
                                 maxLines: 2, // Allow up to 2 lines for title
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -152,9 +156,9 @@ class _MenuItemCardState extends State<MenuItemCard> {
                                   widget.item.description!.isNotEmpty)
                                 Text(
                                   widget.item.description!,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                       fontSize: 12,
-                                      color: Colors.white,
+                                      color: textColor,
                                       fontWeight: FontWeight.w500),
                                   maxLines:
                                       4, // Allow up to 4 lines for description
@@ -189,9 +193,9 @@ class _MenuItemCardState extends State<MenuItemCard> {
                     ),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.check,
-                    color: Colors.white,
+                    color: textColor,
                     size: 16,
                   ),
                 ),
