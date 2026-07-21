@@ -37,8 +37,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
     super.initState();
     _loadOrder();
     _connectLiveTracking();
-    _refreshTimer = Timer.periodic(
-        const Duration(seconds: 20), (_) => _loadOrder(showLoader: false));
+    _refreshTimer = Timer.periodic(const Duration(seconds: 20), (_) => _loadOrder(showLoader: false));
   }
 
   @override
@@ -58,8 +57,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
     }
 
     try {
-      final order =
-          await _mongoService.getOrderByTrackingToken(widget.trackingToken);
+      final order = await _mongoService.getOrderByTrackingToken(widget.trackingToken);
       if (!mounted) return;
       setState(() {
         _order = order;
@@ -78,8 +76,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
   void _connectLiveTracking() {
     _webSocketService.connectToOrderTracking(widget.trackingToken);
     _socketSubscription = _webSocketService.stream.listen((message) {
-      if (message['type'] == 'PUBLIC_ORDER_STATUS_UPDATE' &&
-          message['order'] != null) {
+      if (message['type'] == 'PUBLIC_ORDER_STATUS_UPDATE' && message['order'] != null) {
         final order = Order.fromMap(message['order'], message['order']['_id']);
         if (!mounted) return;
         setState(() => _order = order);
@@ -136,7 +133,15 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
       ),
       body: Container(
         width: double.infinity,
-        decoration: const BoxDecoration(color: Colors.transparent),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: isDark
+                ? [const Color(0xFF121212), const Color(0xFF1E1E1E)]
+                : [const Color(0xFFfcf1f1), const Color(0xFFfffcdd)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 720),
@@ -192,24 +197,17 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
               children: [
                 Text(
                   'Commande #${order.id.substring(order.id.length - 6)}',
-                  style: const TextStyle(
-                      fontSize: 24, fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                Text(order.customerName,
-                    style: TextStyle(
-                        color: isDark ? Colors.white70 : Colors.black54)),
+                Text(order.customerName, style: TextStyle(color: isDark ? Colors.white70 : Colors.black54)),
                 const SizedBox(height: 12),
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    _InfoChip(
-                        icon: Icons.restaurant,
-                        label: _orderTypeLabel(order.orderType)),
-                    _InfoChip(
-                        icon: Icons.euro,
-                        label: '${order.totalAmount.toStringAsFixed(2)} €'),
+                    _InfoChip(icon: Icons.restaurant, label: _orderTypeLabel(order.orderType)),
+                    _InfoChip(icon: Icons.euro, label: '${order.totalAmount.toStringAsFixed(2)} €'),
                     _InfoChip(
                       icon: paid ? Icons.verified : Icons.schedule,
                       label: paid ? 'Paiement validé' : 'Paiement en attente',
@@ -227,9 +225,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Avancement',
-                    style:
-                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                const Text('Avancement', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 18),
                 if (order.status == 'cancelled')
                   const _CancelledState()
@@ -255,15 +251,12 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Articles',
-                    style:
-                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                const Text('Articles', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 12),
                 ...order.items.values.map((item) => ListTile(
                       contentPadding: EdgeInsets.zero,
                       title: Text('${item.quantity}x ${item.item.name}'),
-                      trailing: Text(
-                          '${(item.item.price * item.quantity).toStringAsFixed(2)} €'),
+                      trailing: Text('${(item.item.price * item.quantity).toStringAsFixed(2)} €'),
                     )),
               ],
             ),
@@ -322,8 +315,7 @@ class _TrackingStep extends StatelessWidget {
               border: Border.all(color: color, width: 2),
               shape: BoxShape.circle,
             ),
-            child: Icon(isDone ? Icons.check : Icons.more_horiz,
-                color: isDone ? Colors.white : color, size: 18),
+            child: Icon(isDone ? Icons.check : Icons.more_horiz, color: isDone ? Colors.white : color, size: 18),
           ),
           const SizedBox(width: 12),
           Expanded(

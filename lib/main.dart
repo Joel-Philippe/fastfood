@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:fast_food_app/app_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -116,87 +115,33 @@ const _darkShell = Color(0xFF0B0F14);
 
 Widget _appShellForTheme(BuildContext context, Widget? child) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
+  final navigationColor = isDark ? _darkShell : _lightShellEnd;
 
   SystemChrome.setSystemUIOverlayStyle(
     SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
-      systemNavigationBarColor: Colors.transparent,
-      systemNavigationBarDividerColor: Colors.transparent,
+      systemNavigationBarColor: navigationColor,
+      systemNavigationBarDividerColor: navigationColor,
       statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
       statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
       systemNavigationBarIconBrightness:
           isDark ? Brightness.light : Brightness.dark,
-      systemNavigationBarContrastEnforced: false,
     ),
   );
 
-  return _AnimatedAppShell(
-      isDark: isDark, child: child ?? const SizedBox.shrink());
-}
-
-class _AnimatedAppShell extends StatefulWidget {
-  final bool isDark;
-  final Widget child;
-
-  const _AnimatedAppShell({required this.isDark, required this.child});
-
-  @override
-  State<_AnimatedAppShell> createState() => _AnimatedAppShellState();
-}
-
-class _AnimatedAppShellState extends State<_AnimatedAppShell>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 18),
-    )..repeat(reverse: true);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (widget.isDark) {
-      return ColoredBox(color: _darkShell, child: widget.child);
-    }
-
-    final softColors = <Color>[
-      Colors.white,
-      Color.lerp(_lightShellStart, Colors.white, 0.34)!,
-      Color.lerp(_lightShellEnd, Colors.white, 0.50)!,
-      Colors.white,
-      Color.lerp(_lightShellStart, _lightShellEnd, 0.45)!.withOpacity(0.72),
-      Color.lerp(_lightShellEnd, Colors.white, 0.28)!,
-    ];
-
-    return AnimatedBuilder(
-      animation: _controller,
-      child: widget.child,
-      builder: (context, child) {
-        final t = _controller.value * 2 * pi;
-        return Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: softColors,
-              stops: const [0.0, 0.18, 0.38, 0.58, 0.78, 1.0],
-              begin: Alignment(cos(t) * 0.65, sin(t) * 0.65),
-              end: Alignment(cos(t + pi) * 0.65, sin(t + pi) * 0.65),
+  return DecoratedBox(
+    decoration: BoxDecoration(
+      color: isDark ? _darkShell : null,
+      gradient: isDark
+          ? null
+          : const LinearGradient(
+              colors: [_lightShellStart, _lightShellEnd],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
-          ),
-          child: child,
-        );
-      },
-    );
-  }
+    ),
+    child: child ?? const SizedBox.shrink(),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -214,22 +159,22 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF53c6fd),
           brightness: Brightness.light,
-          surface: Colors.transparent,
+          surface: _lightShellStart,
           onSurface: Colors.black87,
         ),
-        scaffoldBackgroundColor: Colors.transparent,
-        canvasColor: Colors.transparent,
+        scaffoldBackgroundColor: _lightShellStart,
+        canvasColor: _lightShellStart,
         drawerTheme: const DrawerThemeData(
-          backgroundColor: Colors.transparent,
+          backgroundColor: _lightShellStart,
           surfaceTintColor: Colors.transparent,
         ),
         bottomSheetTheme: const BottomSheetThemeData(
-          backgroundColor: Colors.transparent,
-          modalBackgroundColor: Colors.transparent,
+          backgroundColor: _lightShellEnd,
+          modalBackgroundColor: _lightShellEnd,
           surfaceTintColor: Colors.transparent,
         ),
         appBarTheme: AppBarTheme(
-          backgroundColor: Colors.transparent,
+          backgroundColor: _lightShellStart,
           foregroundColor: const Color(0xFF53c6fd),
           elevation: 0,
           titleTextStyle: const TextStyle(
@@ -239,7 +184,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
         cardTheme: CardThemeData(
-          color: Colors.white.withOpacity(0.72),
+          color: _lightShellStart,
           elevation: 2,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),

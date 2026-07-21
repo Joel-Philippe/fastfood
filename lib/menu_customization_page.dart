@@ -179,7 +179,8 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
     final isLargeScreen = size.width > 900;
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF121212) : Colors.transparent,
+      backgroundColor:
+          isDark ? const Color(0xFF121212) : const Color(0xFFFCF1F1),
       body: Center(
         child: Container(
           constraints: const BoxConstraints(maxWidth: 800),
@@ -222,7 +223,8 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
       expandedHeight: 300.0,
       pinned: true,
       elevation: 0,
-      backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.transparent,
+      backgroundColor:
+          isDark ? const Color(0xFF1E1E1E) : const Color(0xFFFFFCDD),
       leading: Container(
         margin: const EdgeInsets.all(8),
         decoration: BoxDecoration(
@@ -290,8 +292,7 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
           vertical: 20,
         ),
         decoration: BoxDecoration(
-          color:
-              isDark ? const Color(0xFF1E1E1E) : Colors.white.withOpacity(0.56),
+          color: isDark ? const Color(0xFF1E1E1E) : const Color(0xFFFFFCDD),
           boxShadow: [
             BoxShadow(
                 color: Colors.black.withOpacity(0.1),
@@ -531,7 +532,8 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.transparent,
+        backgroundColor:
+            isDark ? const Color(0xFF1E1E1E) : const Color(0xFFFFFCDD),
         title: const Text('Sélection requise'),
         content: Text(message),
         actions: [

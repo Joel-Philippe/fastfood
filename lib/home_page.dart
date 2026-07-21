@@ -221,61 +221,73 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Stack(
-      alignment: Alignment.topCenter,
-      children: [
-        Scaffold(
-          backgroundColor: Colors.transparent,
-          appBar: AppBar(
-            title: ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: Image.asset('assets/images/five-minutes-logo.png',
-                  height: 40),
-            ),
-            centerTitle: true,
-            backgroundColor:
-                isDark ? const Color(0xFF1E1E1E) : Colors.transparent,
-            surfaceTintColor: Colors.transparent,
-            elevation: 0,
-            actions: [
-              IconButton(
-                icon:
-                    const Icon(Icons.person_outline, color: Color(0xFF18e9fe)),
-                onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const ProfilePage())).then((_) {
-                  setState(() => _isLoading = true);
-                  _fetchData();
-                }),
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF121212) : null,
+        gradient: isDark
+            ? null
+            : const LinearGradient(
+                colors: [Color(0xFFFCF1F1), Color(0xFFFFFCDD)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-            ],
-            bottom: _infoPages.isNotEmpty
-                ? PreferredSize(
-                    preferredSize: const Size.fromHeight(50),
-                    child: _buildInfoPagesMenu())
-                : null,
+      ),
+      child: Stack(
+        alignment: Alignment.topCenter,
+        children: [
+          Scaffold(
+            backgroundColor: Colors.transparent,
+            appBar: AppBar(
+              title: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Image.asset('assets/images/five-minutes-logo.png',
+                    height: 40),
+              ),
+              centerTitle: true,
+              backgroundColor:
+                  isDark ? const Color(0xFF1E1E1E) : const Color(0xFFFCF1F1),
+              surfaceTintColor: Colors.transparent,
+              elevation: 0,
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.person_outline,
+                      color: Color(0xFF18e9fe)),
+                  onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const ProfilePage())).then((_) {
+                    setState(() => _isLoading = true);
+                    _fetchData();
+                  }),
+                ),
+              ],
+              bottom: _infoPages.isNotEmpty
+                  ? PreferredSize(
+                      preferredSize: const Size.fromHeight(50),
+                      child: _buildInfoPagesMenu())
+                  : null,
+            ),
+            body: _buildBody(),
+            floatingActionButton:
+                _isRestaurantOpen ? _buildFabCartButton(context) : null,
           ),
-          body: _buildBody(),
-          floatingActionButton:
-              _isRestaurantOpen ? _buildFabCartButton(context) : null,
-        ),
-        if (_isRestaurantOpen)
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: ConfettiWidget(
-                confettiController: _confettiController,
-                blastDirection: -pi / 2,
-                emissionFrequency: 0.05,
-                numberOfParticles: 10,
-                gravity: 0.2,
-                shouldLoop: false,
+          if (_isRestaurantOpen)
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: ConfettiWidget(
+                  confettiController: _confettiController,
+                  blastDirection: -pi / 2,
+                  emissionFrequency: 0.05,
+                  numberOfParticles: 10,
+                  gravity: 0.2,
+                  shouldLoop: false,
+                ),
               ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -306,7 +318,7 @@ class _HomePageState extends State<HomePage> {
                 decoration: BoxDecoration(
                   color: isDark
                       ? Colors.white.withOpacity(0.05)
-                      : Colors.white.withOpacity(0.36),
+                      : Colors.grey[100],
                   borderRadius: BorderRadius.circular(15),
                 ),
                 child: Row(
@@ -456,7 +468,7 @@ class _HomePageState extends State<HomePage> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         backgroundColor: Theme.of(context).brightness == Brightness.dark
             ? const Color(0xFF2C2C2C)
-            : Colors.white.withOpacity(0.36),
+            : const Color(0xFFFFFCDD),
         content: GradientText('${item.name} ajouté !',
             style: const TextStyle(fontSize: 14),
             gradient: const LinearGradient(
@@ -547,7 +559,7 @@ class _InfoPageViewer extends StatelessWidget {
       minChildSize: 0.5,
       builder: (context, scrollController) => Container(
         decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF121212) : Colors.transparent,
+            color: isDark ? const Color(0xFF121212) : const Color(0xFFFFFCDD),
             borderRadius:
                 const BorderRadius.vertical(top: Radius.circular(30))),
         child: Center(
