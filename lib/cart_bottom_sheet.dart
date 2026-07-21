@@ -75,7 +75,7 @@ class CartBottomSheet extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    GradientText(
+                    AnimatedGradientText(
                       'Votre Panier',
                       style: theme.textTheme.titleLarge,
                       gradient: const LinearGradient(
@@ -137,20 +137,35 @@ class CartBottomSheet extends StatelessWidget {
                               Row(
                                 children: [
                                   Expanded(
-                                      child: Text(cartItem.item.name,
-                                          style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                              color: isDark
-                                                  ? Colors.white
-                                                  : Colors.black87))),
-                                  Text(
-                                      '${(cartItem.totalPrice / cartItem.quantity).toStringAsFixed(2)} €',
-                                      style: TextStyle(
-                                          fontSize: 16,
-                                          color: isDark
-                                              ? Colors.white70
-                                              : Colors.black87)),
+                                      child: AnimatedGradientText(
+                                    cartItem.item.name,
+                                    gradient: const LinearGradient(
+                                      colors: [
+                                        Color(0xFF00A896),
+                                        Color(0xFFFF6B35)
+                                      ],
+                                      begin: Alignment.centerLeft,
+                                      end: Alignment.centerRight,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  )),
+                                  AnimatedGradientText(
+                                    '${(cartItem.totalPrice / cartItem.quantity).toStringAsFixed(2)} €',
+                                    gradient: const LinearGradient(
+                                      colors: [
+                                        Color(0xFF00A896),
+                                        Color(0xFFFF6B35)
+                                      ],
+                                      begin: Alignment.centerLeft,
+                                      end: Alignment.centerRight,
+                                    ),
+                                    style: const TextStyle(fontSize: 16),
+                                  ),
                                 ],
                               ),
                               _buildCustomizationDetails(cartItem, context),
@@ -170,13 +185,21 @@ class CartBottomSheet extends StatelessWidget {
                                               cart.updateItemQuantity(
                                                   cartItemKey,
                                                   cartItem.quantity - 1)),
-                                      Text(cartItem.quantity.toString(),
-                                          style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                              color: isDark
-                                                  ? Colors.white
-                                                  : Colors.black87)),
+                                      AnimatedGradientText(
+                                        cartItem.quantity.toString(),
+                                        gradient: const LinearGradient(
+                                          colors: [
+                                            Color(0xFF00A896),
+                                            Color(0xFFFF6B35)
+                                          ],
+                                          begin: Alignment.centerLeft,
+                                          end: Alignment.centerRight,
+                                        ),
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
                                       IconButton(
                                           icon: Icon(Icons.add_circle_outline,
                                               color: isDark
@@ -247,7 +270,7 @@ class CartBottomSheet extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          GradientText(
+                          AnimatedGradientText(
                             'Total',
                             style: theme.textTheme.titleLarge,
                             gradient: const LinearGradient(
@@ -281,6 +304,13 @@ class CartBottomSheet extends StatelessWidget {
                         ),
                         text: 'Passer à la caisse',
                         icon: Icons.shopping_cart_checkout,
+                        backgroundColor: Colors.white,
+                        foregroundGradient: const LinearGradient(
+                          colors: [Color(0xFF9c4dea), Color(0xFFff80b1)],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                        ),
+                        animateText: true,
                       ),
                     ],
                   ),

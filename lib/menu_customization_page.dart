@@ -310,6 +310,10 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
             icon: Icons.shopping_basket_outlined,
             gradient: const LinearGradient(
                 colors: [Color(0xFF53c6fd), Color(0xFF9c4dea)]),
+            backgroundColor: Colors.white,
+            foregroundGradient: const LinearGradient(
+                colors: [Color(0xFF53c6fd), Color(0xFF9c4dea)]),
+            animateText: true,
           ),
         ),
       ),

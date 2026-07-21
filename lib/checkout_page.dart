@@ -749,6 +749,13 @@ class _CheckoutPageState extends State<CheckoutPage> {
       ),
       text: 'Payer et passer la commande',
       icon: Icons.credit_card,
+      backgroundColor: Colors.white,
+      foregroundGradient: const LinearGradient(
+        colors: [Color(0xFFe63199), Color(0xFFf87e12)],
+        begin: Alignment.centerLeft,
+        end: Alignment.centerRight,
+      ),
+      animateText: true,
     );
   }
 }
