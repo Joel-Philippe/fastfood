@@ -237,7 +237,7 @@ class _HomePageState extends State<HomePage> {
               ),
               centerTitle: true,
               backgroundColor:
-                  isDark ? const Color(0xFF1E1E1E) : const Color(0xFFFCF1F1),
+                  isDark ? const Color(0xFF1E1E1E) : Colors.transparent,
               surfaceTintColor: Colors.transparent,
               elevation: 0,
               actions: [
@@ -310,7 +310,7 @@ class _HomePageState extends State<HomePage> {
                 decoration: BoxDecoration(
                   color: isDark
                       ? Colors.white.withOpacity(0.05)
-                      : Colors.grey[100],
+                      : Colors.white.withOpacity(0.42),
                   borderRadius: BorderRadius.circular(15),
                 ),
                 child: Row(
@@ -460,7 +460,7 @@ class _HomePageState extends State<HomePage> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         backgroundColor: Theme.of(context).brightness == Brightness.dark
             ? const Color(0xFF2C2C2C)
-            : const Color(0xFFFFFCDD),
+            : Colors.white.withOpacity(0.42),
         content: GradientText('${item.name} ajouté !',
             style: const TextStyle(fontSize: 14),
             gradient: const LinearGradient(
@@ -628,7 +628,7 @@ class _InfoPageViewer extends StatelessWidget {
       minChildSize: 0.5,
       builder: (context, scrollController) => Container(
         decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF121212) : const Color(0xFFFFFCDD),
+            color: isDark ? const Color(0xFF121212) : Colors.transparent,
             borderRadius:
                 const BorderRadius.vertical(top: Radius.circular(30))),
         child: Center(
