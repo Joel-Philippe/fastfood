@@ -313,7 +313,7 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
             backgroundColor: Colors.white,
             foregroundGradient: const LinearGradient(
                 colors: [Color(0xFF53c6fd), Color(0xFF9c4dea)]),
-            animateText: true,
+            foregroundColor: Colors.black,
           ),
         ),
       ),

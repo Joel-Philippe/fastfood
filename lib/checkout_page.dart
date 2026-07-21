@@ -755,7 +755,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
         begin: Alignment.centerLeft,
         end: Alignment.centerRight,
       ),
-      animateText: true,
+      foregroundColor: Colors.black,
     );
   }
 }

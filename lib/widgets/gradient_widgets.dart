@@ -213,6 +213,7 @@ class GradientButton extends StatelessWidget {
     this.icon,
     this.backgroundColor,
     this.foregroundGradient,
+    this.foregroundColor,
     this.animateText = false,
   }) : assert(child != null || (text != null && icon != null),
             'Either a child or both text and icon must be provided.');
@@ -226,17 +227,22 @@ class GradientButton extends StatelessWidget {
   final IconData? icon;
   final Color? backgroundColor;
   final Gradient? foregroundGradient;
+  final Color? foregroundColor;
   final bool animateText;
 
   @override
   Widget build(BuildContext context) {
     final textGradient = foregroundGradient ?? gradient;
+    final effectiveForegroundColor = foregroundColor ?? Colors.white;
 
     return Container(
       decoration: BoxDecoration(
         color: backgroundColor,
         gradient: backgroundColor == null ? gradient : null,
         borderRadius: BorderRadius.circular(borderRadius),
+        border: backgroundColor == null
+            ? null
+            : Border.all(color: textGradient.colors.first, width: 2.8),
         boxShadow: [
           BoxShadow(
             color: textGradient.colors.first.withOpacity(0.28),
@@ -261,7 +267,7 @@ class GradientButton extends StatelessWidget {
                       animateText
                           ? GradientIcon(icon!,
                               size: 24, gradient: textGradient)
-                          : Icon(icon!, color: Colors.white),
+                          : Icon(icon!, color: effectiveForegroundColor),
                       const SizedBox(width: 10),
                       animateText
                           ? AnimatedGradientText(
@@ -276,9 +282,9 @@ class GradientButton extends StatelessWidget {
                             )
                           : Text(
                               text!,
-                              style: const TextStyle(
+                              style: TextStyle(
                                   fontSize: 18,
-                                  color: Colors.white,
+                                  color: effectiveForegroundColor,
                                   fontWeight: FontWeight.bold),
                             ),
                     ],

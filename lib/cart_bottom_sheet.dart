@@ -310,7 +310,7 @@ class CartBottomSheet extends StatelessWidget {
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,
                         ),
-                        animateText: true,
+                        foregroundColor: Colors.black,
                       ),
                     ],
                   ),
