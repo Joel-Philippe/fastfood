@@ -37,7 +37,8 @@ class _MenuItemCardState extends State<MenuItemCard> {
 
   @override
   Widget build(BuildContext context) {
-    final defaultShadowColor = Theme.of(context).shadowColor; // Use theme's shadow color
+    final defaultShadowColor =
+        Theme.of(context).shadowColor; // Use theme's shadow color
 
     return Consumer<CartProvider>(
       builder: (context, cart, child) {
@@ -47,14 +48,16 @@ class _MenuItemCardState extends State<MenuItemCard> {
           children: [
             Card(
               elevation: 8,
-              color: widget.cardTextColor, // Use category color for card background
+              color: widget
+                  .cardTextColor, // Use category color for card background
               shadowColor: widget.cardTextColor.withOpacity(0.5),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
               clipBehavior: Clip.antiAlias,
               child: InkWell(
-                onTap: () => widget.onAddItem(context, widget.item, Theme.of(context).primaryColor),
+                onTap: () => widget.onAddItem(
+                    context, widget.item, Theme.of(context).primaryColor),
                 child: AnimatedOpacity(
                   opacity: _isImageLoaded ? 1.0 : 0.0,
                   duration: const Duration(milliseconds: 300),
@@ -66,30 +69,48 @@ class _MenuItemCardState extends State<MenuItemCard> {
                         child: SizedBox(
                           width: double.infinity,
                           child: ClipRRect(
-                            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                            borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(12)),
                             child: Image.network(
                               widget.item.imageUrl ?? '',
                               fit: BoxFit.cover,
-                              loadingBuilder: (context, child, loadingProgress) {
+                              loadingBuilder:
+                                  (context, child, loadingProgress) {
                                 if (loadingProgress == null) {
-                                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                                    if (mounted) setState(() => _isImageLoaded = true);
+                                  WidgetsBinding.instance
+                                      .addPostFrameCallback((_) {
+                                    if (mounted)
+                                      setState(() => _isImageLoaded = true);
                                   });
                                   return child;
                                 }
                                 return Shimmer.fromColors(
-                                  baseColor: Theme.of(context).brightness == Brightness.dark ? Colors.grey[800]! : Colors.grey[300]!,
-                                  highlightColor: Theme.of(context).brightness == Brightness.dark ? Colors.grey[700]! : Colors.grey[100]!,
+                                  baseColor: Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Colors.grey[800]!
+                                      : Colors.grey[300]!,
+                                  highlightColor:
+                                      Theme.of(context).brightness ==
+                                              Brightness.dark
+                                          ? Colors.grey[700]!
+                                          : Colors.grey[100]!,
                                   child: Container(color: Colors.white),
                                 );
                               },
                               errorBuilder: (context, error, stackTrace) {
-                                WidgetsBinding.instance.addPostFrameCallback((_) {
-                                  if (mounted) setState(() => _isImageLoaded = true);
+                                WidgetsBinding.instance
+                                    .addPostFrameCallback((_) {
+                                  if (mounted)
+                                    setState(() => _isImageLoaded = true);
                                 });
                                 return Container(
-                                  color: Theme.of(context).brightness == Brightness.dark ? Colors.grey[800] : Colors.grey[200],
-                                  child: const Center(child: Icon(Icons.broken_image, size: 50, color: Colors.grey)),
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Colors.grey[800]
+                                      : Colors.grey[200],
+                                  child: const Center(
+                                      child: Icon(Icons.broken_image,
+                                          size: 50, color: Colors.grey)),
                                 );
                               },
                             ),
@@ -100,7 +121,8 @@ class _MenuItemCardState extends State<MenuItemCard> {
                       Padding(
                         padding: const EdgeInsets.all(10.0),
                         child: Container(
-                          constraints: const BoxConstraints(minHeight: 90), // Minimum height for alignment
+                          constraints: const BoxConstraints(
+                              minHeight: 90), // Minimum height for alignment
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisSize: MainAxisSize.min,
@@ -108,23 +130,34 @@ class _MenuItemCardState extends State<MenuItemCard> {
                               // Price
                               Text(
                                 '${widget.item.price.toStringAsFixed(2)} €',
-                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                                style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white),
                               ),
                               const SizedBox(height: 4),
                               // Title
                               Text(
                                 widget.item.name,
-                                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                                style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white),
                                 maxLines: 2, // Allow up to 2 lines for title
                                 overflow: TextOverflow.ellipsis,
                               ),
                               const SizedBox(height: 4),
                               // Description
-                              if (widget.item.description != null && widget.item.description!.isNotEmpty)
+                              if (widget.item.description != null &&
+                                  widget.item.description!.isNotEmpty)
                                 Text(
                                   widget.item.description!,
-                                  style: const TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.w500),
-                                  maxLines: 4, // Allow up to 4 lines for description
+                                  style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w500),
+                                  maxLines:
+                                      4, // Allow up to 4 lines for description
                                   overflow: TextOverflow.ellipsis,
                                 ),
                             ],
@@ -135,7 +168,10 @@ class _MenuItemCardState extends State<MenuItemCard> {
                   ),
                 ),
               ),
-            ).animate(delay: (50 * widget.index).ms).slideY(begin: 0.5, duration: 400.ms, curve: Curves.easeOut).fadeIn(),
+            )
+                .animate(delay: (50 * widget.index).ms)
+                .slideY(begin: 0.5, duration: 400.ms, curve: Curves.easeOut)
+                .fadeIn(),
             if (isInCart)
               Positioned(
                 top: 8,

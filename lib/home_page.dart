@@ -221,17 +221,9 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF121212) : null,
-        gradient: isDark
-            ? null
-            : const LinearGradient(
-                colors: [Color(0xFFFCF1F1), Color(0xFFFFFCDD)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-      ),
+    return _AnimatedLightHomeBackground(
+      isDark: isDark,
+      colors: const [Color(0xFFFCF1F1), Color(0xFFFFFCDD)],
       child: Stack(
         alignment: Alignment.topCenter,
         children: [
@@ -482,54 +474,145 @@ class _HomePageState extends State<HomePage> {
       return AnimatedSwitcher(
         duration: const Duration(milliseconds: 300),
         child: cart.itemCount > 0
-            ? FloatingActionButton(
-                heroTag: 'cart_fab',
-                onPressed: () => showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    backgroundColor: Colors.transparent,
-                    builder: (context) => const CartBottomSheet()),
-                backgroundColor: const Color(0xFF53c6fd),
-                child: Stack(
-                  alignment: Alignment.center,
-                  clipBehavior:
-                      Clip.none, // Permet au badge de dépasser sans être coupé
-                  children: [
-                    const Icon(Icons.shopping_cart,
-                        color: Colors.white, size: 28),
-                    if (cart.itemCount > 0)
-                      Positioned(
-                        top: -6,
-                        right: -6,
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: Colors.red,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                                color: const Color(0xFF53c6fd),
-                                width:
-                                    1.5), // Ajout d'une bordure pour mieux le détacher
-                          ),
-                          constraints:
-                              const BoxConstraints(minWidth: 18, minHeight: 18),
-                          child: Center(
-                            child: Text(
-                              '${cart.itemCount}',
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold),
+            ? AnimatedActionBorder(
+                borderRadius: BorderRadius.circular(34),
+                padding: 6.0,
+                colors: const [
+                  Color(0xFFFFB02E),
+                  Color(0xFF0E6CFF),
+                  Color(0xFFFF4D8D),
+                  Color(0xFFFFB02E),
+                ],
+                duration: const Duration(milliseconds: 1850),
+                child: SizedBox(
+                    width: 68,
+                    height: 68,
+                    child: FloatingActionButton(
+                      heroTag: 'cart_fab',
+                      onPressed: () => showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (context) => const CartBottomSheet()),
+                      backgroundColor: const Color(0xFF53c6fd),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        clipBehavior: Clip
+                            .none, // Permet au badge de dépasser sans être coupé
+                        children: [
+                          const Icon(Icons.shopping_cart,
+                              color: Colors.white, size: 28),
+                          if (cart.itemCount > 0)
+                            Positioned(
+                              top: -6,
+                              right: -6,
+                              child: Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                      color: const Color(0xFF53c6fd),
+                                      width:
+                                          1.5), // Ajout d'une bordure pour mieux le détacher
+                                ),
+                                constraints: const BoxConstraints(
+                                    minWidth: 18, minHeight: 18),
+                                child: Center(
+                                  child: Text(
+                                    '${cart.itemCount}',
+                                    style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
+                        ],
                       ),
-                  ],
-                ),
+                    )),
               )
             : const SizedBox.shrink(),
       );
     });
+  }
+}
+
+class _AnimatedLightHomeBackground extends StatefulWidget {
+  final bool isDark;
+  final List<Color> colors;
+  final Widget child;
+
+  const _AnimatedLightHomeBackground({
+    required this.isDark,
+    required this.colors,
+    required this.child,
+  });
+
+  @override
+  State<_AnimatedLightHomeBackground> createState() =>
+      _AnimatedLightHomeBackgroundState();
+}
+
+class _AnimatedLightHomeBackgroundState
+    extends State<_AnimatedLightHomeBackground>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 18),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.isDark) {
+      return Container(
+        color: const Color(0xFF121212),
+        child: widget.child,
+      );
+    }
+
+    final start = widget.colors[0];
+    final end = widget.colors[1];
+    final softColors = <Color>[
+      Colors.white,
+      Color.lerp(start, Colors.white, 0.34)!,
+      Color.lerp(end, Colors.white, 0.50)!,
+      Colors.white,
+      Color.lerp(start, end, 0.45)!.withOpacity(0.72),
+      Color.lerp(end, Colors.white, 0.28)!,
+    ];
+
+    return AnimatedBuilder(
+      animation: _controller,
+      child: widget.child,
+      builder: (context, child) {
+        final t = _controller.value * 2 * pi;
+        return Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: softColors,
+              stops: const [0.0, 0.18, 0.38, 0.58, 0.78, 1.0],
+              begin: Alignment(cos(t) * 0.65, sin(t) * 0.65),
+              end: Alignment(cos(t + pi) * 0.65, sin(t + pi) * 0.65),
+            ),
+          ),
+          child: child,
+        );
+      },
+    );
   }
 }
 
