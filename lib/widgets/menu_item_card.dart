@@ -39,7 +39,7 @@ class _MenuItemCardState extends State<MenuItemCard> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardColor = isDark ? widget.cardTextColor : Colors.white;
-    final textColor = isDark ? Colors.white : const Color(0xFF6F6482);
+    final textColor = isDark ? Colors.white : const Color(0xFF07395F);
     final defaultShadowColor =
         Theme.of(context).shadowColor; // Use theme's shadow color
 
@@ -139,7 +139,7 @@ class _MenuItemCardState extends State<MenuItemCard> {
                                     fontWeight: FontWeight.bold,
                                     color: isDark
                                         ? Colors.black
-                                        : const Color(0xFF6F6482)),
+                                        : const Color(0xFF07395F)),
                               ),
                               const SizedBox(height: 4),
                               // Title
