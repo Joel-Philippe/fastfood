@@ -68,7 +68,7 @@ class _CategoryCardWidgetState extends State<CategoryCardWidget>
       textColor = Colors.white70;
     } else {
       cardColor = Colors.white;
-      textColor = Colors.black;
+      textColor = const Color(0xFF6F6482);
     }
 
     return ScaleTransition(
