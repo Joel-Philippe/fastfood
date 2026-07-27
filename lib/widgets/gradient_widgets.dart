@@ -262,31 +262,39 @@ class GradientButton extends StatelessWidget {
               child: child ??
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min, // ADD THIS
+                    mainAxisSize: MainAxisSize.max,
                     children: [
                       animateText
                           ? GradientIcon(icon!,
                               size: 24, gradient: textGradient)
                           : Icon(icon!, color: effectiveForegroundColor),
                       const SizedBox(width: 10),
-                      animateText
-                          ? AnimatedGradientText(
-                              text!,
-                              gradient: textGradient,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            )
-                          : Text(
-                              text!,
-                              style: TextStyle(
-                                  fontSize: 18,
-                                  color: effectiveForegroundColor,
-                                  fontWeight: FontWeight.bold),
-                            ),
+                      Flexible(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: animateText
+                              ? AnimatedGradientText(
+                                  text!,
+                                  gradient: textGradient,
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                )
+                              : Text(
+                                  text!,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: effectiveForegroundColor,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                        ),
+                      ),
                     ],
                   ),
             ),
