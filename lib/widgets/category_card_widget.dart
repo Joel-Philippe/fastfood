@@ -62,13 +62,13 @@ class _CategoryCardWidgetState extends State<CategoryCardWidget>
     final Color textColor;
     if (isDark && widget.isSelected) {
       cardColor = categoryBgColor;
-      textColor = Colors.white;
+      textColor = Colors.black;
     } else if (isDark) {
       cardColor = Theme.of(context).cardColor;
-      textColor = Colors.white70;
+      textColor = Colors.black;
     } else {
       cardColor = Colors.white;
-      textColor = const Color(0xFF5B3735);
+      textColor = Colors.black;
     }
 
     return ScaleTransition(
@@ -123,7 +123,7 @@ class _CategoryCardWidgetState extends State<CategoryCardWidget>
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                color: hasImage && isDark ? Colors.white : textColor,
+                color: textColor,
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
                 // A more pronounced shadow to ensure readability on all backgrounds/images

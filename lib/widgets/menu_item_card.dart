@@ -39,7 +39,7 @@ class _MenuItemCardState extends State<MenuItemCard> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardColor = isDark ? widget.cardTextColor : Colors.white;
-    final textColor = isDark ? Colors.white : const Color(0xFF5B3735);
+    final textColor = Colors.black;
     final defaultShadowColor =
         Theme.of(context).shadowColor; // Use theme's shadow color
 
