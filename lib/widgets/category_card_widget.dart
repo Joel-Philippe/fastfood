@@ -51,25 +51,10 @@ class _CategoryCardWidgetState extends State<CategoryCardWidget>
 
   @override
   Widget build(BuildContext context) {
-    final bool hasImage = widget.category.backgroundImageUrl != null &&
-        widget.category.backgroundImageUrl!.isNotEmpty;
-
     final Color categoryBgColor = widget.category.backgroundColorAsColor;
-    final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // Define colors for the no-image state
-    final Color cardColor;
-    final Color textColor;
-    if (isDark && widget.isSelected) {
-      cardColor = categoryBgColor;
-      textColor = Colors.black;
-    } else if (isDark) {
-      cardColor = Theme.of(context).cardColor;
-      textColor = Colors.black;
-    } else {
-      cardColor = Colors.white;
-      textColor = Colors.black;
-    }
+    final Color cardColor = widget.isSelected ? categoryBgColor : Colors.white;
+    final Color textColor = widget.isSelected ? Colors.white : Colors.black;
 
     return ScaleTransition(
       scale: _scaleAnimation,
@@ -82,39 +67,23 @@ class _CategoryCardWidgetState extends State<CategoryCardWidget>
           height: 80,
           padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
-            color: !hasImage || !isDark ? cardColor : Colors.transparent,
+            color: cardColor,
             borderRadius:
                 BorderRadius.circular(25), // Softer, more rounded corners
             border: Border.all(
-              color: isDark
-                  ? (widget.isSelected
-                      ? Colors.white
-                      : Colors.white.withOpacity(0.7))
-                  : (widget.isSelected
-                      ? categoryBgColor
-                      : Colors.black.withOpacity(0.12)),
+              color: widget.isSelected
+                  ? categoryBgColor
+                  : Colors.black.withValues(alpha: 0.12),
               width: widget.isSelected ? 2.5 : 1,
             ),
             boxShadow: [
               BoxShadow(
-                color: isDark && widget.isSelected
-                    ? categoryBgColor.withOpacity(0.6)
-                    : Colors.black.withOpacity(isDark ? 0.2 : 0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 10,
                 spreadRadius: 1,
               )
             ],
-            image: hasImage && isDark
-                ? DecorationImage(
-                    image: NetworkImage(widget.category.backgroundImageUrl!),
-                    fit: BoxFit.cover,
-                    // Use the category's color for the overlay, making it lighter and more distinct
-                    colorFilter: ColorFilter.mode(
-                      categoryBgColor.withOpacity(0.6),
-                      BlendMode.darken,
-                    ),
-                  )
-                : null,
+            image: null,
           ),
           child: Center(
             child: Text(
@@ -126,8 +95,7 @@ class _CategoryCardWidgetState extends State<CategoryCardWidget>
                 color: textColor,
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
-                // A more pronounced shadow to ensure readability on all backgrounds/images
-                shadows: isDark
+                shadows: widget.isSelected
                     ? const [
                         Shadow(
                             blurRadius: 6,
