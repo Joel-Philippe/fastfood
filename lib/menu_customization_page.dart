@@ -396,7 +396,6 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
     required bool isSelected,
     required VoidCallback onTap,
   }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedActionBorder(
@@ -413,9 +412,7 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           decoration: BoxDecoration(
-            color: isSelected
-                ? _accentColor
-                : (isDark ? Colors.white.withOpacity(0.05) : Colors.white),
+            color: isSelected ? _accentColor : Colors.white,
             borderRadius: BorderRadius.circular(15),
             border: Border.all(
               color: Colors.transparent,
