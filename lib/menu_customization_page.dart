@@ -416,8 +416,8 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
           decoration: BoxDecoration(
             color: isSelected
                 ? _accentColor
-                : (isDark ? Colors.white : const Color(0xFFF7F6F1)),
-            borderRadius: BorderRadius.circular(15),
+                : (isDark ? Colors.white : const Color(0xFFFFF6F1)),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: Colors.transparent,
               width: 0,

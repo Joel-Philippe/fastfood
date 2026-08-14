@@ -55,7 +55,7 @@ class _CategoryCardWidgetState extends State<CategoryCardWidget>
     final Color categoryBgColor = widget.category.backgroundColorAsColor;
 
     final Color cardColor =
-        widget.isSelected ? categoryBgColor : const Color(0xFFF7F6F1);
+        widget.isSelected ? categoryBgColor : const Color(0xFFFFF6F1);
     final Color textColor = widget.isSelected ? Colors.white : Colors.black;
     final card = AnimatedContainer(
       duration: const Duration(milliseconds: 300),
@@ -65,7 +65,7 @@ class _CategoryCardWidgetState extends State<CategoryCardWidget>
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
         color: cardColor,
-        borderRadius: BorderRadius.circular(25),
+        borderRadius: BorderRadius.circular(26),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.1),

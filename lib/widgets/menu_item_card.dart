@@ -39,7 +39,7 @@ class _MenuItemCardState extends State<MenuItemCard> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final cardColor = isDark ? widget.cardTextColor : const Color(0xFFF7F6F1);
+    final cardColor = isDark ? widget.cardTextColor : const Color(0xFFFFF6F1);
     final textColor = Colors.black;
 
     return Consumer<CartProvider>(
@@ -66,7 +66,7 @@ class _MenuItemCardState extends State<MenuItemCard> {
                     ? widget.cardTextColor.withOpacity(0.5)
                     : Colors.black.withOpacity(0.12),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(14),
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: InkWell(
@@ -84,7 +84,7 @@ class _MenuItemCardState extends State<MenuItemCard> {
                             width: double.infinity,
                             child: ClipRRect(
                               borderRadius: const BorderRadius.vertical(
-                                  top: Radius.circular(12)),
+                                  top: Radius.circular(14)),
                               child: Image.network(
                                 widget.item.imageUrl ?? '',
                                 fit: BoxFit.cover,
