@@ -437,9 +437,7 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
                 child: Text(
                   label,
                   style: TextStyle(
-                    color: isSelected
-                        ? Colors.white
-                        : (isDark ? Colors.white : Colors.black87),
+                    color: Colors.black,
                     fontWeight:
                         isSelected ? FontWeight.bold : FontWeight.normal,
                   ),
@@ -453,9 +451,7 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
                   child: Text(
                     ' (+${price.toStringAsFixed(2)}€)',
                     style: TextStyle(
-                      color: isSelected
-                          ? Colors.white.withOpacity(0.8)
-                          : Colors.grey,
+                      color: Colors.black87,
                       fontSize: 12,
                     ),
                   ),
