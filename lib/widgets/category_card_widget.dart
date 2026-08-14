@@ -52,11 +52,15 @@ class _CategoryCardWidgetState extends State<CategoryCardWidget>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final Color categoryBgColor = widget.category.backgroundColorAsColor;
     final Color animationGapColor = Theme.of(context).scaffoldBackgroundColor;
 
-    final Color cardColor = widget.isSelected ? categoryBgColor : Colors.white;
-    final Color textColor = widget.isSelected ? Colors.white : Colors.black;
+    final Color cardColor = isDark
+        ? (widget.isSelected ? categoryBgColor : Colors.white)
+        : const Color(0xFFFDF9E0);
+    final Color textColor =
+        isDark && widget.isSelected ? Colors.white : Colors.black;
     final card = AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,

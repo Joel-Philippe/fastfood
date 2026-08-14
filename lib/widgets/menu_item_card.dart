@@ -39,7 +39,7 @@ class _MenuItemCardState extends State<MenuItemCard> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final cardColor = isDark ? widget.cardTextColor : Colors.white;
+    final cardColor = isDark ? widget.cardTextColor : const Color(0xFFFDF9E0);
     final textColor = Colors.black;
 
     return Consumer<CartProvider>(
