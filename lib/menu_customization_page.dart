@@ -399,59 +399,69 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? _accentColor
-              : (isDark ? Colors.white.withOpacity(0.05) : Colors.white),
-          borderRadius: BorderRadius.circular(15),
-          border: Border.all(
+      child: AnimatedActionBorder(
+        borderRadius: BorderRadius.circular(18),
+        padding: isSelected ? 2.4 : 1.5,
+        colors: const [
+          Color(0xFFFFB02E),
+          Color(0xFF0E6CFF),
+          Color(0xFFFF4D8D),
+          Color(0xFFFFB02E),
+        ],
+        duration: const Duration(milliseconds: 1850),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          decoration: BoxDecoration(
             color: isSelected
                 ? _accentColor
-                : (isDark ? Colors.white10 : Colors.grey.shade300),
-            width: 2,
-          ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                      color: _accentColor.withOpacity(0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4))
-                ]
-              : [],
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Flexible(
-              child: Text(
-                label,
-                style: TextStyle(
-                  color: isSelected
-                      ? Colors.white
-                      : (isDark ? Colors.white : Colors.black87),
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                ),
-                softWrap:
-                    true, // Autorise le retour à la ligne si le chip devient trop large
-              ),
+                : (isDark ? Colors.white.withOpacity(0.05) : Colors.white),
+            borderRadius: BorderRadius.circular(15),
+            border: Border.all(
+              color: Colors.transparent,
+              width: 0,
             ),
-            if (price > 0)
-              Padding(
-                padding: const EdgeInsets.only(left: 4.0),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                        color: _accentColor.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4))
+                  ]
+                : [],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
                 child: Text(
-                  ' (+${price.toStringAsFixed(2)}€)',
+                  label,
                   style: TextStyle(
                     color: isSelected
-                        ? Colors.white.withOpacity(0.8)
-                        : Colors.grey,
-                    fontSize: 12,
+                        ? Colors.white
+                        : (isDark ? Colors.white : Colors.black87),
+                    fontWeight:
+                        isSelected ? FontWeight.bold : FontWeight.normal,
                   ),
+                  softWrap:
+                      true, // Autorise le retour à la ligne si le chip devient trop large
                 ),
               ),
-          ],
+              if (price > 0)
+                Padding(
+                  padding: const EdgeInsets.only(left: 4.0),
+                  child: Text(
+                    ' (+${price.toStringAsFixed(2)}€)',
+                    style: TextStyle(
+                      color: isSelected
+                          ? Colors.white.withOpacity(0.8)
+                          : Colors.grey,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );

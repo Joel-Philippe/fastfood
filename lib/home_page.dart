@@ -588,8 +588,10 @@ class _InfoPageViewer extends StatelessWidget {
                     const SizedBox(height: 24),
                     Text(page.title,
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
-                            fontSize: 32, fontWeight: FontWeight.bold)),
+                        style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white : Colors.black)),
                     const SizedBox(height: 16),
                     Center(
                         child: Container(
