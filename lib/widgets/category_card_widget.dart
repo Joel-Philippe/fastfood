@@ -104,7 +104,7 @@ class _CategoryCardWidgetState extends State<CategoryCardWidget>
         onTap: _handleTap,
         child: AnimatedActionBorder(
           borderRadius: BorderRadius.circular(28),
-          padding: widget.isSelected ? 4.0 : 3.0,
+          padding: widget.isSelected ? 2.5 : 1.6,
           colors: const [
             Color(0xFFFFB02E),
             Color(0xFF0E6CFF),

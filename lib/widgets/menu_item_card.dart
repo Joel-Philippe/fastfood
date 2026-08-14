@@ -50,7 +50,7 @@ class _MenuItemCardState extends State<MenuItemCard> {
           children: [
             AnimatedActionBorder(
               borderRadius: BorderRadius.circular(16),
-              padding: 4.0,
+              padding: 2.0,
               colors: const [
                 Color(0xFFFFB02E),
                 Color(0xFF0E6CFF),
