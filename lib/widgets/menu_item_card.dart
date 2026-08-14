@@ -39,7 +39,7 @@ class _MenuItemCardState extends State<MenuItemCard> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final cardColor = isDark ? widget.cardTextColor : const Color(0xFFFDF9E0);
+    final cardColor = isDark ? widget.cardTextColor : const Color(0xFFF7F6F1);
     final textColor = Colors.black;
 
     return Consumer<CartProvider>(
@@ -61,7 +61,7 @@ class _MenuItemCardState extends State<MenuItemCard> {
               child: Card(
                 margin: EdgeInsets.zero,
                 elevation: 8,
-                color: cardColor, // Light mode cards stay white for readability
+                color: cardColor,
                 shadowColor: isDark
                     ? widget.cardTextColor.withOpacity(0.5)
                     : Colors.black.withOpacity(0.12),
