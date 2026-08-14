@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fast_food_app/models.dart';
+import 'package:fast_food_app/widgets/gradient_widgets.dart';
 
 class CategoryCardWidget extends StatefulWidget {
   final MenuCategory category;
@@ -52,59 +53,72 @@ class _CategoryCardWidgetState extends State<CategoryCardWidget>
   @override
   Widget build(BuildContext context) {
     final Color categoryBgColor = widget.category.backgroundColorAsColor;
+    final Color animationGapColor = Theme.of(context).scaffoldBackgroundColor;
 
     final Color cardColor = widget.isSelected ? categoryBgColor : Colors.white;
     final Color textColor = widget.isSelected ? Colors.white : Colors.black;
+    final card = AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+      width: 80,
+      height: 80,
+      padding: const EdgeInsets.all(6),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(25),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 10,
+            spreadRadius: 1,
+          )
+        ],
+        image: null,
+      ),
+      child: Center(
+        child: Text(
+          widget.category.name,
+          textAlign: TextAlign.center,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: textColor,
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+            shadows: widget.isSelected
+                ? const [
+                    Shadow(
+                        blurRadius: 6,
+                        color: Colors.black54,
+                        offset: Offset(0, 1))
+                  ]
+                : null,
+          ),
+        ),
+      ),
+    );
 
     return ScaleTransition(
       scale: _scaleAnimation,
       child: GestureDetector(
         onTap: _handleTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-          width: 80,
-          height: 80,
-          padding: const EdgeInsets.all(6),
-          decoration: BoxDecoration(
-            color: cardColor,
-            borderRadius:
-                BorderRadius.circular(25), // Softer, more rounded corners
-            border: Border.all(
-              color: widget.isSelected
-                  ? categoryBgColor
-                  : Colors.black.withValues(alpha: 0.12),
-              width: widget.isSelected ? 2.5 : 1,
+        child: AnimatedActionBorder(
+          borderRadius: BorderRadius.circular(28),
+          padding: widget.isSelected ? 2.5 : 1.6,
+          colors: const [
+            Color(0xFFFFB02E),
+            Color(0xFF0E6CFF),
+            Color(0xFFFF4D8D),
+            Color(0xFFFFB02E),
+          ],
+          duration: const Duration(milliseconds: 1850),
+          child: Container(
+            padding: EdgeInsets.all(widget.isSelected ? 3 : 2),
+            decoration: BoxDecoration(
+              color: animationGapColor,
+              borderRadius: BorderRadius.circular(26),
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 10,
-                spreadRadius: 1,
-              )
-            ],
-            image: null,
-          ),
-          child: Center(
-            child: Text(
-              widget.category.name,
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: textColor,
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-                shadows: widget.isSelected
-                    ? const [
-                        Shadow(
-                            blurRadius: 6,
-                            color: Colors.black54,
-                            offset: Offset(0, 1))
-                      ]
-                    : null,
-              ),
-            ),
+            child: card,
           ),
         ),
       ),
