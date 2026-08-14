@@ -53,7 +53,6 @@ class _CategoryCardWidgetState extends State<CategoryCardWidget>
   @override
   Widget build(BuildContext context) {
     final Color categoryBgColor = widget.category.backgroundColorAsColor;
-    final Color animationGapColor = Theme.of(context).scaffoldBackgroundColor;
 
     final Color cardColor =
         widget.isSelected ? categoryBgColor : const Color(0xFFF7F6F1);
@@ -105,7 +104,7 @@ class _CategoryCardWidgetState extends State<CategoryCardWidget>
         onTap: _handleTap,
         child: AnimatedActionBorder(
           borderRadius: BorderRadius.circular(28),
-          padding: widget.isSelected ? 2.5 : 1.6,
+          padding: 2.0,
           colors: const [
             Color(0xFFFFB02E),
             Color(0xFF0E6CFF),
@@ -113,14 +112,7 @@ class _CategoryCardWidgetState extends State<CategoryCardWidget>
             Color(0xFFFFB02E),
           ],
           duration: const Duration(milliseconds: 1850),
-          child: Container(
-            padding: EdgeInsets.all(widget.isSelected ? 3 : 2),
-            decoration: BoxDecoration(
-              color: animationGapColor,
-              borderRadius: BorderRadius.circular(26),
-            ),
-            child: card,
-          ),
+          child: card,
         ),
       ),
     );

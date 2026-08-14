@@ -402,7 +402,7 @@ class _MenuCustomizationPageState extends State<MenuCustomizationPage> {
       onTap: onTap,
       child: AnimatedActionBorder(
         borderRadius: BorderRadius.circular(18),
-        padding: isSelected ? 2.4 : 1.5,
+        padding: 2.0,
         colors: const [
           Color(0xFFFFB02E),
           Color(0xFF0E6CFF),
