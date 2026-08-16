@@ -40,7 +40,7 @@ class _MenuItemCardState extends State<MenuItemCard> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardColor = isDark ? widget.cardTextColor : const Color(0xFFFFF6F1);
-    final textColor = Colors.black;
+    final textColor = isDark ? Colors.white : Colors.black;
 
     return Consumer<CartProvider>(
       builder: (context, cart, child) {
@@ -148,7 +148,7 @@ class _MenuItemCardState extends State<MenuItemCard> {
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
                                       color: isDark
-                                          ? Colors.black
+                                          ? Colors.white
                                           : const Color(0xFF5B3735)),
                                 ),
                                 const SizedBox(height: 4),
