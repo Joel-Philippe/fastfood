@@ -377,12 +377,8 @@ class _HomePageState extends State<HomePage> {
     if (_allMenuItems.isEmpty)
       return const Center(child: Text('Aucun article disponible.'));
 
-    final Color selectedColor =
-        _selectedCategory != null && _selectedCategory!.fontColor != null
-            ? Color(int.parse(_selectedCategory!.fontColor!.substring(1, 7),
-                    radix: 16) +
-                0xFF000000)
-            : Theme.of(context).colorScheme.primary;
+    final Color selectedColor = _selectedCategory?.backgroundColorAsColor ??
+        Theme.of(context).colorScheme.primary;
 
     return Column(
       children: [

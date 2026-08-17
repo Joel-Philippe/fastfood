@@ -16,13 +16,15 @@ class CategoryMenuPage extends StatefulWidget {
   final MenuCategory category;
   final MongoService? mongoService; // Make it optional for testing
 
-  const CategoryMenuPage({super.key, required this.category, this.mongoService});
+  const CategoryMenuPage(
+      {super.key, required this.category, this.mongoService});
 
   @override
   _CategoryMenuPageState createState() => _CategoryMenuPageState();
 }
 
-class _CategoryMenuPageState extends State<CategoryMenuPage> with SingleTickerProviderStateMixin {
+class _CategoryMenuPageState extends State<CategoryMenuPage>
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
 
   // State management
@@ -40,7 +42,8 @@ class _CategoryMenuPageState extends State<CategoryMenuPage> with SingleTickerPr
   void initState() {
     super.initState();
     _mongoService = widget.mongoService ?? MongoService();
-    _animationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 500));
+    _animationController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 500));
     _fetchItems();
     _initWebSocket();
   }
@@ -201,9 +204,7 @@ class _CategoryMenuPageState extends State<CategoryMenuPage> with SingleTickerPr
       itemCount: itemsForCategory.length,
       itemBuilder: (context, index) {
         final item = itemsForCategory[index];
-        final Color cardTextColor = widget.category.fontColor != null
-            ? Color(int.parse(widget.category.fontColor!.substring(1, 7), radix: 16) + 0xFF000000)
-            : Theme.of(context).primaryColor;
+        final Color cardTextColor = widget.category.backgroundColorAsColor;
 
         return MenuItemCard(
           item: item,
@@ -259,7 +260,8 @@ class _CategoryMenuPageState extends State<CategoryMenuPage> with SingleTickerPr
                       alignment: Alignment.center,
                       clipBehavior: Clip.none,
                       children: [
-                        const Icon(Icons.shopping_cart, color: Colors.white, size: 28),
+                        const Icon(Icons.shopping_cart,
+                            color: Colors.white, size: 28),
                         Positioned(
                           top: -6,
                           right: -6,
@@ -268,7 +270,9 @@ class _CategoryMenuPageState extends State<CategoryMenuPage> with SingleTickerPr
                             decoration: BoxDecoration(
                               color: Colors.red,
                               shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white.withOpacity(0.5), width: 1.5),
+                              border: Border.all(
+                                  color: Colors.white.withOpacity(0.5),
+                                  width: 1.5),
                             ),
                             constraints: const BoxConstraints(
                               minWidth: 18,
@@ -276,8 +280,10 @@ class _CategoryMenuPageState extends State<CategoryMenuPage> with SingleTickerPr
                             ),
                             child: AnimatedSwitcher(
                               duration: const Duration(milliseconds: 200),
-                              transitionBuilder: (Widget child, Animation<double> animation) {
-                                return ScaleTransition(scale: animation, child: child);
+                              transitionBuilder:
+                                  (Widget child, Animation<double> animation) {
+                                return ScaleTransition(
+                                    scale: animation, child: child);
                               },
                               child: Center(
                                 key: ValueKey<int>(cart.itemCount),
